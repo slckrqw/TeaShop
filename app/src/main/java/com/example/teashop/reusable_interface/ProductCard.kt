@@ -1,5 +1,6 @@
 package com.example.teashop.reusable_interface
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,12 +10,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,8 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
 import com.example.teashop.data.DataSource
-import com.example.teashop.data.Product
-import com.example.teashop.product_screen.ProductScreen
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -57,9 +58,8 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 
-class ProductCard(
-    private val product: Product
-) {
+class ProductCard {
+    @SuppressLint("UnnecessaryComposedModifier")
     private fun Modifier.clickableWithoutRipple(
         interactionSource: MutableInteractionSource,
         onClick: () -> Unit
@@ -76,10 +76,28 @@ class ProductCard(
     )
 
     @Composable
-    fun MakeProductCard(productScreen: (Int)-> Unit, productId: Int) {
+    fun RowOfCards(
+        productScreen: (Int)-> Unit,
+        productId1: Int,
+        productId2: Int
+    ){
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ){
+            MakeProductCard(productScreen = productScreen, productId = productId1)
+            MakeProductCard(productScreen = productScreen, productId = productId2)
+        }
+    }
+
+    @SuppressLint("UnrememberedMutableInteractionSource")
+    @Composable
+    fun RowScope.MakeProductCard(productScreen: (Int)-> Unit, productId: Int) {
+        val product = DataSource().loadProducts()[productId]
         var expanded by remember { mutableStateOf(false) }
         var productWeight by remember { mutableIntStateOf(120) }
-        var iconClicksCnter by remember {
+        var iconClicksCnt by remember {
             mutableIntStateOf(1)
         }
         var heartIconId: Int
@@ -87,24 +105,31 @@ class ProductCard(
 
         Box(
             modifier = Modifier
-                .padding(top = 5.dp, bottom = 5.dp)
-                .width(165.dp)
+                .padding(5.dp)
+                .weight(1f)
+                .widthIn(0.dp, 300.dp)
+                .clickable(onClick = { productScreen(productId) })
                 .shadow(2.dp, shape = RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.TopEnd
         ) {
             Column(
                 modifier = Modifier
-                    .width(165.dp)
                     .background(White10)
             ) {
-                Image(
-                    painterResource(id = product.imageResourceId),
+                Box (
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .clickable(onClick = { productScreen(productId) }),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth
-                )
+                        .fillMaxWidth()
+                        .height(160.dp)
+                ){
+                    Image(
+                        painterResource(id = product.imageResourceId),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp)),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
                 Text(
                     text = "Артикул: ${product.id}",
                     fontFamily = montserratFamily,
@@ -178,8 +203,8 @@ class ProductCard(
                         onClick = { expanded = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Grey20),
                         modifier = Modifier
-                            .padding(start = 15.dp, bottom = 10.dp, top = 5.dp)
-                            .width(dropMenuWidth.dp)
+                            .padding(start = 10.dp, bottom = 10.dp, top = 5.dp, end = 10.dp)
+                            .weight(4f)
                             .height(30.dp),
                         contentPadding = PaddingValues(0.dp),
                         shape = RoundedCornerShape(5.dp)
@@ -221,6 +246,7 @@ class ProductCard(
                         colors = IconButtonDefaults.iconButtonColors(containerColor = Green10),
                         modifier = Modifier
                             .padding(end = 5.dp, bottom = 5.dp)
+                            .weight(1f)
                             .clip(RoundedCornerShape(10.dp))
                             .background(Green10)
                             .size(30.dp)
@@ -238,15 +264,15 @@ class ProductCard(
                 modifier = Modifier
                     .clickableWithoutRipple(
                         interactionSource = MutableInteractionSource(),
-                        onClick = { iconClicksCnter++ }
+                        onClick = { iconClicksCnt++ }
                     )
                     .padding(5.dp)
             ) {
-                when (iconClicksCnter) {
+                when (iconClicksCnt) {
                     1 -> heartIconId = R.drawable.heart_icon_disabled
                     2 -> heartIconId = R.drawable.hearticon
                     else -> {
-                        iconClicksCnter = 1
+                        iconClicksCnt = 1
                         heartIconId = R.drawable.heart_icon_disabled
                     }
                 }
@@ -262,42 +288,53 @@ class ProductCard(
         }
     }
 
+    @SuppressLint("UnrememberedMutableInteractionSource")
     @Composable
     fun MakeProductCard2(productScreen: (Int)-> Unit, productId: Int) {
+        val product = DataSource().loadProducts()[productId]
         var expanded by remember { mutableStateOf(false) }
         var productWeight by remember { mutableIntStateOf(120) }
-        var iconClicksCnter by remember {
+        var iconClicksCnt by remember {
             mutableIntStateOf(1)
         }
         var heartIconId: Int
         val dropMenuWidth = 120
         Box(
             modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp, top = 5.dp, bottom = 5.dp)
+                .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
                 .fillMaxWidth()
                 .background(White10)
+                .clickable(onClick = { productScreen(productId) })
                 .shadow(2.dp, shape = RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.TopEnd
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .background(White10)
                     .fillMaxWidth()
             ) {
-                Image(
-                    painterResource(id = product.imageResourceId),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier.clickable(onClick = { productScreen(productId) })
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .height(200.dp)
+                        .widthIn(0.dp,200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painterResource(id = product.imageResourceId),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier.clip(RoundedCornerShape(10.dp))
+                    )
+                }
                 Column(
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier
-
                         .height(200.dp)
+                        .padding(end = 10.dp)
                         .background(White10)
                 ) {
                     Text(
@@ -427,15 +464,15 @@ class ProductCard(
                 modifier = Modifier
                     .clickableWithoutRipple(
                         interactionSource = MutableInteractionSource(),
-                        onClick = { iconClicksCnter++ }
+                        onClick = { iconClicksCnt++ }
                     )
                     .padding(5.dp)
             ) {
-                when (iconClicksCnter) {
+                when (iconClicksCnt) {
                     1 -> heartIconId = R.drawable.heart_icon_disabled
                     2 -> heartIconId = R.drawable.hearticon
                     else -> {
-                        iconClicksCnter = 1
+                        iconClicksCnt = 1
                         heartIconId = R.drawable.heart_icon_disabled
                     }
                 }
@@ -480,12 +517,14 @@ class ProductCard(
 
             )
     }
+
 }
-
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     TeaShopTheme {
+        ProductCard().MakeProductCard2(productScreen = {}, productId = 1)
     }
 }
+
+

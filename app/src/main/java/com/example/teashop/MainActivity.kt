@@ -4,8 +4,10 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,8 +18,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -78,10 +78,31 @@ fun TeaShopApp(){
             Box(modifier = Modifier.fillMaxWidth()) {
                 BottomAppBar(
                     actions = {
-                        NavigationBarIcon(R.drawable.home_bottombar_icon).MakeNavigationBarIcon(mutableActionChange = {screen = it}, 1, iconColorList[0])
-                        NavigationBarIcon(R.drawable.search_bottombar_icon).MakeNavigationBarIcon(mutableActionChange = {screen = it},2, iconColorList[1])
-                        NavigationBarIcon(R.drawable.shop_bottombar_icon).MakeNavigationBarIcon(mutableActionChange = {screen = it},3, iconColorList[2])
-                        NavigationBarIcon(R.drawable.profile_bottombar_icon).MakeNavigationBarIcon(mutableActionChange = {screen = it},4, iconColorList[3])
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            NavigationBarIcon(R.drawable.home_bottombar_icon).MakeNavigationBarIcon(
+                                mutableActionChange = { screen = it },
+                                1,
+                                iconColorList[0]
+                            )
+                            NavigationBarIcon(R.drawable.search_bottombar_icon).MakeNavigationBarIcon(
+                                mutableActionChange = { screen = it },
+                                2,
+                                iconColorList[1]
+                            )
+                            NavigationBarIcon(R.drawable.shop_bottombar_icon).MakeNavigationBarIcon(
+                                mutableActionChange = { screen = it },
+                                3,
+                                iconColorList[2]
+                            )
+                            NavigationBarIcon(R.drawable.profile_bottombar_icon).MakeNavigationBarIcon(
+                                mutableActionChange = { screen = it },
+                                4,
+                                iconColorList[3]
+                            )
+                        }
                     },
                     modifier = Modifier
                         .height(45.dp)
@@ -116,6 +137,6 @@ fun TeaShopApp(){
 @Composable
 fun GreetingPreview() {
     TeaShopTheme {
-        MainScreen().LazyColumnMainScreen(productsList = DataSource().loadProducts())
+       TeaShopApp()
     }
 }

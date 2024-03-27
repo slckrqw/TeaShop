@@ -1,8 +1,10 @@
 package com.example.teashop.product_screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -45,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
 import com.example.teashop.data.DataSource
-import com.example.teashop.data.Feedback
 import com.example.teashop.data.Product
 import com.example.teashop.feedback_screen.FeedbackScreen
 import com.example.teashop.ui.theme.Black10
@@ -58,10 +60,26 @@ import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 
 class ProductScreen {
+    @SuppressLint("UnnecessaryComposedModifier")
+    private fun Modifier.clickableWithoutRipple(
+        interactionSource: MutableInteractionSource,
+        onClick: () -> Unit
+    ) = composed(
+        factory = {
+            this.then(
+                Modifier.clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = { onClick() }
+                )
+            )
+        }
+    )
+    @SuppressLint("UnrememberedMutableInteractionSource")
     @Composable
     fun MakeProductScreen(product: Product, backScreen: (Int)->Unit = {}){
-        var heartColor: Color
-        var heartIcon: Int
+        val heartColor: Color
+        val heartIcon: Int
         var heartTemp by remember{mutableIntStateOf(0)}
         var expanded by remember{mutableStateOf(false)}
         var productWeight by remember{ mutableIntStateOf(120) }
@@ -94,11 +112,15 @@ class ProductScreen {
                             modifier = Modifier.padding(bottom = 5.dp)
                         ) {
                             Column {
-                                Box {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(360.dp)
+                                ) {
                                     Image(
                                         painter = painterResource(product.imageResourceId),
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxWidth(),
+                                        contentScale = ContentScale.FillBounds,
+                                        modifier = Modifier.fillMaxSize(),
                                         contentDescription = null
                                     )
                                     Row(
@@ -109,20 +131,30 @@ class ProductScreen {
                                             painter = painterResource(R.drawable.back_arrow),
                                             tint = Green10,
                                             modifier = Modifier
-                                                .clickable(onClick = { backScreen(-1) })
+                                                .clickableWithoutRipple(
+                                                    interactionSource = MutableInteractionSource(),
+                                                    onClick = { backScreen(-1) }
+                                                )
                                                 .padding(start = 10.dp, top = 10.dp)
-                                                .size(30.dp),
+                                                .size(25.dp),
                                             contentDescription = null
                                         )
-                                        Icon(
-                                            painter = painterResource(heartIcon),
-                                            tint = heartColor,
+                                        Box (
                                             modifier = Modifier
-                                                .clickable(onClick = { heartTemp++ })
+                                                .clickableWithoutRipple(
+                                                    interactionSource = MutableInteractionSource(),
+                                                    onClick = { heartTemp++ }
+                                                )
                                                 .padding(end = 10.dp, top = 10.dp)
                                                 .size(30.dp),
-                                            contentDescription = null
-                                        )
+                                        ){
+                                            Icon(
+                                                painter = painterResource(heartIcon),
+                                                tint = heartColor,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentDescription = null
+                                            )
+                                        }
                                     }
                                 }
                                 Text(
@@ -351,22 +383,23 @@ class ProductScreen {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 5.dp),
-                            shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = CardDefaults.cardColors(containerColor = White10)
                         ) {
                             Text(
                                 text = "Описание",
                                 fontFamily = montserratFamily,
-                                fontSize = 13.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.W500,
-                                modifier = Modifier.padding(start = 10.dp)
+                                modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
                             )
                             Text(
                                 text = product.description,
                                 fontFamily = montserratFamily,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.W500,
-                                modifier = Modifier.padding(start = 10.dp)
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.W400,
+                                modifier = Modifier.padding(start = 10.dp, bottom = 5.dp, end = 10.dp),
+                                lineHeight = 13.sp
                             )
                         }
                     }

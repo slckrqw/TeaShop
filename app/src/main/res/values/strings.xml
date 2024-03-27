@@ -18,10 +18,9 @@
     <string name = "newTextCatalog">Новинки</string>
     <string name = "filterTextCatalog">Фильтры</string>
     <string name = "sortingTextCatalog1">По популярности</string>
-    <string name = "sortingTextCatalog2">По алфавиту А-Я</string>
-    <string name = "sortingTextCatalog3">По алфавиту Я-А</string>
+    <string name = "sortingTextCatalog2">По убыванию рейтинга</string>
+    <string name = "sortingTextCatalog3">По убыванию цены</string>
     <string name = "sortingTextCatalog4">По возрастанию цены</string>
-    <string name = "sortingTextCatalog5">По убыванию цены</string>
     <string name = "categoryTeaGoodsName">Чайная продукция:</string>
     <string name = "categoryTeaDishesName">Посуда для чая:</string>
     <string name = "FeedbackName">Отзывы</string>

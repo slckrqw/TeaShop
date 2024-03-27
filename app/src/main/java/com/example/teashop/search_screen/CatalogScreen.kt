@@ -48,14 +48,14 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 class CatalogScreen(
-    var filterId: Int = 1,
+    private var filterId: Int = 1,
     val backScreen: (Int)-> Unit = {},
-    val topNameId: Int = 0
+    val topNameId: String = ""
 ) {
     @Composable
     fun MakeCatalogScreen(productsList: List<Product>){
         var screenConfig2 by remember{ mutableIntStateOf(1) }
-        var productScreen by remember{ mutableStateOf(-1) }
+        var productScreen by remember{ mutableIntStateOf(-1) }
         when(productScreen) {
             -1-> {
                 Column {
@@ -67,7 +67,7 @@ class CatalogScreen(
                         items(productsList.size) { product ->//TODO solve problem of indexes
                             when (screenConfig2) {
                                 0 -> {
-                                    ProductCard(product = productsList[product]).MakeProductCard2(productScreen={productScreen = it}, product)
+                                    ProductCard().MakeProductCard2(productScreen={productScreen = it}, product)
                                 }
 
                                 1 -> Row(
@@ -76,13 +76,11 @@ class CatalogScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     if (product % 2 == 0) {
-                                        ProductCard(
-                                            product = productsList[product]
-                                        ).MakeProductCard(productScreen={productScreen = it}, product)
-
-                                        ProductCard(
-                                            product = productsList[product + 1]
-                                        ).MakeProductCard(productScreen={productScreen = it}, product+1)
+                                        ProductCard().RowOfCards(
+                                            productScreen = { productScreen = it },
+                                            productId1 = product,
+                                            productId2 = product + 1
+                                        )
                                     }
                                 }
                             }
@@ -105,7 +103,6 @@ class CatalogScreen(
             2->R.string.sortingTextCatalog2
             3->R.string.sortingTextCatalog3
             4->R.string.sortingTextCatalog4
-            5->R.string.sortingTextCatalog5
             else -> {R.string.sortingTextCatalog1}
         }
         var searchSwitch by remember{mutableIntStateOf(1)}
@@ -133,7 +130,7 @@ class CatalogScreen(
                                     0,
                                     screenChange = { backScreen(-1) })
                                 Text(
-                                    text = stringResource(id = topNameId),
+                                    text = topNameId,
                                     fontFamily = montserratFamily,
                                     fontWeight = FontWeight.W700,
                                     fontSize = 20.sp,
@@ -242,23 +239,21 @@ class CatalogScreen(
                 SheetTextCatalog(2, expandedChange)
                 SheetTextCatalog(3, expandedChange)
                 SheetTextCatalog(4, expandedChange)
-                SheetTextCatalog(5, expandedChange)
             }
         }
     }
 
     @Composable
     fun SheetTextCatalog(textId: Int, expandedChange: (Boolean)->Unit){
-        var stringId: Int = when(textId){
+        val stringId: Int = when(textId){
             1->R.string.sortingTextCatalog1
             2->R.string.sortingTextCatalog2
             3->R.string.sortingTextCatalog3
             4->R.string.sortingTextCatalog4
-            5->R.string.sortingTextCatalog5
             else -> {R.string.sortingTextCatalog1}
         }
-        var cardColor: Color
-        var textColor: Color
+        val cardColor: Color
+        val textColor: Color
         if(textId == filterId){
             cardColor = Green10
             textColor = White10

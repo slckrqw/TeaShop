@@ -60,7 +60,7 @@ class SearchScreen {
                     PopularProductsBanner(catalogChange = {catalogScreen = it})
                 }
             }
-            1-> { CatalogScreen(backScreen = {catalogScreen = it}, topNameId = R.string.newTextCatalog)
+            1-> { CatalogScreen(backScreen = {catalogScreen = it}, topNameId = "Новинки")
                 .MakeCatalogScreen(productsList = DataSource().loadProducts())}
             2-> {CategoryScreen().MakeCategoryScreen(
                 DataSource().loadCategories(),
@@ -73,7 +73,7 @@ class SearchScreen {
                 nameId = R.string.categoryTeaDishesName
             )}
             4->{
-                CatalogScreen(backScreen = {catalogScreen = it}, topNameId = R.string.popularTextCatalog)
+                CatalogScreen(backScreen = {catalogScreen = it}, topNameId = "Популярное")
                     .MakeCatalogScreen(productsList = DataSource().loadProducts())
             }
         }
@@ -134,7 +134,7 @@ class SearchScreen {
             Image(
                 painterResource(drawableId),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,//TODO change image scale
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clickable(onClick = {catalogChange(screenId)})
                     .clip(RoundedCornerShape(15.dp))
