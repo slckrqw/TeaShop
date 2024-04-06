@@ -21,12 +21,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
+import com.example.teashop.search_screen.CatalogScreen
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
+import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
@@ -42,11 +45,12 @@ class SearchCard {
             TextField(
                 modifier = Modifier
                     .background(Green10)
-                    .fillMaxWidth()
-                    .padding(10.dp),
+                    .padding(10.dp)
+                    .fillMaxWidth(),
                 value = searchRequest,
                 placeholder = {
-                    Text(text = stringResource(R.string.searchDefault),
+                    Text(
+                    text = stringResource(R.string.searchDefault),
                     fontSize = 15.sp,
                     fontFamily = montserratFamily,
                     fontWeight = FontWeight.W100,
@@ -70,6 +74,13 @@ class SearchCard {
                 shape = RoundedCornerShape(15.dp),
                 singleLine = true
             )
+        }
+    }
+    @Preview(showBackground = true)
+    @Composable
+    fun GreetingPreview() {
+        TeaShopTheme {
+            MakeCard()
         }
     }
 }

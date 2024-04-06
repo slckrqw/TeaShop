@@ -29,4 +29,7 @@ class DataSource {
             Feedback("Кирилл", 5, "Чай супер", R.drawable.feedback_example),
         )
     }
+    fun loadWeights(): List<Boolean>{
+        return listOf(false, false, false, false)
+    }
 }

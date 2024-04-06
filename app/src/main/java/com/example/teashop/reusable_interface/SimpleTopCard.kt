@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,7 +29,7 @@ class SimpleTopCard (
     val backScreen: (Int) -> Unit
 ){
     @Composable
-    fun MakeTopCard(drawableId:Int, textId: Int){
+    fun MakeTopCard(drawableId:Int, textId: Int, iconSwitch: Boolean = true){
         Card(
             modifier = Modifier
                 .padding(bottom = 10.dp)
@@ -38,18 +39,23 @@ class SimpleTopCard (
             colors = CardDefaults.cardColors(containerColor = Green10)
         ){
             Row(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ){
-                Icon(
-                    painter = painterResource(drawableId),
-                    tint = White10,
-                    modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp)
-                        .size(25.dp)
-                        .clickable(onClick = {backScreen(-1)}),
-                    contentDescription = null
-                )
+                if(iconSwitch) {
+                    Icon(
+                        painter = painterResource(drawableId),
+                        tint = White10,
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .size(25.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(onClick = { backScreen(-1) }),
+                        contentDescription = null
+                    )
+                }
                 Text(
                     text = stringResource(textId),
                     fontFamily = montserratFamily,

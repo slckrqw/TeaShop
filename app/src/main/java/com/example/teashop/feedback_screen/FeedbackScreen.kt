@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -31,6 +33,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.teashop.R
 import com.example.teashop.data.DataSource
+import com.example.teashop.data.Feedback
 import com.example.teashop.data.Product
 import com.example.teashop.reusable_interface.SimpleTopCard
 import com.example.teashop.ui.theme.Black10
@@ -64,183 +68,197 @@ import com.example.teashop.ui.theme.montserratFamily
 
 
 class FeedbackScreen(
-    private var filter: String = "Новые"
+    private var filter: String = "Новые",
+    private var uriListCnt: Int = -1
 ) {
     @Composable
     fun MakeFeedbackScreen(backScreen: (Int)->Unit = {}, product: Product){
 
         var starsRateCnt = 0
-        var userRateCnt = 0
-        var uriListCnt = 0
+        var userRateCnt = 1
         var newFeedbackScreen by remember{ mutableIntStateOf(-1) }
+
         val imageDeleteList = remember {
-            mutableListOf(false, false, false)
+            mutableStateListOf(false, false, false)
         }
-        var imageUri1 by remember {
-            mutableStateOf<Uri?>(null)
-        }
-        var imageUri2 by remember {
-            mutableStateOf<Uri?>(null)
-        }
-        var imageUri3 by remember {
-            mutableStateOf<Uri?>(null)
+        val imageList = remember {
+            mutableStateListOf<Uri?>(null, null, null)
         }
         val launcher = rememberLauncherForActivityResult(
             contract =
             ActivityResultContracts.GetContent()
         ) { uri: Uri? ->
-            when(uriListCnt){
-                1 -> imageUri1 = uri
-                2 -> imageUri2 = uri
-                3 -> imageUri3 = uri
-            }
+            imageList[uriListCnt] = uri
         }
-        var feedbackTextContent by remember{ mutableStateOf("") }
         var expandedChange by remember{mutableStateOf(false)}
+
+        var userFeedbackRate by remember{mutableIntStateOf(0)}
+        var userFeedbackContent by remember{mutableStateOf("")}
 
         when(newFeedbackScreen) {
 
-           -2-> Column(
-                modifier = Modifier.fillMaxSize()
-           ){
-               SimpleTopCard(backScreen = {
-                   newFeedbackScreen = it
-               }).MakeTopCard(
-                   drawableId = R.drawable.back_arrow,
-                   textId = R.string.NewFeedbackName
-               )
-               Card(
-                   colors = CardDefaults.cardColors(containerColor = White10),
-                   shape = RectangleShape,
-                   modifier = Modifier
-                       .padding(bottom = 10.dp)
-                       .height(100.dp)
-                       .fillMaxWidth()
-                       .shadow(elevation = 3.dp)
-               ){
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 10.dp, top = 5.dp)
-                    ){
-                        Image(
-                            painter = painterResource(product.imageResourceId),
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(50.dp),
-                            contentDescription = null,
-                            contentScale = ContentScale.FillBounds
-                        )
-                        Text(
-                            text = stringResource(product.nameId),
-                            fontFamily = montserratFamily,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 10.dp, top = 10.dp)
-                    ){
-                        while(userRateCnt<5){
-                            Icon(
-                                painter = painterResource(R.drawable.star),
-                                tint = Yellow10,
-                                modifier = Modifier
-                                    .padding(end = 20.dp)
-                                    .size(30.dp),
-                                contentDescription = null
-                            )
-                            userRateCnt++
-                        }
-                    }
-               }
-               Card(
-                   colors = CardDefaults.cardColors(containerColor = White10),
-                   shape = RoundedCornerShape(10.dp),
-                   modifier = Modifier
-                       .fillMaxWidth()
-               ){
-                   Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 5.dp)
-                            .fillMaxWidth()
-                   ){
+           -2->Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween
+           ) {
+               Column {
+                   SimpleTopCard(backScreen = {
+                       newFeedbackScreen = it
+                   }).MakeTopCard(
+                       drawableId = R.drawable.back_arrow,
+                       textId = R.string.NewFeedbackName
+                   )
+                   Card(
+                       colors = CardDefaults.cardColors(containerColor = White10),
+                       shape = RectangleShape,
+                       modifier = Modifier
+                           .padding(bottom = 10.dp)
+                           .height(100.dp)
+                           .fillMaxWidth()
+                           .shadow(elevation = 3.dp)
+                   ) {
+                       Row(
+                           verticalAlignment = Alignment.CenterVertically,
+                           modifier = Modifier
+                               .fillMaxWidth()
+                               .padding(start = 10.dp, top = 5.dp)
+                       ) {
+                           Image(
+                               painter = painterResource(product.imageResourceId),
+                               modifier = Modifier
+                                   .padding(end = 10.dp)
+                                   .size(50.dp),
+                               contentDescription = null,
+                               contentScale = ContentScale.FillBounds
+                           )
+                           Text(
+                               text = stringResource(product.nameId),
+                               fontFamily = montserratFamily,
+                               fontSize = 15.sp,
+                               fontWeight = FontWeight.W400
+                           )
+                       }
+                       Row(
+                           verticalAlignment = Alignment.CenterVertically,
+                           modifier = Modifier
+                               .fillMaxWidth()
+                               .padding(start = 10.dp, top = 10.dp)
+                       ) {
+                           while (userRateCnt < 6) {
+                               RateStarIcon(
+                                   userRateCnt,
+                                   userRate = { userFeedbackRate = it },
+                                   userFeedbackRate
+                               )
+                               userRateCnt++
+                           }
+                           userRateCnt = 1
+                       }
+                   }
+                   Card(
+                       colors = CardDefaults.cardColors(containerColor = White10),
+                       shape = RoundedCornerShape(10.dp),
+                       modifier = Modifier
+                           .fillMaxWidth()
+                   ) {
+                       Row(
+                           horizontalArrangement = Arrangement.SpaceBetween,
+                           verticalAlignment = Alignment.CenterVertically,
+                           modifier = Modifier
+                               .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 5.dp)
+                               .fillMaxWidth()
+                       ) {
+                           Text(
+                               text = "Фотографии",
+                               fontFamily = montserratFamily,
+                               fontSize = 13.sp,
+                               fontWeight = FontWeight.W400
+                           )
+                           Text(
+                               text = "До 3 штук",
+                               fontFamily = montserratFamily,
+                               fontSize = 10.sp,
+                               fontWeight = FontWeight.W400,
+                               color = Grey10
+                           )
+                       }
+                       Row(
+                           modifier = Modifier.padding(bottom = 5.dp)
+                       ) {
+                           if(uriListCnt<2) {
+                               Button(
+                                   colors = ButtonDefaults.buttonColors(containerColor = Grey20),
+                                   shape = RoundedCornerShape(15.dp),
+                                   onClick = {
+                                           launcher.launch("image/*")
+                                           uriListCnt++
+                                           imageDeleteList[uriListCnt] = true
+                                   },
+                                   contentPadding = PaddingValues(0.dp),
+                                   modifier = Modifier
+                                       .padding(start = 10.dp)
+                                       .size(100.dp)
+                               ) {
+                                   Icon(
+                                       painter = painterResource(R.drawable.add_image_icon),//TODO fix bag
+                                       tint = Green10,
+                                       modifier = Modifier.size(30.dp),
+                                       contentDescription = null
+                                   )
+                               }
+                           }
+                           MakeImage(model = imageList[0], imageDelete = {imageDeleteList[0] = it}, imageDeleteCnt = imageDeleteList[0])
+                           MakeImage(model = imageList[1], imageDelete = {imageDeleteList[1] = it}, imageDeleteCnt = imageDeleteList[1])
+                           MakeImage(model = imageList[2], imageDelete = {imageDeleteList[2] = it}, imageDeleteCnt = imageDeleteList[2])
+                       }
                        Text(
-                           text = "Фотографии",
+                           text = "Ваш отзыв",
                            fontFamily = montserratFamily,
                            fontSize = 13.sp,
-                           fontWeight = FontWeight.W400
-                       )
-                       Text(
-                           text = "До 3 штук",
-                           fontFamily = montserratFamily,
-                           fontSize = 10.sp,
                            fontWeight = FontWeight.W400,
-                           color = Grey10
+                           modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
+                       )
+                       TextField(
+                           value = userFeedbackContent,
+                           onValueChange = { userFeedbackContent = it },
+                           shape = RoundedCornerShape(15.dp),
+                           colors = TextFieldDefaults.colors(
+                               focusedIndicatorColor = White10,
+                               unfocusedIndicatorColor = White10,
+                               focusedContainerColor = Grey20,
+                               unfocusedContainerColor = Grey20,
+                               disabledContainerColor = Black10,
+                               disabledTextColor = Black10,
+                               focusedTextColor = Black10,
+                           ),
+                           keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                           modifier = Modifier
+                               .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                               .fillMaxWidth(),
+                           maxLines = 20
                        )
                    }
-                   Row(
-                       modifier = Modifier.padding(bottom = 5.dp)
-                   ){
-                           Button(
-                               colors = ButtonDefaults.buttonColors(containerColor = Grey20),
-                               shape = RoundedCornerShape(15.dp),
-                               onClick = {
-                                   if (uriListCnt < 3) {
-                                       launcher.launch("image/*")
-                                       imageDeleteList[uriListCnt] = true
-                                       uriListCnt++
-                                   }
-                               },
-                               contentPadding = PaddingValues(0.dp),
-                               modifier = Modifier
-                                   .padding(start = 5.dp)
-                                   .size(80.dp)
-                           ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.add_image_icon),
-                                    tint = Green10,
-                                    modifier = Modifier.size(30.dp),
-                                    contentDescription = null
-                                )
-                           }
-                       MakeImage(model = imageUri1, imageDelete = {imageDeleteList[0] = it}, imageDeleteList[0])
-                       MakeImage(model = imageUri2, imageDelete = {imageDeleteList[1] = it}, imageDeleteList[1])
-                       MakeImage(model = imageUri3, imageDelete = {imageDeleteList[2] = it}, imageDeleteList[2])
-                   }
+               }
+               Button(
+                   onClick = {
+                       val newFeedback = Feedback()
+                       newFeedback.rate = userFeedbackRate
+                       newFeedback.content = userFeedbackContent
+                       newFeedbackScreen = -1
+                   },
+                   colors = ButtonDefaults.buttonColors(containerColor = Green10),
+                   shape = RoundedCornerShape(10.dp),
+                   modifier = Modifier
+                       .padding(start = 30.dp, end = 30.dp, bottom = 10.dp)
+                       .fillMaxWidth()
+               ){
                     Text(
-                        text = "Ваш отзыв",
+                        text = "Оставить отзыв",
                         fontFamily = montserratFamily,
-                        fontSize = 13.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.W400,
-                        modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
+                        color = White10
                     )
-                   TextField(
-                       value = feedbackTextContent,
-                       onValueChange = {feedbackTextContent = it},
-                       shape = RoundedCornerShape(15.dp),
-                       colors = TextFieldDefaults.colors(
-                           focusedIndicatorColor = White10,
-                           unfocusedIndicatorColor = White10,
-                           focusedContainerColor = Grey20,
-                           unfocusedContainerColor = Grey20,
-                           disabledContainerColor = Grey20,
-                           disabledTextColor = Black10,
-                           focusedTextColor = Black10,
-                       ),
-                       keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                       modifier = Modifier
-                           .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
-                           .fillMaxWidth()
-                           .height(40.dp),
-                       maxLines = 20
-                   )
                }
            }
            -1 -> Column(
@@ -256,8 +274,9 @@ class FeedbackScreen(
                     Icon(
                         painter = painterResource(R.drawable.plus_icon),
                         modifier = Modifier
-                            .clickable(onClick = { newFeedbackScreen = -2 })
                             .padding(bottom = 10.dp, end = 10.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(onClick = { newFeedbackScreen = -2 })
                             .size(20.dp),
                         tint = White10,
                         contentDescription = null
@@ -407,6 +426,23 @@ class FeedbackScreen(
     }
 
     @Composable
+    fun RateStarIcon(starNumber: Int, userRate:(Int) -> Unit, rateTracker: Int){
+        val starColor: Color = if(starNumber>rateTracker){
+            Grey10
+        } else Yellow10
+        Icon(
+            painter = painterResource(R.drawable.star),
+            tint = starColor,
+            modifier = Modifier
+                .padding(end = 20.dp)
+                .size(30.dp)
+                .clip(RoundedCornerShape(15.dp))
+                .clickable(onClick = { userRate(starNumber) }),
+            contentDescription = null
+        )
+    }
+
+    @Composable
     fun MakeImage(model: Uri?, imageDelete: (Boolean) -> Unit, imageDeleteCnt: Boolean){
         if(imageDeleteCnt) {
             AsyncImage(
@@ -414,10 +450,11 @@ class FeedbackScreen(
                 contentDescription = null,
                 modifier = Modifier
                     .padding(start = 10.dp)
-                    .size(80.dp)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .clickable(onClick = {
                         imageDelete(false)
+                        uriListCnt--
                     }),
                 contentScale = ContentScale.Crop,
             )

@@ -25,4 +25,9 @@
     <string name = "categoryTeaDishesName">Посуда для чая:</string>
     <string name = "FeedbackName">Отзывы</string>
     <string name = "NewFeedbackName">Ваш отзыв</string>
+    <string name = "Basket">Корзина</string>
+    <string name = "BasketOrder">Оформление заказа</string>
+    <string name = "BasketOrderChange">Изменение адреса</string>
+    <string name = "RegistrationPage">Регистрация</string>
+    <string name = "AuthorizationPage">Авторизация</string>
 </resources>

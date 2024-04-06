@@ -24,8 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teashop.basket_screen.BasketScreen
 import com.example.teashop.data.DataSource
 import com.example.teashop.main_screen.MainScreen
+import com.example.teashop.profile_screen.ProfileScreen
 import com.example.teashop.reusable_interface.NavigationBarIcon
 import com.example.teashop.search_screen.SearchScreen
 import com.example.teashop.ui.theme.Grey20
@@ -69,6 +71,18 @@ fun TeaShopApp(){
             iconColorList[1] = true
             iconColorList[2] = false
             iconColorList[3] = false
+        }
+        3 -> {
+            iconColorList[0] = false
+            iconColorList[1] = false
+            iconColorList[2] = true
+            iconColorList[3] = false
+        }
+        4 -> {
+            iconColorList[0] = false
+            iconColorList[1] = false
+            iconColorList[2] = false
+            iconColorList[3] = true
         }
     }
     Scaffold(
@@ -126,6 +140,12 @@ fun TeaShopApp(){
                    }
                    2 -> {
                        SearchScreen().ColumnSearchScreen()
+                   }
+                   3 -> {
+                       BasketScreen().MakeBasketScreen()
+                   }
+                   4 -> {
+                       ProfileScreen().MakeProfileScreen()
                    }
                }
             }

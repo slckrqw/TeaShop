@@ -108,6 +108,7 @@ class ProductCard {
                 .padding(5.dp)
                 .weight(1f)
                 .widthIn(0.dp, 300.dp)
+                .clip(RoundedCornerShape(10.dp))
                 .clickable(onClick = { productScreen(productId) })
                 .shadow(2.dp, shape = RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.TopEnd

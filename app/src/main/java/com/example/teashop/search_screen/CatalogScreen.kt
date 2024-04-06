@@ -4,7 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,13 +14,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,16 +44,24 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
+import com.example.teashop.data.DataSource
 import com.example.teashop.data.Product
+import com.example.teashop.data.ProductFilter
 import com.example.teashop.product_screen.ProductScreen
 import com.example.teashop.reusable_interface.ProductCard
 import com.example.teashop.reusable_interface.SearchCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
+import com.example.teashop.ui.theme.Green20
+import com.example.teashop.ui.theme.Grey10
+import com.example.teashop.ui.theme.Grey20
+import com.example.teashop.ui.theme.Red10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
@@ -120,28 +139,29 @@ class CatalogScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-                                .padding(15.dp)
+                                .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 20.dp)
                                 .fillMaxWidth()
                         ) {
-                            Row {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 IconsTopCatalog(
                                     drawableId = R.drawable.back_arrow,
                                     25,
-                                    0,
                                     screenChange = { backScreen(-1) })
                                 Text(
                                     text = topNameId,
                                     fontFamily = montserratFamily,
                                     fontWeight = FontWeight.W700,
                                     fontSize = 20.sp,
-                                    color = White10
+                                    color = White10,
+                                    modifier = Modifier.padding(start = 10.dp)
                                 )
                             }
                             Row {
                                 IconsTopCatalog(
                                     drawableId = R.drawable.searchicon,
                                     25,
-                                    5,
                                     screenChange = { searchSwitch = it })
                                 IconButton(
                                     onClick = {
@@ -152,7 +172,7 @@ class CatalogScreen(
                                               }
                                     },
                                     modifier = Modifier
-                                        .padding(start = 5.dp, end = 5.dp)
+                                        .padding(start = 10.dp)
                                         .size(25.dp)
                                 ){
                                     Icon(
@@ -168,16 +188,17 @@ class CatalogScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-                                .padding(start = 15.dp, end = 15.dp, bottom = 10.dp)
+                                .padding(start = 20.dp, end = 15.dp, bottom = 10.dp)
                                 .fillMaxWidth()
                         ) {
                             Row(
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .clickable(onClick = { sortingSheet = true })
                             ) {
                                 IconsTopCatalog(
                                     drawableId = R.drawable.sorting_icon,
-                                    iconSize = 20,
-                                    5
+                                    iconSize = 20
                                 )
                                 Text(
                                     text = stringResource(id = filterText),
@@ -187,14 +208,17 @@ class CatalogScreen(
                                     color = White10,
                                     modifier = Modifier
                                         .align(Alignment.CenterVertically)
-                                        .clickable(onClick = { sortingSheet = true })
+                                        .padding(start = 5.dp)
                                 )
                             }
-                            Row {
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .clickable(onClick = { filterSheet = true })
+                            ) {
                                 IconsTopCatalog(
                                     drawableId = R.drawable.filter_icon,
-                                    iconSize = 20,
-                                    5
+                                    iconSize = 20
                                 )
                                 Text(
                                     text = stringResource(id = R.string.filterTextCatalog),
@@ -203,16 +227,19 @@ class CatalogScreen(
                                     fontSize = 10.sp,
                                     color = White10,
                                     modifier = Modifier
-                                        .padding(end = 5.dp)
+                                        .padding(start = 5.dp, end = 5.dp)
                                         .align(Alignment.CenterVertically)
-                                        .clickable(onClick = { filterSheet = true })
                                 )
                             }
                         }
                     }
                 }
                 if (sortingSheet) {
-                    BottomSheetCatalog(expandedChange = { sortingSheet = it })
+                    BottomSortingCatalog(expandedChange = { sortingSheet = it })
+                }
+                var productfilter: ProductFilter?
+                if (filterSheet) {
+                    productfilter = bottomFilterCatalog(expandedChange = {filterSheet = it})
                 }
             }
         }
@@ -220,20 +247,183 @@ class CatalogScreen(
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun BottomSheetCatalog(expandedChange: (Boolean)->Unit){
+    fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(ProductFilter?){
+        val filterRequest = ProductFilter()
+        var switchOn by remember{mutableStateOf(false)}
+        var pushToBack = false
+        ModalBottomSheet(
+            onDismissRequest = { expandedChange(false) },
+            containerColor = White10,
+            modifier = Modifier.padding(bottom = 10.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Цена, руб.",
+                    fontFamily = montserratFamily,
+                    fontWeight = FontWeight.W400,
+                    fontSize = 15.sp,
+                    color = Black10,
+                    modifier = Modifier.padding(start = 10.dp, bottom = 10.dp, top = 10.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    FilterCatalogField(price = {
+                        if (it != null) {
+                            filterRequest.minPrice = it.toDouble()
+                        }
+                    }, "От")
+                    FilterCatalogField(price = {
+                        if (it != null) {
+                            filterRequest.minPrice = it.toDouble()
+                        }
+                    }, "До")
+                }
+                Row(
+                    modifier = Modifier.padding(start = 10.dp)
+                ) {
+                    WeightButton(weightRequest = { filterRequest.weightList[0] = it }, weight = 50)
+                    WeightButton(weightRequest = { filterRequest.weightList[1] = it }, weight = 100)
+                    WeightButton(weightRequest = { filterRequest.weightList[2] = it }, weight = 200)
+                    WeightButton(weightRequest = { filterRequest.weightList[3] = it }, weight = 500)
+                }
+                Row(
+                    modifier = Modifier
+                        .padding(start = 10.dp, bottom = 10.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "В наличии",
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.W400,
+                        fontSize = 15.sp,
+                        color = Black10,
+                        modifier = Modifier.padding(end = 20.dp)
+                    )
+                    Switch(
+                        checked = switchOn,
+                        onCheckedChange = { switchOn = it },
+                        colors = SwitchDefaults.colors(
+                            checkedBorderColor = White10,
+                            uncheckedBorderColor = White10,
+                            checkedThumbColor = Green10,
+                            uncheckedThumbColor = Grey10,
+                            checkedTrackColor = Grey20,
+                            uncheckedTrackColor = Grey20,
+                        )
+                    )
+                }
+                Button(
+                    onClick = {
+                        pushToBack = true
+                        expandedChange(false)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Green10),
+                    modifier = Modifier
+                        .padding(start = 10.dp, end = 10.dp, bottom = 50.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Применить",
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.W400,
+                        fontSize = 15.sp,
+                        color = White10
+                    )
+                }
+            }
+        }
+        return if(pushToBack){
+            pushToBack = false
+            filterRequest
+        } else null
+    }
+
+    @Composable
+    fun RowScope.WeightButton(weightRequest: (Boolean) -> Unit, weight: Int){
+        var colorChange by remember{mutableStateOf(false)}
+        val buttonColor: Color = when(colorChange){
+            true -> Green10
+            false -> Grey10
+        }
+        Button(
+            onClick = {
+                colorChange = !colorChange
+                weightRequest(colorChange)
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier
+                .padding(end = 10.dp)
+                .weight(1f)
+        ){
+            Text(
+                text = "$weight грамм",
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W400,
+                fontSize = 13.sp,
+                color = White10,
+            )
+        }
+    }
+
+    @Composable
+    fun RowScope.FilterCatalogField(price: (String?) -> Unit, goalString: String){
+        var priceValue by remember{mutableStateOf("0")}
+        TextField(
+            value = priceValue,
+            onValueChange = {priceValue = it},
+            shape = RoundedCornerShape(15.dp),
+            placeholder = {
+                Text(
+                    text = goalString,
+                    fontFamily = montserratFamily,
+                    fontWeight = FontWeight.W400,
+                    fontSize = 13.sp,
+                    color = Black10
+                )
+            },
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp)
+                .weight(1f),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number).copy(imeAction = ImeAction.Done),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Green10,
+                unfocusedIndicatorColor = Green10,
+                focusedContainerColor = Grey20,
+                unfocusedContainerColor = Grey20,
+                disabledContainerColor = Grey20,
+                disabledTextColor = Black10,
+                focusedTextColor = Black10,
+                focusedSupportingTextColor = Black10,
+                disabledSupportingTextColor = Black10
+            ),
+            singleLine = true
+        )
+        price(priceValue)
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun BottomSortingCatalog(expandedChange: (Boolean)->Unit){
         ModalBottomSheet(
             onDismissRequest = {expandedChange(false)},
             containerColor = White10,
-             modifier = Modifier.padding(bottom = 10.dp)
         ){
-            Column(modifier = Modifier.padding(bottom = 15.dp)) {
+            Column(modifier = Modifier.padding(bottom = 30.dp)) {
                 Text(
                     text = "Сортировать",
                     fontFamily = montserratFamily,
                     fontWeight = FontWeight.W500,
                     fontSize = 25.sp,
                     color = Black10,
-                    modifier = Modifier.padding(start = 5.dp, bottom = 20.dp)
+                    modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
                 )
                 SheetTextCatalog(1, expandedChange)
                 SheetTextCatalog(2, expandedChange)
@@ -270,7 +460,9 @@ class CatalogScreen(
                 .fillMaxWidth()
                 .padding(bottom = 10.dp)
         ){
-            Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.height(40.dp)) {
+            Box(contentAlignment = Alignment.CenterStart,
+                modifier = Modifier.height(40.dp)
+            ) {
                 Text(
                     text = stringResource(id = stringId),
                     fontFamily = montserratFamily,
@@ -290,11 +482,10 @@ class CatalogScreen(
     }
 
     @Composable
-    fun IconsTopCatalog(drawableId: Int, iconSize: Int, startPadding: Int, screenChange: (Int)-> Unit = {}){
+    fun IconsTopCatalog(drawableId: Int, iconSize: Int, screenChange: (Int)-> Unit = {}){
         IconButton(
             onClick = {screenChange(0)},
             modifier = Modifier
-                .padding(start = startPadding.dp, end = 5.dp)
                 .size(iconSize.dp)
         ){
             Icon(
@@ -311,6 +502,6 @@ class CatalogScreen(
 @Composable
 fun GreetingPreview() {
     TeaShopTheme {
-        CatalogScreen().SheetTextCatalog(textId = 1, expandedChange = {})
+        CatalogScreen().MakeCatalogScreen(productsList = DataSource().loadProducts())
     }
 }

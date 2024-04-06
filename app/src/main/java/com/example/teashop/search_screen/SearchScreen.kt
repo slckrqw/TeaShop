@@ -91,8 +91,8 @@ class SearchScreen {
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
-                    .clickable(onClick = {catalogChange(1)})
                     .clip(RoundedCornerShape(15.dp))
+                    .clickable(onClick = {catalogChange(1)})
                     .fillMaxSize()
             )
             Column(
@@ -136,8 +136,8 @@ class SearchScreen {
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .clickable(onClick = {catalogChange(screenId)})
                     .clip(RoundedCornerShape(15.dp))
+                    .clickable(onClick = {catalogChange(screenId)})
                     .fillMaxSize()
             )
             Text(
