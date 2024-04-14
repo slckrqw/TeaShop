@@ -21,41 +21,39 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
-
-class SimpleTopCard (
-    val backScreen: (Int) -> Unit
-){
-    @Composable
-    fun MakeTopCard(drawableId:Int, textId: Int, iconSwitch: Boolean = true){
-        Card(
+@Composable
+fun MakeTopCard(drawableId:Int, textId: Int?, iconSwitch: Boolean = true, navController: NavController){
+    Card(
+        modifier = Modifier
+            .padding(bottom = 10.dp)
+            .height(60.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
+        colors = CardDefaults.cardColors(containerColor = Green10)
+    ){
+        Row(
             modifier = Modifier
-                .padding(bottom = 10.dp)
-                .height(60.dp)
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
-            colors = CardDefaults.cardColors(containerColor = Green10)
+                .padding(start = 10.dp)
+                .fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
         ){
-            Row(
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                if(iconSwitch) {
-                    Icon(
-                        painter = painterResource(drawableId),
-                        tint = White10,
-                        modifier = Modifier
-                            .padding(end = 10.dp)
-                            .size(25.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable(onClick = { backScreen(-1) }),
-                        contentDescription = null
-                    )
-                }
+            if(iconSwitch) {
+                Icon(
+                    painter = painterResource(drawableId),
+                    tint = White10,
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .size(25.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable(onClick = { navController.popBackStack() }),
+                    contentDescription = null
+                )
+            }
+            if(textId != null) {
                 Text(
                     text = stringResource(textId),
                     fontFamily = montserratFamily,

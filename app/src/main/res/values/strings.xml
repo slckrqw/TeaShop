@@ -11,8 +11,6 @@
     <string name = "popularProductsMainScreenText">Популярные продукты</string>
     <string name = "newProductsCardSearchScreen1">Новинки</string>
     <string name = "newProductsCardSearchScreen2">По выгодным\nценам</string>
-    <string name = "teaProduction">Чайная\nпродукция</string>
-    <string name = "teaDishes">Посуда\nдля чая</string>
     <string name = "popularGoodsSearchScreen">Популярные\nтовары</string>
     <string name = "popularTextCatalog">Популярное</string>
     <string name = "newTextCatalog">Новинки</string>
@@ -30,4 +28,6 @@
     <string name = "BasketOrderChange">Изменение адреса</string>
     <string name = "RegistrationPage">Регистрация</string>
     <string name = "AuthorizationPage">Авторизация</string>
+    <string name = "YourOrders">Ваши заказы</string>
+    <string name = "OrderDescription">Ваш заказ</string>
 </resources>

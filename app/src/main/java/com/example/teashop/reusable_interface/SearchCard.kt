@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
-import com.example.teashop.search_screen.CatalogScreen
+import com.example.teashop.data.SearchSwitch
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
@@ -33,54 +33,44 @@ import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
-class SearchCard {
-
-    @Composable
-    fun MakeCard(searchCardHide: (Int)->Unit = {}){
-        var searchRequest by remember{ mutableStateOf("") }
-        Card(modifier = Modifier
-            .fillMaxWidth(),
-            shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)
-        ){
-            TextField(
-                modifier = Modifier
-                    .background(Green10)
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                value = searchRequest,
-                placeholder = {
-                    Text(
-                    text = stringResource(R.string.searchDefault),
-                    fontSize = 15.sp,
-                    fontFamily = montserratFamily,
-                    fontWeight = FontWeight.W100,
-                    color = Grey10
-                    )
-                },
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(
-                    onSearch = {searchCardHide(1)}),
-                leadingIcon = { Icon(painter = painterResource(R.drawable.searchicon), null) },
-                onValueChange = {searchRequest = it},
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Green10,
-                    unfocusedIndicatorColor = Green10,
-                    focusedContainerColor = White10,
-                    unfocusedContainerColor = White10,
-                    disabledContainerColor = White10,
-                    disabledTextColor = Black10,
-                    focusedTextColor = Black10,
-                ),
-                shape = RoundedCornerShape(15.dp),
-                singleLine = true
-            )
-        }
-    }
-    @Preview(showBackground = true)
-    @Composable
-    fun GreetingPreview() {
-        TeaShopTheme {
-            MakeCard()
-        }
+@Composable
+fun MakeSearchCard(searchCardHide: (SearchSwitch)->Unit = {}){
+    var searchRequest by remember{ mutableStateOf("") }
+    Card(modifier = Modifier
+        .fillMaxWidth(),
+        shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)
+    ){
+        TextField(
+            modifier = Modifier
+                .background(Green10)
+                .padding(10.dp)
+                .fillMaxWidth(),
+            value = searchRequest,
+            placeholder = {
+                Text(
+                text = stringResource(R.string.searchDefault),
+                fontSize = 15.sp,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W100,
+                color = Grey10
+                )
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = {searchCardHide(SearchSwitch.FILTERS)}),
+            leadingIcon = { Icon(painter = painterResource(R.drawable.searchicon), null) },
+            onValueChange = {searchRequest = it},
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Green10,
+                unfocusedIndicatorColor = Green10,
+                focusedContainerColor = White10,
+                unfocusedContainerColor = White10,
+                disabledContainerColor = White10,
+                disabledTextColor = Black10,
+                focusedTextColor = Black10,
+            ),
+            shape = RoundedCornerShape(15.dp),
+            singleLine = true
+        )
     }
 }

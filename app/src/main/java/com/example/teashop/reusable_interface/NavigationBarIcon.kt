@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.teashop.data.NaviBarIcons
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
 
@@ -15,10 +16,16 @@ class NavigationBarIcon(
     private val drawableId: Int
 ) {
     @Composable
-    fun MakeNavigationBarIcon(mutableActionChange:(Int)->Unit, screenId: Int, iconColor: Boolean){
+    fun MakeNavigationBarIcon(
+        mutableActionChange:()->Unit,
+        colorChange: (NaviBarIcons) -> Unit,
+        screen: NaviBarIcons,
+        iconColor: Boolean
+    ){
         IconButton(
             onClick = {
-                mutableActionChange(screenId)
+                mutableActionChange()
+                colorChange(screen)
             },
             modifier = Modifier
                 .padding(start = 30.dp, end = 30.dp, top = 5.dp, bottom = 5.dp)

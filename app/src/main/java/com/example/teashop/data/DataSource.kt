@@ -32,4 +32,13 @@ class DataSource {
     fun loadWeights(): List<Boolean>{
         return listOf(false, false, false, false)
     }
+    fun loadOrders(): List<Order>{
+        return listOf(
+            Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, productList = loadProducts(), status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124"),
+            Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, productList = loadProducts(), status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124"),
+            Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, productList = loadProducts(), status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124"),
+            Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, productList = loadProducts(), status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124"),
+            Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, productList = loadProducts(), status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124"),
+        )
+    }
 }

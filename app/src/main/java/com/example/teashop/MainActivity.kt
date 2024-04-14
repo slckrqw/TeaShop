@@ -4,35 +4,34 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.teashop.basket_screen.BasketScreen
-import com.example.teashop.data.DataSource
-import com.example.teashop.main_screen.MainScreen
-import com.example.teashop.profile_screen.ProfileScreen
-import com.example.teashop.reusable_interface.NavigationBarIcon
-import com.example.teashop.search_screen.SearchScreen
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.teashop.data.Order
+import com.example.teashop.screen.screen.basket_screen.LaunchBasketScreen
+import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
+import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
+import com.example.teashop.data.Product
+import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
+import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
+import com.example.teashop.screen.screen.main_screen.LaunchMainScreen
+import com.example.teashop.screen.screen.product_screen.LaunchProductScreen
+import com.example.teashop.screen.screen.profile_screen.LaunchLogScreen
+import com.example.teashop.screen.screen.profile_screen.LaunchProfileScreen
+import com.example.teashop.screen.screen.profile_screen.LaunchRegScreen
+import com.example.teashop.screen.screen.catalog_screen.LaunchCatalogScreen
+import com.example.teashop.navigation.Screen
+import com.example.teashop.screen.screen.profile_screen.LaunchOrderDescriptionScreen
+import com.example.teashop.screen.screen.profile_screen.LaunchOrdersScreen
+import com.example.teashop.screen.screen.search_screen.LaunchSearchScreen
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
-import com.example.teashop.ui.theme.White10
 
 const val DEFAULT_BALANCE = 0
 
@@ -57,106 +56,76 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TeaShopApp(){
-    var screen by remember { mutableIntStateOf(1) }
-    val iconColorList = remember{ mutableListOf(false, false, false, false)}
-    when(screen) {
-        1 -> {
-            iconColorList[0] = true
-            iconColorList[1] = false
-            iconColorList[2] = false
-            iconColorList[3] = false//TODO refactor this shit
-        }
-        2 -> {
-            iconColorList[0] = false
-            iconColorList[1] = true
-            iconColorList[2] = false
-            iconColorList[3] = false
-        }
-        3 -> {
-            iconColorList[0] = false
-            iconColorList[1] = false
-            iconColorList[2] = true
-            iconColorList[3] = false
-        }
-        4 -> {
-            iconColorList[0] = false
-            iconColorList[1] = false
-            iconColorList[2] = false
-            iconColorList[3] = true
-        }
-    }
-    Scaffold(
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,
-        modifier = Modifier.height(45.dp),
-        bottomBar = {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                BottomAppBar(
-                    actions = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            NavigationBarIcon(R.drawable.home_bottombar_icon).MakeNavigationBarIcon(
-                                mutableActionChange = { screen = it },
-                                1,
-                                iconColorList[0]
-                            )
-                            NavigationBarIcon(R.drawable.search_bottombar_icon).MakeNavigationBarIcon(
-                                mutableActionChange = { screen = it },
-                                2,
-                                iconColorList[1]
-                            )
-                            NavigationBarIcon(R.drawable.shop_bottombar_icon).MakeNavigationBarIcon(
-                                mutableActionChange = { screen = it },
-                                3,
-                                iconColorList[2]
-                            )
-                            NavigationBarIcon(R.drawable.profile_bottombar_icon).MakeNavigationBarIcon(
-                                mutableActionChange = { screen = it },
-                                4,
-                                iconColorList[3]
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .height(45.dp)
-                        .fillMaxWidth(),
-                    containerColor = White10,
-                    contentPadding = PaddingValues(0.dp)
-                )
-            }
-        },
-        content = {
-                padding->
-            Box(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ){
-               when(screen) {
-                   1 -> {
-                       MainScreen().LazyColumnMainScreen(productsList = DataSource().loadProducts())
-                   }
-                   2 -> {
-                       SearchScreen().ColumnSearchScreen()
-                   }
-                   3 -> {
-                       BasketScreen().MakeBasketScreen()
-                   }
-                   4 -> {
-                       ProfileScreen().MakeProfileScreen()
-                   }
-               }
-            }
-        }
-    )
-}
+    
+    val navController = rememberNavController()
+    
+    NavHost(navController = navController, startDestination = Screen.Main.route){
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TeaShopTheme {
-       TeaShopApp()
+        composable(Screen.Main.route){
+            LaunchMainScreen(navController = navController)
+        }
+
+        composable(Screen.Search.route){
+            LaunchSearchScreen(navController = navController)
+        }
+
+        composable(Screen.Basket.route){
+            LaunchBasketScreen(navController = navController)
+        }
+
+        composable(Screen.Profile.route){
+            LaunchProfileScreen(navController = navController)
+        }
+
+        composable(
+            Screen.Catalog.route,
+            arguments = listOf(navArgument("topName")
+            {
+                type = NavType.StringType
+            })
+        ){
+            LaunchCatalogScreen(navController, topName = it.arguments?.getString("topName"))
+        }
+
+        composable(Screen.Product.route){
+            val product: Product? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
+            LaunchProductScreen(product = product, navController = navController)
+        }
+
+        composable(Screen.Category.route){
+            val nameId: Int? = navController.previousBackStackEntry?.savedStateHandle?.get("nameId")
+            LaunchCategoryScreen(navController = navController, nameId = nameId)
+        }
+
+        composable(Screen.Feedback.route){
+            val product: Product? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
+            LaunchFeedbackScreen(navController = navController, product = product)
+        }
+
+        composable(Screen.NewFeedback.route){
+            val product: Product? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
+            LaunchNewFeedbackScreen(navController = navController, product = product)
+        }
+
+        composable(Screen.Order.route){
+            LaunchOrderScreen(navController = navController)
+        }
+
+        composable(Screen.Reg.route){
+            LaunchRegScreen(navController = navController)
+        }
+
+        composable(Screen.Log.route){
+            LaunchLogScreen(navController = navController)
+        }
+        
+        composable(Screen.Orders.route){
+            LaunchOrdersScreen(navController = navController)
+        }
+
+        composable(Screen.OrderDescription.route){
+            val order: Order? = navController.previousBackStackEntry?.savedStateHandle?.get("order")
+            LaunchOrderDescriptionScreen(navController = navController, order = order)
+        }
     }
 }
