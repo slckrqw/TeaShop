@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.teashop.data.Product
+import com.example.teashop.data.model.product.Product
 import com.example.teashop.screen.screen.basket_screen.SumTextRow
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10

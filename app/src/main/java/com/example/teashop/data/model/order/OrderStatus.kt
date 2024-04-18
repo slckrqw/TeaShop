@@ -1,4 +1,4 @@
-package com.example.teashop.data
+package com.example.teashop.data.model.order
 
 enum class OrderStatus {
     NEW,

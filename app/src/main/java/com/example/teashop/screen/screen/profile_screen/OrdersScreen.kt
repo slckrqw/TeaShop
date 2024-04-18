@@ -26,9 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
-import com.example.teashop.data.DataSource
-import com.example.teashop.data.Order
-import com.example.teashop.data.OrderStatus
+import com.example.teashop.data.model.DataSource
+import com.example.teashop.data.model.order.Order
+import com.example.teashop.data.model.order.OrderStatus
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10

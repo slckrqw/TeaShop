@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.NaviBarIcons
+import com.example.teashop.data.model.NaviBarIcons
 import com.example.teashop.ui.theme.White10
 
 var currentIcon = NaviBarIcons.MAIN

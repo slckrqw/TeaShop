@@ -27,7 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.DataSource
+import com.example.teashop.data.model.DataSource
+import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 import com.example.teashop.navigation.Navigation
@@ -57,8 +58,12 @@ fun MakeSearchScreen(navController: NavController){
                 R.drawable.tea_production,
                 "Чайная\nпродукция",
                onClick = {
-                   navController.currentBackStackEntry?.savedStateHandle?.set("categoryList", DataSource().loadCategories())
-                   navController.currentBackStackEntry?.savedStateHandle?.set("title", "Чайная продукция:")
+                   var parentCategory: ParentCategory? = null
+                   when (it) {
+                       "Чайная\nпродукция" -> parentCategory = ParentCategory.TEA
+                       "Посуда\nдля чая" -> parentCategory = ParentCategory.TEA_DISHES
+                   }
+                   navController.currentBackStackEntry?.savedStateHandle?.set("type", parentCategory)
                    navController.navigate(Screen.Category.route)
                }
             )
@@ -66,8 +71,12 @@ fun MakeSearchScreen(navController: NavController){
                 R.drawable.tea_dishes,
                 "Посуда\nдля чая",
                 onClick = {
-                    navController.currentBackStackEntry?.savedStateHandle?.set("categoryList", DataSource().loadCategories())
-                    navController.currentBackStackEntry?.savedStateHandle?.set("title", "Посуда для чая:")
+                    var parentCategory: ParentCategory? = null
+                    when (it) {
+                        "Чайная\nпродукция" -> parentCategory = ParentCategory.TEA
+                        "Посуда\nдля чая" -> parentCategory = ParentCategory.TEA_DISHES
+                    }
+                    navController.currentBackStackEntry?.savedStateHandle?.set("type", parentCategory)
                     navController.navigate(Screen.Category.route)
                 }
             )
@@ -119,7 +128,7 @@ fun NewProductsBanner(onClick: () -> Unit){
 }
 
 @Composable
-fun RowScope.TeaProductsBanner(drawableId: Int, title: String, onClick: () -> Unit){
+fun RowScope.TeaProductsBanner(drawableId: Int, title: String, onClick: (title: String) -> Unit){
     Box(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
@@ -134,7 +143,7 @@ fun RowScope.TeaProductsBanner(drawableId: Int, title: String, onClick: () -> Un
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .clip(RoundedCornerShape(15.dp))
-                .clickable(onClick = {onClick() })
+                .clickable(onClick = {onClick(title)})
                 .fillMaxSize()
         )
         Text(

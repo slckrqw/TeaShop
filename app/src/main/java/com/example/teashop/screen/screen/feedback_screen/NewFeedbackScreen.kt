@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.teashop.R
-import com.example.teashop.data.Product
+import com.example.teashop.data.model.product.Product
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard

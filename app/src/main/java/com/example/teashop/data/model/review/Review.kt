@@ -1,10 +1,10 @@
-package com.example.teashop.data
+package com.example.teashop.data.model.review
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Feedback(
+data class Review(
     var userId: String = "",
     var rate: Int = 0,
     var content: String = "",

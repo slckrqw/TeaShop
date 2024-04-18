@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.DataSource
+import com.example.teashop.data.model.DataSource
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard
@@ -46,13 +46,13 @@ import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
-
 @Composable
 fun LaunchBasketScreen(navController: NavController){
     Navigation(navController = navController){
         MakeBasketScreen(navController = navController)
     }
 }
+
 @Composable
 fun MakeBasketScreen(navController: NavController){
 
@@ -207,6 +207,7 @@ fun MakeBasketScreen(navController: NavController){
         }
     }
 }
+
 @Composable
 fun BasketIcon(icon: Int){
     Icon(

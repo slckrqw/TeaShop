@@ -4,6 +4,8 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -13,12 +15,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.teashop.data.Category
-import com.example.teashop.data.Order
+import com.example.teashop.data.model.order.Order
 import com.example.teashop.screen.screen.basket_screen.LaunchBasketScreen
 import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
 import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
-import com.example.teashop.data.Product
+import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
 import com.example.teashop.screen.screen.main_screen.LaunchMainScreen
@@ -46,7 +48,6 @@ class MainActivity : ComponentActivity() {
             window.statusBarColor = Color.parseColor("#1FAF54")
             window.navigationBarColor=getColor(R.color.white)
             TeaShopTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Grey20
@@ -60,10 +61,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TeaShopApp(){
-    
     val navController = rememberNavController()
     
-    NavHost(navController = navController, startDestination = Screen.Main.route){
+    NavHost(navController = navController,
+        startDestination = Screen.Main.route,
+        enterTransition = { fadeIn() },
+        exitTransition = { fadeOut() },
+        popEnterTransition  = { fadeIn() },
+        popExitTransition  = { fadeOut() }){
 
         composable(Screen.Main.route){
             LaunchMainScreen(navController = navController)
@@ -96,13 +101,11 @@ fun TeaShopApp(){
             LaunchProductScreen(product = product, navController = navController)
         }
 
-        composable(Screen.Category.route){
-            val title: String? = navController.previousBackStackEntry?.savedStateHandle?.get("title")
-            val categoryList: List<Category>? = navController.previousBackStackEntry?.savedStateHandle?.get("categoryList")
+        composable(Screen.Category.route) {
+            val type: ParentCategory? = navController.previousBackStackEntry?.savedStateHandle?.get("type")
             LaunchCategoryScreen(
                 navController = navController,
-                title = title,
-                categoryList = categoryList
+                type = type,
             )
         }
 

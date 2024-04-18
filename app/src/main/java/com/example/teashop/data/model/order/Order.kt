@@ -1,6 +1,9 @@
-package com.example.teashop.data
+package com.example.teashop.data.model.order
 
 import android.os.Parcelable
+import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.recipient.Recipient
+import com.example.teashop.data.model.address.Address
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

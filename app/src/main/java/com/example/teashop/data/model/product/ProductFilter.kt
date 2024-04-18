@@ -1,6 +1,4 @@
-package com.example.teashop.data
-
-import androidx.compose.runtime.remember
+package com.example.teashop.data.model.product
 
 data class ProductFilter(
     var categoryId: Int = 0,
