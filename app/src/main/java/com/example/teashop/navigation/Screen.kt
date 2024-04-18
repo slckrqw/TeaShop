@@ -13,7 +13,7 @@ open class Screen (val route: String){
 
     object Product: Screen("product_screen/{product}")
 
-    object Category: Screen("category_screen/{nameId}")
+    object Category: Screen("category_screen/{title}/{categoryList}")
 
     object Feedback: Screen("feedback_screen/{product}")
 
@@ -28,4 +28,10 @@ open class Screen (val route: String){
     object Orders: Screen ("orders_screen")
 
     object OrderDescription: Screen("description_screen/{order}")
+
+    object UserData: Screen("userData_screen")
+
+    object UserFeedback: Screen("userFeedback_screen")
+
+    object AddressChange: Screen("addressChange_screen")
 }

@@ -1,4 +1,4 @@
-package com.example.teashop.reusable_interface
+package com.example.teashop.reusable_interface.cards
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -26,7 +26,7 @@ import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 @Composable
-fun MakeTopCard(drawableId:Int, textId: Int?, iconSwitch: Boolean = true, navController: NavController){
+fun MakeTopCard(drawableId:Int, text: String?, iconSwitch: Boolean = true, navController: NavController){
     Card(
         modifier = Modifier
             .padding(bottom = 10.dp)
@@ -53,9 +53,9 @@ fun MakeTopCard(drawableId:Int, textId: Int?, iconSwitch: Boolean = true, navCon
                     contentDescription = null
                 )
             }
-            if(textId != null) {
+            if(text != null) {
                 Text(
-                    text = stringResource(textId),
+                    text = text,
                     fontFamily = montserratFamily,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.W500,

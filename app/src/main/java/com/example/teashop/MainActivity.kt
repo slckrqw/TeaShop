@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.teashop.data.Category
 import com.example.teashop.data.Order
 import com.example.teashop.screen.screen.basket_screen.LaunchBasketScreen
 import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
@@ -27,8 +28,11 @@ import com.example.teashop.screen.screen.profile_screen.LaunchProfileScreen
 import com.example.teashop.screen.screen.profile_screen.LaunchRegScreen
 import com.example.teashop.screen.screen.catalog_screen.LaunchCatalogScreen
 import com.example.teashop.navigation.Screen
+import com.example.teashop.screen.screen.basket_screen.LaunchAddressChangeScreen
 import com.example.teashop.screen.screen.profile_screen.LaunchOrderDescriptionScreen
 import com.example.teashop.screen.screen.profile_screen.LaunchOrdersScreen
+import com.example.teashop.screen.screen.profile_screen.LaunchUserDataScreen
+import com.example.teashop.screen.screen.profile_screen.LaunchUserFeedbackScreen
 import com.example.teashop.screen.screen.search_screen.LaunchSearchScreen
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
@@ -93,8 +97,13 @@ fun TeaShopApp(){
         }
 
         composable(Screen.Category.route){
-            val nameId: Int? = navController.previousBackStackEntry?.savedStateHandle?.get("nameId")
-            LaunchCategoryScreen(navController = navController, nameId = nameId)
+            val title: String? = navController.previousBackStackEntry?.savedStateHandle?.get("title")
+            val categoryList: List<Category>? = navController.previousBackStackEntry?.savedStateHandle?.get("categoryList")
+            LaunchCategoryScreen(
+                navController = navController,
+                title = title,
+                categoryList = categoryList
+            )
         }
 
         composable(Screen.Feedback.route){
@@ -126,6 +135,18 @@ fun TeaShopApp(){
         composable(Screen.OrderDescription.route){
             val order: Order? = navController.previousBackStackEntry?.savedStateHandle?.get("order")
             LaunchOrderDescriptionScreen(navController = navController, order = order)
+        }
+        
+        composable(Screen.UserData.route){
+            LaunchUserDataScreen(navController = navController)
+        }
+        
+        composable(Screen.UserFeedback.route){
+            LaunchUserFeedbackScreen(navController = navController)
+        }
+        
+        composable(Screen.AddressChange.route){
+            LaunchAddressChangeScreen(navController = navController)
         }
     }
 }

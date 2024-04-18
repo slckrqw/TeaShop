@@ -1,4 +1,4 @@
-package com.example.teashop.reusable_interface
+package com.example.teashop.reusable_interface.cards
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.DataSource
 import com.example.teashop.data.Product
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10

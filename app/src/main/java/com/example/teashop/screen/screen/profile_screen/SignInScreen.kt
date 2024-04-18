@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.navigation.Navigation
-import com.example.teashop.reusable_interface.MakeTopCard
+import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
@@ -44,7 +44,7 @@ fun LaunchRegScreen(navController: NavController){
     Navigation(navController = navController){
         MakeSignInScreen(
             navController = navController,
-            header = R.string.RegistrationPage,
+            header = "Регистрация",
             pageName = "Создание аккаунта",
             nameSwitch = true
         )
@@ -56,7 +56,7 @@ fun LaunchLogScreen(navController: NavController){
     Navigation(navController = navController){
         MakeSignInScreen(
             navController = navController,
-            header = R.string.AuthorizationPage,
+            header = "Авторизация",
             pageName = "Вход в аккаунт",
             nameSwitch = false
         )
@@ -66,7 +66,8 @@ fun LaunchLogScreen(navController: NavController){
 @Composable
 fun MakeSignInScreen(
     navController: NavController,
-    header: Int, pageName: String,
+    header: String?,
+    pageName: String,
     nameSwitch: Boolean,
 ){
     var buttonText by remember{
@@ -78,7 +79,7 @@ fun MakeSignInScreen(
     ){
         MakeTopCard(
             drawableId = R.drawable.back_arrow,
-            textId = header,
+            text = header,
             navController = navController,
             iconSwitch = nameSwitch
         )

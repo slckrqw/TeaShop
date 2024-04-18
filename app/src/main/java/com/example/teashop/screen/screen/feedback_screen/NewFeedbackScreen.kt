@@ -29,7 +29,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,28 +40,23 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.teashop.R
-import com.example.teashop.TeaShopApp
-import com.example.teashop.data.DataSource
-import com.example.teashop.data.Feedback
 import com.example.teashop.data.Product
 import com.example.teashop.navigation.Navigation
-import com.example.teashop.reusable_interface.MakeTopCard
+import com.example.teashop.reusable_interface.MakeAgreeBottomButton
+import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.Grey20
-import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
@@ -98,7 +92,7 @@ fun MakeNewFeedbackScreen(navController: NavController, product: Product?){
             Column {
                 MakeTopCard(
                     drawableId = R.drawable.back_arrow,
-                    textId = R.string.NewFeedbackName,
+                    text = "Ваш отзыв",
                     navController = navController
                 )
                 Card(
@@ -235,24 +229,7 @@ fun MakeNewFeedbackScreen(navController: NavController, product: Product?){
                     )
                 }
             }
-            Button(
-                onClick = {
-                    navController.popBackStack()
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Green10),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .padding(start = 30.dp, end = 30.dp, bottom = 10.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = "Оставить отзыв",
-                    fontFamily = montserratFamily,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.W400,
-                    color = White10
-                )
-            }
+            MakeAgreeBottomButton(onClick = { navController.popBackStack() }, text = "Оставить отзыв")
         }
     }
 }

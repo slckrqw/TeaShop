@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.DataSource
@@ -57,9 +55,9 @@ import com.example.teashop.data.Product
 import com.example.teashop.data.ProductFilter
 import com.example.teashop.data.SearchSwitch
 import com.example.teashop.navigation.Navigation
-import com.example.teashop.reusable_interface.MakeProductCard2
-import com.example.teashop.reusable_interface.MakeSearchCard
-import com.example.teashop.reusable_interface.RowOfCards
+import com.example.teashop.reusable_interface.cards.MakeProductCard2
+import com.example.teashop.reusable_interface.cards.MakeSearchCard
+import com.example.teashop.reusable_interface.cards.RowOfCards
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10

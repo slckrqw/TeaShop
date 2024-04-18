@@ -20,7 +20,7 @@ class DataSource {
             Category("Название категории", R.drawable.category_example)
         )
     }
-    private fun loadFeedback(): List<Feedback>{
+    fun loadFeedback(): List<Feedback>{
         return listOf(
             Feedback("Кирилл", 4, "Хороший чай", R.drawable.feedback_example),
             Feedback("Кирилл", 3, "Чай так себе", R.drawable.feedback_example),

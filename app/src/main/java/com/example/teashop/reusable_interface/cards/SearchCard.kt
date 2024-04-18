@@ -1,4 +1,4 @@
-package com.example.teashop.reusable_interface
+package com.example.teashop.reusable_interface.cards
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth

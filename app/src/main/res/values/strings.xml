@@ -30,4 +30,6 @@
     <string name = "AuthorizationPage">Авторизация</string>
     <string name = "YourOrders">Ваши заказы</string>
     <string name = "OrderDescription">Ваш заказ</string>
+    <string name = "UserData">Мои данные</string>
+    <string name = "UserFeedback">Мои отзывы</string>
 </resources>

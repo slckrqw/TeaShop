@@ -43,9 +43,9 @@ import com.example.teashop.R
 import com.example.teashop.data.DataSource
 import com.example.teashop.data.Product
 import com.example.teashop.navigation.Navigation
-import com.example.teashop.reusable_interface.MakeSearchCard
+import com.example.teashop.reusable_interface.cards.MakeSearchCard
 
-import com.example.teashop.reusable_interface.RowOfCards
+import com.example.teashop.reusable_interface.cards.RowOfCards
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
