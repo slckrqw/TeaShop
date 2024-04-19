@@ -1,12 +1,18 @@
 package com.example.teashop.data.model.review
 
 import android.os.Parcelable
+import com.example.teashop.data.model.image.Image
 import kotlinx.parcelize.Parcelize
+import java.time.ZonedDateTime
 
-@Parcelize
 data class Review(
-    var userId: String = "",
-    var rate: Int = 0,
-    var content: String = "",
-    var imageResourceId: Int = 0
-):Parcelable
+    var id: Long = 1234,
+    var createdTime: ZonedDateTime = ZonedDateTime.now(),
+    var userName: String = "",
+    var stars: Int = 0,
+    var reviewText: String = "",
+    var images: List<Image>? = listOf(Image()),
+    var productId: Long = 1234,
+    var productTitle: String = "Зелёный чай",
+    var productImage: Image = Image()
+)

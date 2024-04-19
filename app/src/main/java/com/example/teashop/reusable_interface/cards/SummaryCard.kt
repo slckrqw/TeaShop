@@ -23,7 +23,7 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun MakeSummaryCard(productCnt: Int, productList: List<ProductFull>){
+fun MakeSummaryCard(productCnt: Int, productList: List<ProductFull?>){
     Card(
         colors = CardDefaults.cardColors(containerColor = White10),
         shape = RectangleShape,
@@ -49,7 +49,7 @@ fun MakeSummaryCard(productCnt: Int, productList: List<ProductFull>){
             )
             SumTextRow(
                 header = "Начислится бонусы",
-                answer = "+${productList[productCnt].bonusCnt}",
+                answer = "+", //TODO summary price
                 textColor = Green10
             )
             SumTextRow(header = "Списание бонусов", answer = "-0", textColor = Red10)
@@ -67,7 +67,7 @@ fun MakeSummaryCard(productCnt: Int, productList: List<ProductFull>){
                     color = Black10
                 )
                 Text(
-                    text = "${productList[productCnt].price} руб.",
+                    text = " руб.", //TODO ${productList[productCnt].price}
                     fontFamily = montserratFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.W600,

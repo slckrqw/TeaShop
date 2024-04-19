@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.navigation.Navigation
@@ -111,7 +112,7 @@ fun MakeNewFeedbackScreen(navController: NavController, product: ProductFull?){
                             .padding(start = 10.dp, top = 5.dp)
                     ) {
                         Image(
-                            painter = painterResource(product.imageResourceId),
+                            painter = rememberAsyncImagePainter(model = product.images[0]),
                             modifier = Modifier
                                 .padding(end = 10.dp)
                                 .size(50.dp),
@@ -119,7 +120,7 @@ fun MakeNewFeedbackScreen(navController: NavController, product: ProductFull?){
                             contentScale = ContentScale.FillBounds
                         )
                         Text(
-                            text = stringResource(product.nameId),
+                            text = product.title,
                             fontFamily = montserratFamily,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.W400

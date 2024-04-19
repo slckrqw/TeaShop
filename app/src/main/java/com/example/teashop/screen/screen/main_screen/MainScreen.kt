@@ -42,6 +42,7 @@ import com.example.teashop.DEFAULT_BALANCE
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
+import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
 
@@ -55,12 +56,12 @@ import com.example.teashop.ui.theme.montserratFamily
 @Composable
 fun LaunchMainScreen(navController: NavController){
     Navigation(navController = navController) {
-        MakeMainScreen(productsList = DataSource().loadProducts(), navController = navController)
+        MakeMainScreen(productsList = DataSource().loadShortProducts(), navController = navController)
     }
 }
 
 @Composable
-fun MakeMainScreen(productsList: List<ProductFull>, navController: NavController){
+fun MakeMainScreen(productsList: List<ProductShort?>, navController: NavController){
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

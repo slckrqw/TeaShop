@@ -48,8 +48,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
+import com.example.teashop.data.model.packages.PackageShort
 import com.example.teashop.data.model.product.ProductFull
+import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.variant.VariantType
+import com.example.teashop.navigation.Screen
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -58,6 +63,10 @@ import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
+import javax.sql.DataSource
+
+var productWeight = VariantType.FIVE_HUNDRED_GRAMS
+
 
 @SuppressLint("UnnecessaryComposedModifier")
 private fun Modifier.clickableWithoutRipple(
@@ -78,8 +87,8 @@ private fun Modifier.clickableWithoutRipple(
 @Composable
 fun RowOfCards(
     navController: NavController,
-    product1: ProductFull?,
-    product2: ProductFull?
+    product1: ProductShort?,
+    product2: ProductShort?
 ){
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -87,18 +96,18 @@ fun RowOfCards(
         modifier = Modifier.fillMaxWidth()
     ){
         MakeProductCard(navController = navController, product = product1)
-        MakeProductCard(navController = navController, product = product2)
+        MakeProductCard(navController = navController,product = product2)
     }
 }
 
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
-fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?) {
-    var expanded by remember { mutableStateOf(false) }
-    var productWeight by remember { mutableIntStateOf(120) }
+fun RowScope.MakeProductCard(navController: NavController, product: ProductShort?) {
+    var productWeight by remember { mutableStateOf(VariantType.FIFTY_GRAMS) }
     var iconClicksCnt by remember {
         mutableIntStateOf(1)
     }
+    var expanded by remember{ mutableStateOf(false) }
     var heartIconId: Int
     val dropMenuWidth = 100
 
@@ -109,10 +118,16 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
                 .weight(1f)
                 .widthIn(0.dp, 300.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .clickable(onClick = {
-                    navController.currentBackStackEntry?.savedStateHandle?.set("product", product)
-                    navController.navigate("product_screen/$product")
-                })
+                .clickable(
+                    onClick = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "product", com.example.teashop.data.model.DataSource().loadFullProducts()[0]
+                        )
+                        navController.navigate(
+                            Screen.Product.route
+                        )
+                    }
+                )
                 .shadow(2.dp, shape = RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.TopEnd
         ) {
@@ -127,7 +142,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
                         .height(160.dp)
                 ) {
                     Image(
-                        painterResource(id = product.imageResourceId),
+                        rememberAsyncImagePainter(model = product.images[0]),
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp)),
                         contentDescription = null,
@@ -135,7 +150,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
                     )
                 }
                 Text(
-                    text = "Артикул: ${product.id}",
+                    text = "Артикул: ${product.article}",
                     fontFamily = montserratFamily,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.W200,
@@ -143,7 +158,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
                     modifier = Modifier.padding(start = 10.dp)
                 )
                 Text(
-                    text = stringResource(product.nameId),
+                    text = product.title,
                     fontFamily = montserratFamily,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.W500,
@@ -162,13 +177,13 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
                         contentDescription = null
                     )
                     Text(
-                        text = product.rate.toString(),
+                        text = product.averageRating.toString(),
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = "${product.rateCnt} отзывов",
+                        text = "${product.countOfReviews} отзывов",
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.W300,
@@ -180,17 +195,19 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .fillMaxWidth()
                 ) {
                     Text(
-                        text = "${product.price} ₽",
+                        text = "${product.packages[0].price*(1-(product.discount/100))} ₽",
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.W500,
-                        modifier = Modifier.padding(top = 5.dp, start = 10.dp)
+                        modifier = Modifier.padding(top = 5.dp)
                     )
                     Text(
-                        text = "${product.previousPrice} ₽",
+                        text = "${product.packages[0].price} ₽",
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.W300,
@@ -218,31 +235,18 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
                             modifier = Modifier.fillMaxSize()
                         ) {
                             Text(
-                                text = "$productWeight гр",
+                                text = productWeight.value,
                                 fontFamily = montserratFamily,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.W200,
                                 color = Black10,
                                 modifier = Modifier.padding(start = 5.dp)
                             )
-                            DropdownMenu(
+                            DropDownMenu(
+                                dropMenuWidth = dropMenuWidth,
                                 expanded = expanded,
-                                onDismissRequest = { expanded = false },
-                                modifier = Modifier.background(Grey20)
-                            ) {
-                                DropdownItem(
-                                    teaWeight = 120,
-                                    expandedChange = { expanded = it },
-                                    weightChange = { productWeight = it },
-                                    dropMenuWidth = dropMenuWidth
-                                )
-                                DropdownItem(
-                                    teaWeight = 240,
-                                    expandedChange = { expanded = it },
-                                    weightChange = { productWeight = it },
-                                    dropMenuWidth = dropMenuWidth
-                                )
-                            }
+                                expandedChange = {expanded = it}
+                            )
                         }
                     }
                     IconButton(
@@ -295,12 +299,12 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?
 
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
-fun MakeProductCard2(navController: NavController, product: ProductFull?) {
-    var expanded by remember { mutableStateOf(false) }
-    var productWeight by remember { mutableIntStateOf(120) }
+fun MakeProductCard2(navController: NavController, product: ProductShort?) {
+    val productWeight by remember { mutableStateOf(VariantType.FIFTY_GRAMS) }
     var iconClicksCnt by remember {
         mutableIntStateOf(1)
     }
+    var expanded by remember{ mutableStateOf(false) }
     var heartIconId: Int
     val dropMenuWidth = 120
     if(product != null) {
@@ -312,7 +316,7 @@ fun MakeProductCard2(navController: NavController, product: ProductFull?) {
                 .clickable(onClick = {
                     navController.currentBackStackEntry?.savedStateHandle?.set("product", product)
                     navController.navigate("product_screen/$product")
-                    }
+                }
                 )
                 .shadow(2.dp, shape = RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.TopEnd
@@ -332,7 +336,7 @@ fun MakeProductCard2(navController: NavController, product: ProductFull?) {
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painterResource(id = product.imageResourceId),
+                        rememberAsyncImagePainter(model = product.images[0]),
                         contentDescription = null,
                         contentScale = ContentScale.FillBounds,
                         modifier = Modifier.clip(RoundedCornerShape(10.dp))
@@ -347,14 +351,14 @@ fun MakeProductCard2(navController: NavController, product: ProductFull?) {
                         .background(White10)
                 ) {
                     Text(
-                        text = stringResource(product.nameId),
+                        text = product.title,
                         fontFamily = montserratFamily,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.W500,
                         color = Black10
                     )
                     Text(
-                        text = "Артикул: ${product.id}",
+                        text = "Артикул: ${product.article}",
                         fontFamily = montserratFamily,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.W200,
@@ -371,13 +375,13 @@ fun MakeProductCard2(navController: NavController, product: ProductFull?) {
                             contentDescription = null
                         )
                         Text(
-                            text = product.rate.toString(),
+                            text = product.averageRating.toString(),
                             fontFamily = montserratFamily,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.W500
                         )
                         Text(
-                            text = "${product.rateCnt} отзывов",
+                            text = "${product.countOfReviews} отзывов",
                             fontFamily = montserratFamily,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.W300,
@@ -388,17 +392,16 @@ fun MakeProductCard2(navController: NavController, product: ProductFull?) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start,
-
-                        ) {
+                    ) {
                         Text(
-                            text = "${product.price} ₽",
+                            text = "${product.packages[0].price*product.discount} ₽",
                             fontFamily = montserratFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.W500,
                             modifier = Modifier.padding(top = 5.dp)
                         )
                         Text(
-                            text = "${product.previousPrice} ₽",
+                            text = "${product.packages[0].price} ₽",
                             fontFamily = montserratFamily,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.W300,
@@ -421,31 +424,18 @@ fun MakeProductCard2(navController: NavController, product: ProductFull?) {
                             modifier = Modifier.fillMaxSize()
                         ) {
                             Text(
-                                text = "$productWeight гр",
+                                text = productWeight.value,
                                 fontFamily = montserratFamily,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.W200,
                                 color = Black10,
                                 modifier = Modifier.padding(start = 5.dp)
                             )
-                            DropdownMenu(
+                            DropDownMenu(
+                                dropMenuWidth = dropMenuWidth,
                                 expanded = expanded,
-                                onDismissRequest = { expanded = false },
-                                modifier = Modifier.background(Grey20)
-                            ) {
-                                DropdownItem(
-                                    teaWeight = 120,
-                                    expandedChange = { expanded = it },
-                                    weightChange = { productWeight = it },
-                                    dropMenuWidth = dropMenuWidth
-                                )
-                                DropdownItem(
-                                    teaWeight = 240,
-                                    expandedChange = { expanded = it },
-                                    weightChange = { productWeight = it },
-                                    dropMenuWidth = dropMenuWidth
-                                )
-                            }
+                                expandedChange = {expanded = it}
+                            )
                         }
                     }
                     IconButton(
@@ -495,36 +485,6 @@ fun MakeProductCard2(navController: NavController, product: ProductFull?) {
             }
         }
     }
-}
-
-@Composable
-fun DropdownItem(
-    teaWeight: Int,
-    expandedChange:(Boolean)->Unit,
-    weightChange:(Int) -> Unit,
-    dropMenuWidth: Int
-){
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = "$teaWeight гр",
-                fontFamily = montserratFamily,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.W200,
-                color = Black10
-            )
-        },
-        onClick = {
-            weightChange(teaWeight)
-            expandedChange(false)
-        },
-        contentPadding = PaddingValues(5.dp),
-        modifier = Modifier
-            .width(dropMenuWidth.dp)
-            .height(30.dp)
-            .background(Grey20),
-
-        )
 }
 
 @Preview(showBackground = true)

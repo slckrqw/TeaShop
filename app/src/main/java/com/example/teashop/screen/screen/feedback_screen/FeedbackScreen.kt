@@ -33,7 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
+import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
+import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.review.Review
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeFeedbackCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
@@ -46,122 +49,120 @@ import com.example.teashop.ui.theme.montserratFamily
 private var filter: String = "Новые"
 
 @Composable
-fun LaunchFeedbackScreen(navController: NavController, product: ProductFull?){
+fun LaunchFeedbackScreen(navController: NavController, product: ProductShort?){
     Navigation(navController = navController) {
         MakeFeedbackScreen(
             navController,
+            DataSource().loadFeedback(),
             product
         )
     }
 }
 @Composable
-fun MakeFeedbackScreen(navController: NavController, product: ProductFull?){
+fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>, product: ProductShort?){
 
-    var starsRateCnt = 0
     var expandedChange by remember{mutableStateOf(false)}
 
-    if(product != null) {
     Column(
-            modifier = Modifier.fillMaxSize()
-        ){
-            Box(
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                MakeTopCard(
-                    drawableId = R.drawable.back_arrow,
-                    text = "Отзывы",
-                    navController = navController
-                )
-                Icon(
-                    painter = painterResource(R.drawable.plus_icon),
-                    modifier = Modifier
-                        .padding(bottom = 10.dp, end = 10.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable(onClick = {
-                            navController.currentBackStackEntry?.savedStateHandle?.set(
-                                "product",
-                                product
-                            )
-                            navController.navigate("newFeedback_screen/$product")
-                        })
-                        .size(20.dp),
-                    tint = White10,
-                    contentDescription = null
-                )
-            }
-            Card(
+        modifier = Modifier.fillMaxSize()
+    ){
+        Box(
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            MakeTopCard(
+                drawableId = R.drawable.back_arrow,
+                text = "Отзывы",
+                navController = navController
+            )
+            Icon(
+                painter = painterResource(R.drawable.plus_icon),
                 modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = White10)
+                    .padding(bottom = 10.dp, end = 10.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable(onClick = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "product",
+                            product
+                        )
+                        navController.navigate("newFeedback_screen/$product")
+                    })
+                    .size(20.dp),
+                tint = White10,
+                contentDescription = null
+            )
+        }
+        Card(
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = White10)
+        ) {
+            Column(
+                modifier = Modifier.padding(start = 10.dp, bottom = 5.dp, top = 5.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(start = 10.dp, bottom = 5.dp, top = 5.dp)
-                ) {
-                    Text(
-                        text = "Общий рейтинг",
-                        fontFamily = montserratFamily,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.W500
-                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.star),
-                            tint = Yellow10,
-                            modifier = Modifier.size(30.dp),
-                            contentDescription = null
-                        )
-                        Text(
-                            text = product.rate.toString(),
-                            fontFamily = montserratFamily,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.W500
-                        )
-                        Text(
-                            text = "${product.rateCnt} отзывов",
-                            fontFamily = montserratFamily,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.W300,
-                            modifier = Modifier.padding(start = 15.dp)
-                        )
-                    }
-                }
-            }
-            Card(
-                colors = CardDefaults.cardColors(containerColor = White10),
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .clickable(onClick = { expandedChange = true })
-            ) {
+                Text(
+                    text = "Общий рейтинг",
+                    fontFamily = montserratFamily,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.W500
+                )
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(start = 10.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.sorting_icon),
-                        tint = Green10,
-                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(R.drawable.star),
+                        tint = Yellow10,
+                        modifier = Modifier.size(30.dp),
                         contentDescription = null
                     )
                     Text(
-                        text = filter,
+                        text = product?.averageRating.toString(),
+                        fontFamily = montserratFamily,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.W500
+                    )
+                    Text(
+                        text = "${reviewList.size} отзывов",
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.W400,
+                        fontWeight = FontWeight.W300,
+                        modifier = Modifier.padding(start = 15.dp)
                     )
                 }
             }
-            LazyColumn {
-                items(product.feedBackList.size) { feedback ->
-                    MakeFeedbackCard(product = product, feedback = feedback)
-                }
+        }
+        Card(
+            colors = CardDefaults.cardColors(containerColor = White10),
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .clickable(onClick = { expandedChange = true })
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(start = 10.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.sorting_icon),
+                    tint = Green10,
+                    modifier = Modifier.size(20.dp),
+                    contentDescription = null
+                )
+                Text(
+                    text = filter,
+                    fontFamily = montserratFamily,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.W400,
+                )
             }
-            if (expandedChange) {
-                BottomSheetCatalog(expandedChange = { expandedChange = it })
+        }
+        LazyColumn {
+            items(reviewList.size) { review ->
+                MakeFeedbackCard(reviewList[review])
             }
+        }
+        if (expandedChange) {
+            BottomSheetCatalog(expandedChange = { expandedChange = it })
         }
     }
 }

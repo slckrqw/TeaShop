@@ -47,9 +47,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
+import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.reusable_interface.cards.DropDownMenu
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -78,7 +81,7 @@ private fun Modifier.clickableWithoutRipple(
 @Composable
 fun LaunchProductScreen(navController: NavController, product: ProductFull?){
     Navigation(navController = navController) {
-        MakeProductScreen(product = product, navController)
+        MakeProductScreen(product = product, navController = navController)
     }
 }
 
@@ -90,6 +93,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
     var heartTemp by remember{mutableIntStateOf(0)}
     var expanded by remember{mutableStateOf(false)}
     var productWeight by remember{ mutableIntStateOf(120) }
+    val dropMenuWidth = 100
 
     when(heartTemp){
         0 -> {
@@ -122,7 +126,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 .height(360.dp)
                         ) {
                             Image(
-                                painter = painterResource(product.imageResourceId),
+                                painter = rememberAsyncImagePainter(model = product.images[0]),
                                 contentScale = ContentScale.FillBounds,
                                 modifier = Modifier.fillMaxSize(),
                                 contentDescription = null
@@ -162,7 +166,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                             }
                         }
                         Text(
-                            text = "Артикул: ${product.id}",
+                            text = "Артикул: ${product.article}",
                             fontFamily = montserratFamily,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.W200,
@@ -170,7 +174,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                             modifier = Modifier.padding(start = 5.dp)
                         )
                         Text(
-                            text = stringResource(product.nameId),
+                            text = product.title,
                             fontFamily = montserratFamily,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.W500,
@@ -189,13 +193,13 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 Text(
-                                    text = "${product.price} ₽",
+                                    text = "${product.packages[0].price*(1-(product.discount/100))} ₽",
                                     fontFamily = montserratFamily,
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.W700
                                 )
                                 Text(
-                                    text = "${product.previousPrice} ₽",
+                                    text = "${product.packages[0].price} ₽",
                                     fontFamily = montserratFamily,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.W300,
@@ -231,24 +235,11 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                             color = Black10,
                                             modifier = Modifier.padding(start = 5.dp)
                                         )
-                                        DropdownMenu(
+                                        DropDownMenu(
+                                            dropMenuWidth = dropMenuWidth,
                                             expanded = expanded,
-                                            onDismissRequest = { expanded = false },
-                                            modifier = Modifier.background(Grey20),
-                                        ) {
-                                            DropdownItem(
-                                                teaWeight = 120,
-                                                expandedChange = { expanded = it },
-                                                weightChange = { productWeight = it },
-                                                dropMenuWidth = 100
-                                            )
-                                            DropdownItem(
-                                                teaWeight = 240,
-                                                expandedChange = { expanded = it },
-                                                weightChange = { productWeight = it },
-                                                dropMenuWidth = 100
-                                            )
-                                        }
+                                            expandedChange = {expanded = it}
+                                        )
                                     }
                                 }
                                 Button(
@@ -302,7 +293,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 contentDescription = null
                             )
                             Text(
-                                text = "+${product.bonusCnt} бонусных рублей",
+                                text = "+ бонусных рублей",
                                 fontFamily = montserratFamily,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.W500,
@@ -345,14 +336,14 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 contentDescription = null
                             )
                             Text(
-                                text = "${product.rate}",
+                                text = "${product.averageRating}",
                                 fontFamily = montserratFamily,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.W500,
                                 modifier = Modifier.padding(start = 5.dp)
                             )
                             Text(
-                                text = "${product.rateCnt} отзывов",
+                                text = "${product.countOfReviews} отзывов",
                                 fontFamily = montserratFamily,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.W300,
@@ -416,35 +407,6 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
             }
         }
     }
-}
-@Composable
-fun DropdownItem(
-    teaWeight: Int,
-    expandedChange:(Boolean)->Unit,
-    weightChange:(Int) -> Unit,
-    dropMenuWidth: Int
-){
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = "$teaWeight гр",
-                fontFamily = montserratFamily,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.W200,
-                color = Black10
-            )
-        },
-        onClick = {
-            weightChange(teaWeight)
-            expandedChange(false)
-        },
-        contentPadding = PaddingValues(5.dp),
-        modifier = Modifier
-            .width(dropMenuWidth.dp)
-            .height(30.dp)
-            .background(Grey20)
-
-    )
 }
 
 @Preview(showBackground = true)

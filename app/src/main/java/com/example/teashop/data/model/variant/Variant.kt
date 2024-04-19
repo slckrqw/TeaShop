@@ -4,3 +4,4 @@ data class Variant(
     val id: Int,
     val title: String
 )
+

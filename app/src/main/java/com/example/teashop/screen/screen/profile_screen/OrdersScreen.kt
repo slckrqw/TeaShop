@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.order.Order
@@ -72,7 +73,7 @@ fun MakeOrderCard(order: Order?, navController: NavController){
                 .clickable(onClick = {
                     navController.currentBackStackEntry?.savedStateHandle?.set("order", order)
                     navController.navigate("description_screen/$order")
-                    }
+                }
                 ),
             colors = CardDefaults.cardColors(containerColor = White10),
             shape = RoundedCornerShape(10.dp)
@@ -110,7 +111,7 @@ fun MakeOrderCard(order: Order?, navController: NavController){
                 ) {
                     order.productList.forEach {
                         Image(
-                            painter = painterResource(it.imageResourceId),
+                            painter = rememberAsyncImagePainter(model = it.images[0]),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(60.dp)

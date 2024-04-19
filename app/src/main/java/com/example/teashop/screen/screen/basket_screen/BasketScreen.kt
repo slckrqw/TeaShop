@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.navigation.Navigation
@@ -56,7 +57,7 @@ fun LaunchBasketScreen(navController: NavController){
 @Composable
 fun MakeBasketScreen(navController: NavController){
 
-    val basketList = DataSource().loadProducts()
+    val basketList = DataSource().loadShortProducts()
     val productCnt = 1
 
     Column{
@@ -117,7 +118,7 @@ fun MakeBasketScreen(navController: NavController){
 
                         ) {
                             Image(
-                                painter = painterResource(basketList[basketItem].imageResourceId),
+                                painter = rememberAsyncImagePainter(basketList[basketItem]?.images), //TODO
                                 modifier = Modifier
                                     .widthIn(0.dp, 125.dp),
                                 contentScale = ContentScale.FillBounds,
@@ -130,7 +131,7 @@ fun MakeBasketScreen(navController: NavController){
                                 verticalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 Text(
-                                    text = stringResource(basketList[basketItem].nameId),
+                                    text = basketList[basketItem]?.title.toString(),
                                     fontFamily = montserratFamily,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.W500,
@@ -144,14 +145,14 @@ fun MakeBasketScreen(navController: NavController){
                                         .padding(bottom = 10.dp)
                                 ) {
                                     Text(
-                                        text = "${basketList[basketItem].price} ₽ x 50гр",
+                                        text = "${basketList[basketItem]?.discount} ₽ x 50гр",//TODO
                                         fontFamily = montserratFamily,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.W700,
                                         color = Black10
                                     )
                                     Text(
-                                        text = "+ ${basketList[basketItem].bonusCnt} бонусов",
+                                        text = "+ ${basketList[basketItem]?.discount} бонусов",//TODO
                                         fontFamily = montserratFamily,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.W400,

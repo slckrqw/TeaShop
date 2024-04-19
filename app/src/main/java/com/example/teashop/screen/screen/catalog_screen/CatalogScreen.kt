@@ -54,6 +54,7 @@ import com.example.teashop.data.enums.ScreenConfig
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.product.ProductFilter
 import com.example.teashop.data.enums.SearchSwitch
+import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeProductCard2
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
@@ -72,14 +73,14 @@ var filterId = 1
 fun LaunchCatalogScreen(navController: NavController, topName: String?){
     Navigation(navController = navController) {
         MakeCatalogScreen(
-            productsList = DataSource().loadProducts(),
+            productsList = DataSource().loadShortProducts(),
             navController = navController,
             topName = topName
         )
     }
 }
 @Composable
-fun MakeCatalogScreen(productsList: List<ProductFull>, navController: NavController, topName: String?) {
+fun MakeCatalogScreen(productsList: List<ProductShort?>, navController: NavController, topName: String?) {
     var screenConfig by rememberSaveable{ mutableStateOf(ScreenConfig.ROW) }
     Column {
         TopCardCatalog(
@@ -96,8 +97,8 @@ fun MakeCatalogScreen(productsList: List<ProductFull>, navController: NavControl
                 when (screenConfig) {
                     ScreenConfig.SINGLE -> {
                        MakeProductCard2(
-                            navController,
-                            productsList[product]
+                           navController,
+                           productsList[product]
                        )
                     }
 

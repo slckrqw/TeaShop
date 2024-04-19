@@ -57,7 +57,7 @@ fun LaunchOrderScreen(navController: NavController){
 fun MakeOrderScreen(navController: NavController){
 
     var productCnt = 1
-    var basketList = DataSource().loadProducts()
+    var basketList = DataSource().loadFullProducts()
     var receiverName by remember {
         mutableStateOf("")
     }

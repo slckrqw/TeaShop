@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.order.Order
 import com.example.teashop.navigation.Navigation
@@ -157,7 +158,7 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order?){
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
-                            painter = painterResource(order.productList[product].imageResourceId),
+                            painter = rememberAsyncImagePainter(model = order.productList[product].images[0]),
                             contentDescription = null
                         )
                         Column(
@@ -167,14 +168,14 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order?){
                             verticalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Text(
-                                text = stringResource(order.productList[product].nameId),
+                                text = order.productList[product].title,
                                 fontSize = 11.sp,
                                 fontFamily = montserratFamily,
                                 fontWeight = FontWeight.W600,
                                 color = Black10
                             )
                             Text(
-                                text = "${order.productList[product].price} ₽",
+                                text = " ₽",
                                 fontSize = 13.sp,
                                 fontFamily = montserratFamily,
                                 fontWeight = FontWeight.W400,

@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.navigation.Navigation
@@ -43,7 +44,7 @@ fun LaunchUserFeedbackScreen(navController: NavController){
 @Composable
 fun MakeUserFeedbackScreen(navController: NavController){
     val feedbackList = DataSource().loadFeedback()
-    val product = DataSource().loadProducts()[0]
+    val product = DataSource().loadShortProducts()[0]
     LazyColumn {
         item{
             MakeTopCard(
@@ -74,19 +75,20 @@ fun MakeUserFeedbackScreen(navController: NavController){
                             modifier = Modifier.fillMaxHeight(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Image(
-                                painter = painterResource(product.imageResourceId),
-                                contentDescription = null,
-                                modifier = Modifier.padding(end = 10.dp)
-                            )
-                            Text(
-                                text = stringResource(product.nameId),
-                                fontFamily = montserratFamily,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.W400,
-                                color = Black10,
-
-                            )
+                            product?.let {
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = product.images[0]),
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(end = 10.dp)
+                                )
+                                Text(
+                                    text = product.title,
+                                    fontFamily = montserratFamily,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.W400,
+                                    color = Black10
+                                )
+                            }
                         }
                         Icon(
                             painter = painterResource(R.drawable.dropdown_icon),
@@ -95,7 +97,7 @@ fun MakeUserFeedbackScreen(navController: NavController){
                         )
                     }
                 }
-                MakeFeedbackCard(product = product, feedback = feedback)
+                MakeFeedbackCard(review = feedbackList[feedback])
             }
         }
     }
