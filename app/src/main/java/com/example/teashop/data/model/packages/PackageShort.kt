@@ -1,7 +1,7 @@
 package com.example.teashop.data.model.packages
 
 data class PackageShort(
-    private val id: Long,
-    private val variantName: String,
-    private val price: Double
+    val id: Long,
+    val variantName: String,
+    val price: Double
 )

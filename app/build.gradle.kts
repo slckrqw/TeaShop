@@ -63,6 +63,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation ("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha03")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -71,13 +72,14 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // http requests
+    // Http requests
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
 
-    // Json Moshi
+    // Converters
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 
     //Image Loading
     implementation("io.coil-kt:coil-compose:2.6.0")

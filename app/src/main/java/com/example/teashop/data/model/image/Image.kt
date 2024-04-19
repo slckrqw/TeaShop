@@ -1,6 +1,6 @@
 package com.example.teashop.data.model.image
 
-data class ImageDto(
+data class Image(
     val id: Long,
     val imageUrl: String
 )

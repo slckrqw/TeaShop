@@ -1,4 +1,4 @@
-package com.example.teashop.screen.screen.profile_screen
+package com.example.teashop.screen.screen.profile_screen.sign_in
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,24 +30,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import com.example.teashop.R
+import com.example.teashop.data.model.user.UserRole
 import com.example.teashop.data.model.auth.AuthRequest
-import com.example.teashop.data.model.auth.AuthResponse
-import com.example.teashop.data.repository.AuthRepository
+import com.example.teashop.data.model.auth.RegistrationRequest
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
+const val MAX_SIZE = 70
 
 @Composable
 fun LaunchRegScreen(navController: NavController){
@@ -81,7 +80,15 @@ fun MakeSignInScreen(
     pageName: String,
     nameSwitch: Boolean,
 ){
+    val tokenStorage = TokenStorage()
+    val authViewModel: AuthViewModel = viewModel()
+    val registrationViewModel: RegistrationViewModel = viewModel()
+    val context = LocalContext.current
+
     var buttonText by remember{
+        mutableStateOf("")
+    }
+    var userName by remember {
         mutableStateOf("")
     }
     var userEmail by remember{
@@ -127,7 +134,7 @@ fun MakeSignInScreen(
             buttonText = if(nameSwitch){
                 UserField(
                     header = "Имя",
-                    onValueChange = {},
+                    onValueChange = { userName = it },
                     icon = R.drawable.name_icon
                 )
                 "Зарегистрироваться"
@@ -142,35 +149,58 @@ fun MakeSignInScreen(
             UserField(
                 header = "Пароль",
                 onValueChange = {userPassword = it},
-                icon = R.drawable.password_icon
+                icon = R.drawable.password_icon,
             )
             Button(
                 onClick = {
-                    if(nameSwitch){
+                    if (!userEmail.contains("@")) {
+                        Toast.makeText(context, "Укажите корректный адрес электронной почты",
+                            Toast.LENGTH_LONG).show()
+                        return@Button
+                    }
 
-                    } else {
-                        val authRequest: AuthRequest = AuthRequest(userEmail, userPassword)
-                        runBlocking {
-                            launch{
-                                val authResponse: Call<AuthResponse> = AuthRepository().authenticate(authRequest)
-                                authResponse.enqueue(object : Callback<AuthResponse?> {
-                                    override fun onResponse(call: Call<AuthResponse?>?, response: Response<AuthResponse?>) {
-                                        val model: AuthResponse? = response.body() //TODO save token in user's memory
-                                        if(response.code() == 200){
-                                            model?.let {
-                                                println(model.role) //TODO check role of user
-                                            }
-                                        } else{
-                                            //TODO toast window with error
-                                        }
-                                    }
-
-                                    override fun onFailure(call: Call<AuthResponse?>?, t: Throwable) {
-                                        print("error")
-                                    }
-                                })
+                    if (nameSwitch){
+                        val registrationRequest = RegistrationRequest(
+                            userName,
+                            userEmail.replace(" ", ""),
+                            userPassword.replace(" ", "")
+                        )
+                        registrationViewModel.registration(
+                            registrationRequest,
+                            onSuccess = {
+                                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                                navController.navigate(Screen.Log.route)
+                            },
+                            onError = {
+                                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
                             }
-                        }
+                        )
+                    } else {
+                        val authRequest = AuthRequest(
+                            userEmail.replace(" ", ""),
+                            userPassword.replace(" ", "")
+                        )
+                        authViewModel.authenticate(
+                            authRequest,
+                            onSuccess = { authResponse ->
+                                tokenStorage.saveToken(context, authResponse.token)
+                                if (authResponse.role == UserRole.USER.name) {
+                                    navController.navigate(
+                                        Screen.Profile.route,
+                                        navOptions = navOptions {
+                                            popUpTo(navController.graph.id) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    )
+                                } else {
+                                    // TODO navigate to AdminSection
+                                }
+                            },
+                            onError = {
+                                Toast.makeText(context, "Неправильный логин или пароль", Toast.LENGTH_LONG).show()
+                            }
+                        )
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
@@ -210,7 +240,10 @@ fun UserField(header: String, onValueChange: (String) -> Unit, icon: Int){
     }
     TextField(
         value = value,
-        onValueChange = { value = it },
+        onValueChange = {
+            if (it.length < MAX_SIZE)
+                value = it
+        },
         shape = RoundedCornerShape(15.dp),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Grey10,

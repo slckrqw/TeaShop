@@ -25,9 +25,9 @@ import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
 import com.example.teashop.screen.screen.main_screen.LaunchMainScreen
 import com.example.teashop.screen.screen.product_screen.LaunchProductScreen
-import com.example.teashop.screen.screen.profile_screen.LaunchLogScreen
-import com.example.teashop.screen.screen.profile_screen.LaunchProfileScreen
-import com.example.teashop.screen.screen.profile_screen.LaunchRegScreen
+import com.example.teashop.screen.screen.profile_screen.sign_in.LaunchLogScreen
+import com.example.teashop.screen.screen.profile_screen.profile.LaunchProfileScreen
+import com.example.teashop.screen.screen.profile_screen.sign_in.LaunchRegScreen
 import com.example.teashop.screen.screen.catalog_screen.LaunchCatalogScreen
 import com.example.teashop.navigation.Screen
 import com.example.teashop.screen.screen.basket_screen.LaunchAddressChangeScreen

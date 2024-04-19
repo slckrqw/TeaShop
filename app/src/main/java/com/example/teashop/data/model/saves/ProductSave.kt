@@ -1,12 +1,12 @@
 package com.example.teashop.data.model.saves
 
 data class ProductSave(
-    private val id: Long,
-    private val images: List<Long>,
-    private val packages: List<PackageSave>,
-    private val categoryId: Int,
-    private val article: String,
-    private val title: String,
-    private val description: String,
-    private val discount: Short
+    val id: Long,
+    val images: List<Long>,
+    val packages: List<PackageSave>,
+    val categoryId: Int,
+    val article: String,
+    val title: String,
+    val description: String,
+    val discount: Short
 )

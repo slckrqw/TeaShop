@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.category.ParentCategory
-import com.example.teashop.data.model.image.ImageDto
 import com.example.teashop.data.repository.CategoryRepository
 import kotlinx.coroutines.launch
 

@@ -1,10 +1,11 @@
 package com.example.teashop.data.model.bucket
 
-import com.example.teashop.data.model.imageDto.ImageDto
+import com.example.teashop.data.model.image.Image
+
 
 data class ProductBucket(
-    private val id: Long,
-    private val title: String,
-    private val discount: Short,
-    private val images: List<ImageDto>
+    val id: Long,
+    val title: String,
+    val discount: Short,
+    val images: List<Image>
 )

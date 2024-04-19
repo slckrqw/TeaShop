@@ -10,17 +10,21 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.enums.NaviBarIcons
+import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.navigation.Screen
 import com.example.teashop.ui.theme.White10
 
 var currentIcon = NaviBarIcons.MAIN
 
 @Composable
 fun MakeNaviBar(navController: NavController){
-
+    val tokenStorage = TokenStorage()
+    val context = LocalContext.current
     val iconColorList = remember { mutableListOf(false, false, false, false) }
     var colorListCnt = 0
     when (currentIcon) {
@@ -64,25 +68,37 @@ fun MakeNaviBar(navController: NavController){
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     NavigationBarIcon(R.drawable.home_bottombar_icon).MakeNavigationBarIcon(
-                        mutableActionChange = { navController.navigate("main_screen") },
+                        mutableActionChange = { navController.navigate(Screen.Main.route) },
                         colorChange = {currentIcon = it},
                         screen = NaviBarIcons.MAIN,
                         iconColorList[0]
                     )
                     NavigationBarIcon(R.drawable.search_bottombar_icon).MakeNavigationBarIcon(
-                        mutableActionChange = { navController.navigate("search_screen") },
+                        mutableActionChange = { navController.navigate(Screen.Search.route) },
                         colorChange = {currentIcon = it},
                         screen = NaviBarIcons.SEARCH,
                         iconColorList[1]
                     )
                     NavigationBarIcon(R.drawable.shop_bottombar_icon).MakeNavigationBarIcon(
-                        mutableActionChange = { navController.navigate("basket_screen") },
+                        mutableActionChange = {
+                            if (tokenStorage.getToken(context).isNullOrEmpty()) {
+                                navController.navigate(Screen.Log.route)
+                            } else {
+                                navController.navigate(Screen.Basket.route)
+                            }
+                        },
                         colorChange = {currentIcon = it},
                         screen = NaviBarIcons.BASKET,
                         iconColorList[2]
                     )
                     NavigationBarIcon(R.drawable.profile_bottombar_icon).MakeNavigationBarIcon(
-                        mutableActionChange = { navController.navigate("profile_screen") },
+                        mutableActionChange = {
+                            if (tokenStorage.getToken(context).isNullOrEmpty()) {
+                                navController.navigate(Screen.Log.route)
+                            } else {
+                                navController.navigate(Screen.Profile.route)
+                            }
+                        },
                         colorChange = {currentIcon = it},
                         screen = NaviBarIcons.PROFILE,
                         iconColorList[3]

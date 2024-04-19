@@ -3,11 +3,11 @@ package com.example.teashop.data.model.bucket
 import java.time.ZonedDateTime
 
 data class Bucket(
-    private val id: Long,
-    private val userId: Long,
-    private val totalSumWithDiscount: Double,
-    private val totalDiscount: Double,
-    private val plusTeaBonuses: Int,
-    private val product: List<PackageBucket>,
-    private val modifiedDate: ZonedDateTime
+    val id: Long,
+    val userId: Long,
+    val totalSumWithDiscount: Double,
+    val totalDiscount: Double,
+    val plusTeaBonuses: Int,
+    val product: List<PackageBucket>?,
+    val modifiedDate: ZonedDateTime
 )
