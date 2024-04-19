@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.teashop.R
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard
@@ -65,14 +65,14 @@ var uriListCnt = -1
 val imageList = mutableStateMapOf<Int,Uri?>(1 to null, 2 to null, 3 to null)
 
 @Composable
-fun LaunchNewFeedbackScreen(navController: NavController, product: Product?){
+fun LaunchNewFeedbackScreen(navController: NavController, product: ProductFull?){
     Navigation(navController = navController) {
         MakeNewFeedbackScreen(navController = navController, product = product)
     }
 }
 
 @Composable
-fun MakeNewFeedbackScreen(navController: NavController, product: Product?){
+fun MakeNewFeedbackScreen(navController: NavController, product: ProductFull?){
 
     val launcher = rememberLauncherForActivityResult(
         contract =

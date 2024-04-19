@@ -1,5 +1,6 @@
 package com.example.teashop.screen.screen.profile_screen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -19,10 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -30,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
+import com.example.teashop.data.model.auth.AuthRequest
+import com.example.teashop.data.model.auth.AuthResponse
+import com.example.teashop.data.repository.AuthRepository
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -37,6 +43,11 @@ import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 @Composable
@@ -71,6 +82,12 @@ fun MakeSignInScreen(
     nameSwitch: Boolean,
 ){
     var buttonText by remember{
+        mutableStateOf("")
+    }
+    var userEmail by remember{
+        mutableStateOf("")
+    }
+    var userPassword by remember{
         mutableStateOf("")
     }
     Column(
@@ -119,12 +136,43 @@ fun MakeSignInScreen(
             }
             UserField(
                 header = "Электронная почта",
-                onValueChange = {},
+                onValueChange = {userEmail = it},
                 icon = R.drawable.email_icon
             )
-            UserField(header = "Пароль", onValueChange = {}, icon = R.drawable.password_icon)
+            UserField(
+                header = "Пароль",
+                onValueChange = {userPassword = it},
+                icon = R.drawable.password_icon
+            )
             Button(
-                onClick = { },
+                onClick = {
+                    if(nameSwitch){
+
+                    } else {
+                        val authRequest: AuthRequest = AuthRequest(userEmail, userPassword)
+                        runBlocking {
+                            launch{
+                                val authResponse: Call<AuthResponse> = AuthRepository().authenticate(authRequest)
+                                authResponse.enqueue(object : Callback<AuthResponse?> {
+                                    override fun onResponse(call: Call<AuthResponse?>?, response: Response<AuthResponse?>) {
+                                        val model: AuthResponse? = response.body() //TODO save token in user's memory
+                                        if(response.code() == 200){
+                                            model?.let {
+                                                println(model.role) //TODO check role of user
+                                            }
+                                        } else{
+                                            //TODO toast window with error
+                                        }
+                                    }
+
+                                    override fun onFailure(call: Call<AuthResponse?>?, t: Throwable) {
+                                        print("error")
+                                    }
+                                })
+                            }
+                        }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
@@ -196,4 +244,5 @@ fun UserField(header: String, onValueChange: (String) -> Unit, icon: Int){
             .fillMaxWidth(),
         singleLine = true
     )
+    onValueChange(value)
 }

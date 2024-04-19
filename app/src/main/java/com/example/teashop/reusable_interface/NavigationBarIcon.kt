@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.teashop.data.model.NaviBarIcons
+import com.example.teashop.data.enums.NaviBarIcons
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
 

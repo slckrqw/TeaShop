@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeFeedbackCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
@@ -46,7 +46,7 @@ import com.example.teashop.ui.theme.montserratFamily
 private var filter: String = "Новые"
 
 @Composable
-fun LaunchFeedbackScreen(navController: NavController, product: Product?){
+fun LaunchFeedbackScreen(navController: NavController, product: ProductFull?){
     Navigation(navController = navController) {
         MakeFeedbackScreen(
             navController,
@@ -55,7 +55,7 @@ fun LaunchFeedbackScreen(navController: NavController, product: Product?){
     }
 }
 @Composable
-fun MakeFeedbackScreen(navController: NavController, product: Product?){
+fun MakeFeedbackScreen(navController: NavController, product: ProductFull?){
 
     var starsRateCnt = 0
     var expandedChange by remember{mutableStateOf(false)}

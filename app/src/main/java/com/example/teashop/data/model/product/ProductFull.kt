@@ -7,7 +7,7 @@ import com.example.teashop.data.model.review.Review
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Product(
+data class ProductFull(
     @StringRes val nameId:Int,
     val id:String,
     val rate: Double,

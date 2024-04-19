@@ -1,4 +1,4 @@
-package com.example.teashop.data.model
+package com.example.teashop.data.enums
 
 enum class NaviBarIcons {
     MAIN,

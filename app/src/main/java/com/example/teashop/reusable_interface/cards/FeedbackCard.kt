@@ -19,13 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun MakeFeedbackCard(product: Product?, feedback: Int){
+fun MakeFeedbackCard(product: ProductFull?, feedback: Int){
     var starsRateCnt = 0
     if(product != null) {
         Card(

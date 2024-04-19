@@ -19,7 +19,7 @@ import com.example.teashop.data.model.order.Order
 import com.example.teashop.screen.screen.basket_screen.LaunchBasketScreen
 import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
 import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
@@ -97,7 +97,7 @@ fun TeaShopApp(){
         }
 
         composable(Screen.Product.route){
-            val product: Product? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
+            val product: ProductFull? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
             LaunchProductScreen(product = product, navController = navController)
         }
 
@@ -110,12 +110,12 @@ fun TeaShopApp(){
         }
 
         composable(Screen.Feedback.route){
-            val product: Product? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
+            val product: ProductFull? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
             LaunchFeedbackScreen(navController = navController, product = product)
         }
 
         composable(Screen.NewFeedback.route){
-            val product: Product? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
+            val product: ProductFull? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
             LaunchNewFeedbackScreen(navController = navController, product = product)
         }
 

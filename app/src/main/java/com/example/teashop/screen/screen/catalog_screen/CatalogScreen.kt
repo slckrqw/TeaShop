@@ -50,10 +50,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
-import com.example.teashop.data.model.ScreenConfig
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.enums.ScreenConfig
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.product.ProductFilter
-import com.example.teashop.data.model.SearchSwitch
+import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeProductCard2
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
@@ -79,7 +79,7 @@ fun LaunchCatalogScreen(navController: NavController, topName: String?){
     }
 }
 @Composable
-fun MakeCatalogScreen(productsList: List<Product>, navController: NavController, topName: String?) {
+fun MakeCatalogScreen(productsList: List<ProductFull>, navController: NavController, topName: String?) {
     var screenConfig by rememberSaveable{ mutableStateOf(ScreenConfig.ROW) }
     Column {
         TopCardCatalog(

@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
@@ -76,7 +76,7 @@ private fun Modifier.clickableWithoutRipple(
 )
 
 @Composable
-fun LaunchProductScreen(navController: NavController, product: Product?){
+fun LaunchProductScreen(navController: NavController, product: ProductFull?){
     Navigation(navController = navController) {
         MakeProductScreen(product = product, navController)
     }
@@ -84,7 +84,7 @@ fun LaunchProductScreen(navController: NavController, product: Product?){
 
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
-fun MakeProductScreen(product: Product?, navController: NavController){
+fun MakeProductScreen(product: ProductFull?, navController: NavController){
     val heartColor: Color
     val heartIcon: Int
     var heartTemp by remember{mutableIntStateOf(0)}

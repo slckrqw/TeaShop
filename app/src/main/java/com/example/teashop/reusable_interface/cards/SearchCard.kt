@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.R
-import com.example.teashop.data.model.SearchSwitch
+import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10

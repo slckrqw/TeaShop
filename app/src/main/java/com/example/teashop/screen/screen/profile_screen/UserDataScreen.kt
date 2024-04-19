@@ -58,7 +58,7 @@ fun MakeUserDataScreen(navController: NavController){
                         modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
                     )
                     MakeFullTextField(header = "Имя", onValueChange = {})
-                    MakeFullTextField(header = "Фамилия", onValueChange = {})
+                    MakeFullTextField(header = "Фамилия", onValueChange = {}, bottomPadding = 0)
                 }
             }
             Card(
@@ -77,7 +77,7 @@ fun MakeUserDataScreen(navController: NavController){
                     )
                     MakeFullTextField(header = "Email")
                     MakeFullTextField(header = "Пароль")
-                    MakeFullTextField(header = "Новый пароль")
+                    MakeFullTextField(header = "Новый пароль", bottomPadding = 0)
                 }
             }
         }

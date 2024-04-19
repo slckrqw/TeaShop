@@ -41,7 +41,7 @@ import androidx.navigation.NavController
 import com.example.teashop.DEFAULT_BALANCE
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
 
@@ -60,7 +60,7 @@ fun LaunchMainScreen(navController: NavController){
 }
 
 @Composable
-fun MakeMainScreen(productsList: List<Product>, navController: NavController){
+fun MakeMainScreen(productsList: List<ProductFull>, navController: NavController){
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

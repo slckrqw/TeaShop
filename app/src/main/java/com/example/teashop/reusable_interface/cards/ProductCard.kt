@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.model.product.Product
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -78,8 +78,8 @@ private fun Modifier.clickableWithoutRipple(
 @Composable
 fun RowOfCards(
     navController: NavController,
-    product1: Product?,
-    product2: Product?
+    product1: ProductFull?,
+    product2: ProductFull?
 ){
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -93,7 +93,7 @@ fun RowOfCards(
 
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
-fun RowScope.MakeProductCard(navController: NavController, product: Product?) {
+fun RowScope.MakeProductCard(navController: NavController, product: ProductFull?) {
     var expanded by remember { mutableStateOf(false) }
     var productWeight by remember { mutableIntStateOf(120) }
     var iconClicksCnt by remember {
@@ -295,7 +295,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: Product?) {
 
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
-fun MakeProductCard2(navController: NavController, product: Product?) {
+fun MakeProductCard2(navController: NavController, product: ProductFull?) {
     var expanded by remember { mutableStateOf(false) }
     var productWeight by remember { mutableIntStateOf(120) }
     var iconClicksCnt by remember {
