@@ -38,7 +38,6 @@ import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
-import com.example.teashop.screen.screen.category_screen.CategoryViewModel
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
@@ -56,21 +55,21 @@ fun LaunchProfileScreen(navController: NavController){
     }
 
     LaunchedEffect(Unit) {
-            viewModel.getLoggedUserInfo(
-                tokenStorage.getToken(context)!!,
-                onError = {
-                    Toast.makeText(context, "Упс, вы не еще не авторизировались", Toast.LENGTH_LONG).show()
-                    tokenStorage.deleteToken(context)
-                    navController.navigate(
-                        Screen.Log.route,
-                        navOptions = navOptions {
-                            popUpTo(navController.graph.id) {
-                                inclusive = true
-                            }
+        viewModel.getLoggedUserInfo(
+            tokenStorage.getToken(context)!!,
+            onError = {
+                Toast.makeText(context, "Упс, вы не еще не авторизировались", Toast.LENGTH_LONG).show()
+                tokenStorage.deleteToken(context)
+                navController.navigate(
+                    Screen.Log.route,
+                    navOptions = navOptions {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
                         }
-                    )
-                }
-            )
+                    }
+                )
+            }
+        )
     }
 
     Navigation(navController = navController){
@@ -78,8 +77,12 @@ fun LaunchProfileScreen(navController: NavController){
     }
 }
 
+var orderCount = ""
+
 @Composable
 fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context, navController: NavController){
+    orderCount = user?.ordersCount.toString()
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -105,7 +108,7 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
                         modifier = Modifier.size(40.dp)
                     )
                     Text(
-                        text = "Привет, " + (user?.name ?: "Гость"),
+                        text = "Привет, " + (user?.name ?: ""),
                         fontFamily = montserratFamily,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.W500,
@@ -129,9 +132,7 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-
-                        ) {
+                        Column {
                             Text(
                                 text = "Мой баланс",
                                 fontFamily = montserratFamily,
@@ -140,7 +141,7 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
                                 color = Black10
                             )
                             Text(
-                                text = "100 Бонусов",
+                                text = (user?.teaBonuses.toString() ?: "") + " Бонусов",
                                 fontFamily = montserratFamily,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.W500,
@@ -173,7 +174,10 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
         ProfileCard(
             icon = R.drawable.user_data_icon,
             title = "Мои данные",
-            onClick = {navController.navigate(Screen.UserData.route)}
+            onClick = {
+                navController.currentBackStackEntry?.savedStateHandle?.set("user", user)
+                navController.navigate(Screen.UserData.route)
+            }
         )
         ProfileCard(
             icon = R.drawable.feedback_icon,
@@ -206,7 +210,7 @@ fun ProfileCard(icon: Int, title: String, counter: Boolean = false, onClick: () 
         modifier = Modifier
             .padding(bottom = 10.dp)
             .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = {onClick()})
+            .clickable(onClick = { onClick() })
             .shadow(1.dp, shape = RoundedCornerShape(10.dp))
             .fillMaxWidth(),
         shape = RoundedCornerShape(10.dp)
@@ -237,7 +241,7 @@ fun ProfileCard(icon: Int, title: String, counter: Boolean = false, onClick: () 
             }
             if(counter) {
                 Text(
-                    text = "12",
+                    text = orderCount,
                     fontFamily = montserratFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.W500,

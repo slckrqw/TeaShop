@@ -77,7 +77,7 @@ fun MakeUserFeedbackScreen(navController: NavController){
                         ) {
                             product?.let {
                                 Image(
-                                    painter = rememberAsyncImagePainter(model = product.images[0]),
+                                    painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
                                     contentDescription = null,
                                     modifier = Modifier.padding(end = 10.dp)
                                 )

@@ -24,9 +24,9 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun MakeFullTextField(header: String, onValueChange: (String) -> Unit = {}, bottomPadding: Int = 10){
+fun MakeFullTextField(header: String, onValueChange: (String) -> Unit = {}, bottomPadding: Int = 10, inputValue: String? = ""){
     var value by remember{
-        mutableStateOf("")
+        mutableStateOf(inputValue ?: "")
     }
     Column(
         modifier = Modifier.padding(start = 10.dp)

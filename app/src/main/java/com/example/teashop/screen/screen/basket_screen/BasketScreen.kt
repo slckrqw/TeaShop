@@ -118,7 +118,7 @@ fun MakeBasketScreen(navController: NavController){
 
                         ) {
                             Image(
-                                painter = rememberAsyncImagePainter(basketList[basketItem]?.images), //TODO
+                                painter = rememberAsyncImagePainter(basketList[basketItem]?.images?.get(0)?.imageUrl), //TODO
                                 modifier = Modifier
                                     .widthIn(0.dp, 125.dp),
                                 contentScale = ContentScale.FillBounds,
@@ -145,7 +145,7 @@ fun MakeBasketScreen(navController: NavController){
                                         .padding(bottom = 10.dp)
                                 ) {
                                     Text(
-                                        text = "${basketList[basketItem]?.discount} ₽ x 50гр",//TODO
+                                        text = "${basketList[basketItem]?.discount?.toDouble()} ₽ x 50гр",//TODO
                                         fontFamily = montserratFamily,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.W700,

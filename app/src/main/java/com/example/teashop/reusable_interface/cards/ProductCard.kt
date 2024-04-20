@@ -67,7 +67,6 @@ import javax.sql.DataSource
 
 var productWeight = VariantType.FIVE_HUNDRED_GRAMS
 
-
 @SuppressLint("UnnecessaryComposedModifier")
 private fun Modifier.clickableWithoutRipple(
     interactionSource: MutableInteractionSource,
@@ -142,7 +141,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                         .height(160.dp)
                 ) {
                     Image(
-                        rememberAsyncImagePainter(model = product.images[0]),
+                        rememberAsyncImagePainter(model = product.images[0].imageUrl),
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp)),
                         contentDescription = null,
@@ -200,7 +199,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "${product.packages[0].price*(1-(product.discount/100))} ₽",
+                        text = "${product.packages[0].price*(1-(product.discount.toDouble()/100))} ₽",
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.W500,
@@ -336,7 +335,7 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        rememberAsyncImagePainter(model = product.images[0]),
+                        painter = rememberAsyncImagePainter(product.images[0].imageUrl),
                         contentDescription = null,
                         contentScale = ContentScale.FillBounds,
                         modifier = Modifier.clip(RoundedCornerShape(10.dp))
@@ -394,7 +393,7 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         horizontalArrangement = Arrangement.Start,
                     ) {
                         Text(
-                            text = "${product.packages[0].price*product.discount} ₽",
+                            text = "${product.packages[0].price*product.discount.toDouble()} ₽",
                             fontFamily = montserratFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.W500,

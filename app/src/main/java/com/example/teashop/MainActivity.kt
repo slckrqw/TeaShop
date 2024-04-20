@@ -22,6 +22,7 @@ import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.user.User
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
 import com.example.teashop.screen.screen.main_screen.LaunchMainScreen
@@ -34,7 +35,7 @@ import com.example.teashop.navigation.Screen
 import com.example.teashop.screen.screen.basket_screen.LaunchAddressChangeScreen
 import com.example.teashop.screen.screen.profile_screen.LaunchOrderDescriptionScreen
 import com.example.teashop.screen.screen.profile_screen.LaunchOrdersScreen
-import com.example.teashop.screen.screen.profile_screen.LaunchUserDataScreen
+import com.example.teashop.screen.screen.profile_screen.user_data.LaunchUserDataScreen
 import com.example.teashop.screen.screen.profile_screen.LaunchUserFeedbackScreen
 import com.example.teashop.screen.screen.search_screen.LaunchSearchScreen
 import com.example.teashop.ui.theme.Grey20
@@ -142,7 +143,8 @@ fun TeaShopApp(){
         }
         
         composable(Screen.UserData.route){
-            LaunchUserDataScreen(navController = navController)
+            val user: User? = navController.previousBackStackEntry?.savedStateHandle?.get("user")
+            LaunchUserDataScreen(navController = navController, user = user)
         }
         
         composable(Screen.UserFeedback.route){

@@ -161,7 +161,7 @@ fun MakeSignInScreen(
 
                     if (nameSwitch){
                         val registrationRequest = RegistrationRequest(
-                            userName,
+                            userName.trim(),
                             userEmail.replace(" ", ""),
                             userPassword.replace(" ", "")
                         )

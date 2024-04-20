@@ -112,7 +112,7 @@ fun MakeNewFeedbackScreen(navController: NavController, product: ProductFull?){
                             .padding(start = 10.dp, top = 5.dp)
                     ) {
                         Image(
-                            painter = rememberAsyncImagePainter(model = product.images[0]),
+                            painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
                             modifier = Modifier
                                 .padding(end = 10.dp)
                                 .size(50.dp),

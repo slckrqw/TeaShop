@@ -1,7 +1,10 @@
 package com.example.teashop.data.model.bucket
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.time.ZonedDateTime
 
+@Parcelize
 data class Bucket(
     val id: Long,
     val userId: Long,
@@ -10,4 +13,4 @@ data class Bucket(
     val plusTeaBonuses: Int,
     val product: List<PackageBucket>?,
     val modifiedDate: ZonedDateTime
-)
+): Parcelable

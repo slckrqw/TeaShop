@@ -126,7 +126,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 .height(360.dp)
                         ) {
                             Image(
-                                painter = rememberAsyncImagePainter(model = product.images[0]),
+                                painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
                                 contentScale = ContentScale.FillBounds,
                                 modifier = Modifier.fillMaxSize(),
                                 contentDescription = null
@@ -193,7 +193,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 Text(
-                                    text = "${product.packages[0].price*(1-(product.discount/100))} ₽",
+                                    text = "${product.packages[0].price*(1-(product.discount.toDouble()/100))} ₽",
                                     fontFamily = montserratFamily,
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.W700
