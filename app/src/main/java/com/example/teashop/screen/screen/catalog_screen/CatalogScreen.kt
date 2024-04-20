@@ -51,10 +51,10 @@ import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.enums.ScreenConfig
-import com.example.teashop.data.model.product.ProductFull
-import com.example.teashop.data.model.product.ProductFilter
 import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.filters.Filters
+import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeProductCard2
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
@@ -67,7 +67,13 @@ import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
-var filterId = 1
+var sortingId = 1
+var filterParams = Filters(
+    priceMin = 0.0,
+    priceMax = 0.0,
+    packageType = VariantType.FIFTY_GRAMS,
+    inStock = false
+)
 
 @Composable
 fun LaunchCatalogScreen(navController: NavController, topName: String?){
@@ -97,7 +103,7 @@ fun MakeCatalogScreen(productsList: List<ProductShort?>, navController: NavContr
                 when (screenConfig) {
                     ScreenConfig.SINGLE -> {
                        MakeProductCard2(
-                           navController,
+                           navController = navController,
                            productsList[product]
                        )
                     }
@@ -130,7 +136,7 @@ fun TopCardCatalog(
 ){
     var filterSheet by remember{mutableStateOf(false)}
     var sortingSheet by remember{mutableStateOf(false)}
-    val filterText:Int = when(filterId){
+    val sortingText:Int = when(sortingId){
         1->R.string.sortingTextCatalog1
         2->R.string.sortingTextCatalog2
         3->R.string.sortingTextCatalog3
@@ -190,7 +196,6 @@ fun TopCardCatalog(
                                           when(screenTemp){
                                               ScreenConfig.SINGLE-> screenChange(ScreenConfig.ROW)
                                               ScreenConfig.ROW-> screenChange(ScreenConfig.SINGLE)
-                                              else -> screenChange(ScreenConfig.ROW)
                                           }
                                 },
                                 modifier = Modifier
@@ -223,7 +228,7 @@ fun TopCardCatalog(
                                 iconSize = 20
                             )
                             Text(
-                                text = stringResource(id = filterText),
+                                text = stringResource(id = sortingText),
                                 fontFamily = montserratFamily,
                                 fontWeight = FontWeight.W700,
                                 fontSize = 10.sp,
@@ -259,9 +264,8 @@ fun TopCardCatalog(
             if (sortingSheet) {
                 BottomSortingCatalog(expandedChange = { sortingSheet = it })
             }
-            var productfilter: ProductFilter?
             if (filterSheet) {
-                productfilter = bottomFilterCatalog(expandedChange = {filterSheet = it})
+                bottomFilterCatalog(expandedChange = {filterSheet = it})
             }
         }
     }
@@ -269,8 +273,8 @@ fun TopCardCatalog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(ProductFilter?){
-    val filterRequest = ProductFilter()
+fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(Filters?){
+    val filterRequest = Filters()
     var switchOn by remember{mutableStateOf(false)}
     var pushToBack = false
     ModalBottomSheet(
@@ -295,24 +299,28 @@ fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(ProductFilter?){
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                FilterCatalogField(price = {
-                    if (it != null) {
-                        filterRequest.minPrice = it.toDouble()
-                    }
-                }, "От")
-                FilterCatalogField(price = {
-                    if (it != null) {
-                        filterRequest.minPrice = it.toDouble()
-                    }
-                }, "До")
+                FilterCatalogField(
+                    priceValue = filterParams.priceMin,
+                    price = {
+                        filterParams.priceMin = it.toDouble()
+                    },
+                    goalString = "От"
+                )
+                FilterCatalogField(
+                    priceValue = filterParams.priceMax,
+                    price = {
+                        filterParams.priceMax = it.toDouble()
+                    },
+                    goalString = "До"
+                )
             }
             Row(
                 modifier = Modifier.padding(start = 10.dp)
             ) {
-                WeightButton(weightRequest = { filterRequest.weightList[0] = it }, weight = 50)
-                WeightButton(weightRequest = { filterRequest.weightList[1] = it }, weight = 100)
-                WeightButton(weightRequest = { filterRequest.weightList[2] = it }, weight = 200)
-                WeightButton(weightRequest = { filterRequest.weightList[3] = it }, weight = 500)
+                WeightButton(weight = VariantType.FIFTY_GRAMS)
+                WeightButton(weight = VariantType.HUNDRED_GRAMS)
+                WeightButton(weight = VariantType.TWO_HUNDRED_GRAMS)
+                WeightButton(weight = VariantType.FIVE_HUNDRED_GRAMS)
             }
             Row(
                 modifier = Modifier
@@ -330,7 +338,10 @@ fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(ProductFilter?){
                 )
                 Switch(
                     checked = switchOn,
-                    onCheckedChange = { switchOn = it },
+                    onCheckedChange = {
+                            filterParams.inStock = it
+                            switchOn = !switchOn
+                        },
                     colors = SwitchDefaults.colors(
                         checkedBorderColor = White10,
                         uncheckedBorderColor = White10,
@@ -368,7 +379,7 @@ fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(ProductFilter?){
 }
 
 @Composable
-fun RowScope.WeightButton(weightRequest: (Boolean) -> Unit, weight: Int){
+fun RowScope.WeightButton(weight: VariantType){
     var colorChange by rememberSaveable{mutableStateOf(false)}
     val buttonColor: Color = when(colorChange){
         true -> Green10
@@ -377,7 +388,7 @@ fun RowScope.WeightButton(weightRequest: (Boolean) -> Unit, weight: Int){
     Button(
         onClick = {
             colorChange = !colorChange
-            weightRequest(colorChange)
+            filterParams.packageType = weight
         },
         colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
         contentPadding = PaddingValues(0.dp),
@@ -386,7 +397,7 @@ fun RowScope.WeightButton(weightRequest: (Boolean) -> Unit, weight: Int){
             .weight(1f)
     ){
         Text(
-            text = "$weight грамм",
+            text = weight.value,
             fontFamily = montserratFamily,
             fontWeight = FontWeight.W400,
             fontSize = 13.sp,
@@ -396,11 +407,14 @@ fun RowScope.WeightButton(weightRequest: (Boolean) -> Unit, weight: Int){
 }
 
 @Composable
-fun RowScope.FilterCatalogField(price: (String?) -> Unit, goalString: String){
-    var priceValue by remember{mutableStateOf("0")}
+fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goalString: String){
+    var priceValueField by remember{mutableStateOf("")}
     TextField(
-        value = priceValue,
-        onValueChange = {priceValue = it},
+        value = if(priceValue == 0.0){
+            priceValueField
+        }else{
+            priceValue.toString()
+        },
         shape = RoundedCornerShape(15.dp),
         placeholder = {
             Text(
@@ -411,6 +425,7 @@ fun RowScope.FilterCatalogField(price: (String?) -> Unit, goalString: String){
                 color = Black10
             )
         },
+        onValueChange = {priceValueField = it},
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp)
             .weight(1f),
@@ -428,7 +443,12 @@ fun RowScope.FilterCatalogField(price: (String?) -> Unit, goalString: String){
         ),
         singleLine = true
     )
-    price(priceValue)
+    if(priceValueField == ""){
+        price("0")
+    }else{
+        price(priceValueField)
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -468,7 +488,7 @@ fun SheetTextCatalog(textId: Int, expandedChange: (Boolean)->Unit){
 
     val cardColor: Color
     val textColor: Color
-    if(textId == filterId){
+    if(textId == sortingId){
         cardColor = Green10
         textColor = White10
     }
@@ -497,10 +517,11 @@ fun SheetTextCatalog(textId: Int, expandedChange: (Boolean)->Unit){
                 modifier = Modifier
                     .padding(start = 5.dp)
                     .fillMaxWidth()
-                    .clickable(onClick = {
-                        filterId = textId
-                        expandedChange(false)
-                    }
+                    .clickable(
+                        onClick = {
+                            sortingId = textId
+                            expandedChange(false)
+                        }
                     )
             )
         }

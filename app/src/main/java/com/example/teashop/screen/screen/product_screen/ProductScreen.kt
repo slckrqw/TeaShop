@@ -51,8 +51,9 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
+import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.navigation.Navigation
-import com.example.teashop.reusable_interface.cards.DropDownMenu
+import com.example.teashop.reusable_interface.cards.DropdownItem
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -92,8 +93,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
     val heartIcon: Int
     var heartTemp by remember{mutableIntStateOf(0)}
     var expanded by remember{mutableStateOf(false)}
-    var productWeight by remember{ mutableIntStateOf(120) }
-    val dropMenuWidth = 100
+    var productWeight by remember{ mutableStateOf(VariantType.FIFTY_GRAMS) }
 
     when(heartTemp){
         0 -> {
@@ -228,18 +228,44 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                         modifier = Modifier.fillMaxSize()
                                     ) {
                                         Text(
-                                            text = "$productWeight гр",
+                                            text = productWeight.value,
                                             fontFamily = montserratFamily,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.W200,
                                             color = Black10,
                                             modifier = Modifier.padding(start = 5.dp)
                                         )
-                                        DropDownMenu(
-                                            dropMenuWidth = dropMenuWidth,
+                                        DropdownMenu(
                                             expanded = expanded,
-                                            expandedChange = {expanded = it}
-                                        )
+                                            onDismissRequest = { expanded = false },
+                                            modifier = Modifier.background(Grey20)
+                                        ) {
+                                            DropdownItem(
+                                                teaWeight = VariantType.FIFTY_GRAMS,
+                                                expandedChange = {expanded = it},
+                                                weightChange = {productWeight = it}
+                                            )
+                                            DropdownItem(
+                                                teaWeight = VariantType.HUNDRED_GRAMS,
+                                                expandedChange = {expanded = it},
+                                                weightChange = {productWeight = it}
+                                            )
+                                            DropdownItem(
+                                                teaWeight = VariantType.TWO_HUNDRED_GRAMS,
+                                                expandedChange = {expanded = it},
+                                                weightChange = {productWeight = it}
+                                            )
+                                            DropdownItem(
+                                                teaWeight = VariantType.FIVE_HUNDRED_GRAMS,
+                                                expandedChange = {expanded = it},
+                                                weightChange = {productWeight = it}
+                                            )
+                                            DropdownItem(
+                                                teaWeight = VariantType.PACK,
+                                                expandedChange = {expanded = it},
+                                                weightChange = {productWeight = it}
+                                            )
+                                        }
                                     }
                                 }
                                 Button(
@@ -407,6 +433,35 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
             }
         }
     }
+}
+
+@Composable
+fun DropdownItem(
+    teaWeight: VariantType,
+    dropMenuWidth: Int = 100,
+    expandedChange: (Boolean) -> Unit,
+    weightChange: (VariantType) -> Unit
+){
+    DropdownMenuItem(
+        text = {
+            Text(
+                text = teaWeight.value,
+                fontFamily = montserratFamily,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.W200,
+                color = Black10
+            )
+        },
+        onClick = {
+            expandedChange(false)
+            weightChange(teaWeight)
+        },
+        contentPadding = PaddingValues(5.dp),
+        modifier = Modifier
+            .width(dropMenuWidth.dp)
+            .height(30.dp)
+            .background(Grey20)
+    )
 }
 
 @Preview(showBackground = true)

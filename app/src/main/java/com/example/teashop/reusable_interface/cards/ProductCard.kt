@@ -65,8 +65,6 @@ import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 import javax.sql.DataSource
 
-var productWeight = VariantType.FIVE_HUNDRED_GRAMS
-
 @SuppressLint("UnnecessaryComposedModifier")
 private fun Modifier.clickableWithoutRipple(
     interactionSource: MutableInteractionSource,
@@ -108,7 +106,6 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
     }
     var expanded by remember{ mutableStateOf(false) }
     var heartIconId: Int
-    val dropMenuWidth = 100
 
     if(product != null) {
         Box(
@@ -120,7 +117,10 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                 .clickable(
                     onClick = {
                         navController.currentBackStackEntry?.savedStateHandle?.set(
-                            "product", com.example.teashop.data.model.DataSource().loadFullProducts()[0]
+                            "product",
+                            com.example.teashop.data.model
+                                .DataSource()
+                                .loadFullProducts()[0]
                         )
                         navController.navigate(
                             Screen.Product.route
@@ -241,11 +241,37 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                                 color = Black10,
                                 modifier = Modifier.padding(start = 5.dp)
                             )
-                            DropDownMenu(
-                                dropMenuWidth = dropMenuWidth,
+                            DropdownMenu(
                                 expanded = expanded,
-                                expandedChange = {expanded = it}
-                            )
+                                onDismissRequest = { expanded = false },
+                                modifier = Modifier.background(Grey20)
+                            ) {
+                                DropdownItem(
+                                    teaWeight = VariantType.FIFTY_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.HUNDRED_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.TWO_HUNDRED_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.FIVE_HUNDRED_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.PACK,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                            }
                         }
                     }
                     IconButton(
@@ -299,7 +325,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun MakeProductCard2(navController: NavController, product: ProductShort?) {
-    val productWeight by remember { mutableStateOf(VariantType.FIFTY_GRAMS) }
+    var productWeight by remember { mutableStateOf(VariantType.FIFTY_GRAMS) }
     var iconClicksCnt by remember {
         mutableIntStateOf(1)
     }
@@ -430,11 +456,37 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                                 color = Black10,
                                 modifier = Modifier.padding(start = 5.dp)
                             )
-                            DropDownMenu(
-                                dropMenuWidth = dropMenuWidth,
+                            DropdownMenu(
                                 expanded = expanded,
-                                expandedChange = {expanded = it}
-                            )
+                                onDismissRequest = { expanded = false },
+                                modifier = Modifier.background(Grey20)
+                            ) {
+                                DropdownItem(
+                                    teaWeight = VariantType.FIFTY_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.HUNDRED_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.TWO_HUNDRED_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.FIVE_HUNDRED_GRAMS,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                                DropdownItem(
+                                    teaWeight = VariantType.PACK,
+                                    expandedChange = {expanded = it},
+                                    weightChange = {productWeight = it}
+                                )
+                            }
                         }
                     }
                     IconButton(
@@ -484,6 +536,35 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
             }
         }
     }
+}
+
+@Composable
+fun DropdownItem(
+    teaWeight: VariantType,
+    dropMenuWidth: Int = 100,
+    expandedChange: (Boolean) -> Unit,
+    weightChange: (VariantType) -> Unit
+){
+    DropdownMenuItem(
+        text = {
+            Text(
+                text = teaWeight.value,
+                fontFamily = montserratFamily,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.W200,
+                color = Black10
+            )
+        },
+        onClick = {
+            expandedChange(false)
+            weightChange(teaWeight)
+        },
+        contentPadding = PaddingValues(5.dp),
+        modifier = Modifier
+            .width(dropMenuWidth.dp)
+            .height(30.dp)
+            .background(Grey20)
+    )
 }
 
 @Preview(showBackground = true)
