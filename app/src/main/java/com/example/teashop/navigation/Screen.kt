@@ -15,7 +15,7 @@ open class Screen (val route: String){
 
     object Category: Screen("category_screen/{title}/{categoryList}")
 
-    object Feedback: Screen("feedback_screen/{product}")
+    object Feedback: Screen("feedback_screen/{reviewList}")
 
     object NewFeedback: Screen("newFeedback_screen/{product}")
 

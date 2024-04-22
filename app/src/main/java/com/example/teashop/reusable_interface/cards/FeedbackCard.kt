@@ -16,12 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
+import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.review.Review
+import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
@@ -71,7 +74,7 @@ fun MakeFeedbackCard(review: Review){
             ) {
                 review.images?.forEach {
                     Image(
-                        painter = rememberAsyncImagePainter(it),
+                        painter = rememberAsyncImagePainter(it.imageUrl),
                         contentScale = ContentScale.Inside,
                         contentDescription = null,
                         modifier = Modifier
@@ -81,5 +84,13 @@ fun MakeFeedbackCard(review: Review){
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreviewFeedbackCard() {
+    TeaShopTheme {
+        MakeFeedbackCard(review = DataSource().loadFeedback()[0])
     }
 }

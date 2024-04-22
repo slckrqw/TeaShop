@@ -38,6 +38,7 @@ import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.cards.MakeFeedbackCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -49,19 +50,26 @@ import com.example.teashop.ui.theme.montserratFamily
 private var filter: String = "Новые"
 
 @Composable
-fun LaunchFeedbackScreen(navController: NavController, product: ProductShort?){
+fun LaunchFeedbackScreen(navController: NavController, reviewList: List<Review>?){
     Navigation(navController = navController) {
         MakeFeedbackScreen(
             navController,
-            DataSource().loadFeedback(),
-            product
+            reviewList
         )
     }
 }
 @Composable
-fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>, product: ProductShort?){
+fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>?){
 
     var expandedChange by remember{mutableStateOf(false)}
+    var reviewListSum = 0.0
+    var averageRate = 0.0
+    reviewList?.let {
+        reviewList.forEach {
+            reviewListSum += it.stars
+        }
+        averageRate = reviewListSum / reviewList.size
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -79,13 +87,12 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>, p
                 modifier = Modifier
                     .padding(bottom = 10.dp, end = 10.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .clickable(onClick = {
-                        navController.currentBackStackEntry?.savedStateHandle?.set(
-                            "product",
-                            product
-                        )
-                        navController.navigate("newFeedback_screen/$product")
-                    })
+                    .clickable(
+                        onClick = {
+                            navController.currentBackStackEntry?.savedStateHandle?.set("product", DataSource().loadFullProducts()[0])
+                            navController.navigate(Screen.NewFeedback.route)
+                        }
+                    )
                     .size(20.dp),
                 tint = White10,
                 contentDescription = null
@@ -116,13 +123,13 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>, p
                         contentDescription = null
                     )
                     Text(
-                        text = product?.averageRating.toString(),
+                        text = "$averageRate",
                         fontFamily = montserratFamily,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = "${reviewList.size} отзывов",
+                        text = "${reviewList?.size} отзывов",
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.W300,
@@ -135,6 +142,7 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>, p
             colors = CardDefaults.cardColors(containerColor = White10),
             modifier = Modifier
                 .padding(bottom = 10.dp)
+                .clip(RoundedCornerShape(10.dp))
                 .clickable(onClick = { expandedChange = true })
         ) {
             Row(
@@ -157,8 +165,10 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>, p
             }
         }
         LazyColumn {
-            items(reviewList.size) { review ->
-                MakeFeedbackCard(reviewList[review])
+            reviewList?.let {
+                items(reviewList.size) { review ->
+                    MakeFeedbackCard(reviewList[review])
+                }
             }
         }
         if (expandedChange) {

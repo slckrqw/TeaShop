@@ -215,7 +215,10 @@ fun TopCardCatalog(
                                     .size(25.dp)
                             ){
                                 Icon(
-                                    painterResource(R.drawable.format_button),
+                                    painter = when(screenTemp){
+                                        ScreenConfig.ROW -> painterResource(R.drawable.format_button)
+                                        ScreenConfig.SINGLE -> painterResource(R.drawable.format_button2)
+                                    },
                                     tint = White10,
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize()

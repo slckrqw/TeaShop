@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -48,10 +49,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
+import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.cards.DropdownItem
+import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -60,6 +64,8 @@ import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @SuppressLint("UnnecessaryComposedModifier")
 private fun Modifier.clickableWithoutRipple(
@@ -92,6 +98,9 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
     var heartTemp by remember{mutableIntStateOf(0)}
     var expanded by remember{mutableStateOf(false)}
     var productWeight by remember{ mutableStateOf(VariantType.FIFTY_GRAMS) }
+    var bonusInfo by remember{
+        mutableStateOf(false)
+    }
 
     when(heartTemp){
         0 -> {
@@ -191,13 +200,23 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 Text(
-                                    text = "${product.packages[0].price*(1-(product.discount.toDouble()/100))} ₽",
+                                    text = "${
+                                        BigDecimal(
+                                        product.packages
+                                            .first { it.variant == productWeight ||
+                                                    it.variant == VariantType.PACK }
+                                            .price*(1-product.discount.toDouble()/100)
+                                    ).setScale(2, RoundingMode.HALF_UP)} ₽",
                                     fontFamily = montserratFamily,
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.W700
                                 )
                                 Text(
-                                    text = "${product.packages[0].price} ₽",
+                                    text = "${product
+                                        .packages
+                                        .first { it.variant == productWeight ||
+                                                it.variant == VariantType.PACK}
+                                        .price} ₽",
                                     fontFamily = montserratFamily,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.W300,
@@ -238,31 +257,13 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                             onDismissRequest = { expanded = false },
                                             modifier = Modifier.background(Grey20)
                                         ) {
-                                            DropdownItem(
-                                                teaWeight = VariantType.FIFTY_GRAMS,
-                                                expandedChange = {expanded = it},
-                                                weightChange = {productWeight = it}
-                                            )
-                                            DropdownItem(
-                                                teaWeight = VariantType.HUNDRED_GRAMS,
-                                                expandedChange = {expanded = it},
-                                                weightChange = {productWeight = it}
-                                            )
-                                            DropdownItem(
-                                                teaWeight = VariantType.TWO_HUNDRED_GRAMS,
-                                                expandedChange = {expanded = it},
-                                                weightChange = {productWeight = it}
-                                            )
-                                            DropdownItem(
-                                                teaWeight = VariantType.FIVE_HUNDRED_GRAMS,
-                                                expandedChange = {expanded = it},
-                                                weightChange = {productWeight = it}
-                                            )
-                                            DropdownItem(
-                                                teaWeight = VariantType.PACK,
-                                                expandedChange = {expanded = it},
-                                                weightChange = {productWeight = it}
-                                            )
+                                            product.packages.forEach { it ->
+                                                DropdownItem(
+                                                    teaWeight = it.variant,
+                                                    expandedChange = { expanded = it },
+                                                    weightChange = { productWeight = it }
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -317,7 +318,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 contentDescription = null
                             )
                             Text(
-                                text = "+ бонусных рублей",
+                                text = "+  бонусных рублей",
                                 fontFamily = montserratFamily,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.W500,
@@ -329,7 +330,13 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                             tint = Green10,
                             modifier = Modifier
                                 .padding(end = 15.dp)
-                                .size(25.dp),
+                                .size(25.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable(
+                                    onClick = {
+                                        bonusInfo = true
+                                    }
+                                ),
                             contentDescription = null
                         )
                     }
@@ -377,8 +384,8 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
 
                         Button(
                             onClick = {
-                                navController.currentBackStackEntry?.savedStateHandle?.set("product", product)
-                                navController.navigate("feedback_screen/$product")
+                                navController.currentBackStackEntry?.savedStateHandle?.set("reviewList", DataSource().loadFeedback())
+                                navController.navigate(Screen.Feedback.route)
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Green10),
                             contentPadding = PaddingValues(0.dp),
@@ -428,6 +435,11 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                         lineHeight = 13.sp
                     )
                 }
+            }
+        }
+        if(bonusInfo){
+            BottomSheetBonuses(header = "Что такое бонусы?", textId = R.string.BonusInfo) {
+                bonusInfo = it
             }
         }
     }

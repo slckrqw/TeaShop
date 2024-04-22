@@ -21,6 +21,7 @@ import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.review.Review
 import com.example.teashop.data.model.user.User
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
@@ -104,8 +105,8 @@ fun TeaShopApp(){
         }
 
         composable(Screen.Feedback.route){
-            val product: ProductShort? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
-            LaunchFeedbackScreen(navController = navController, product = product)
+            val reviewList: List<Review>? = navController.previousBackStackEntry?.savedStateHandle?.get("reviewList")
+            LaunchFeedbackScreen(navController = navController, reviewList = reviewList)
         }
 
         composable(Screen.NewFeedback.route){

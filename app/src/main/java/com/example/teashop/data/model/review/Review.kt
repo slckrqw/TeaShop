@@ -8,9 +8,9 @@ import java.time.ZonedDateTime
 data class Review(
     var id: Long = 1234,
     var createdTime: ZonedDateTime = ZonedDateTime.now(),
-    var userName: String = "",
-    var stars: Int = 0,
-    var reviewText: String = "",
+    var userName: String = "kirpich",
+    var stars: Int = 3,
+    var reviewText: String = "aboba",
     var images: List<Image>? = listOf(Image()),
     var productId: Long = 1234,
     var productTitle: String = "Зелёный чай",

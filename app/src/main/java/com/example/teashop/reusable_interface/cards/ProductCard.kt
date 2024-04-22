@@ -506,14 +506,23 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         horizontalArrangement = Arrangement.Start,
                     ) {
                         Text(
-                            text = "${product.packages[0].price*product.discount.toDouble()} ₽",
+                            text = "${BigDecimal(
+                                product.packages
+                                    .first { it.variantType == productWeight ||
+                                            it.variantType == VariantType.PACK }
+                                    .price*(1-product.discount.toDouble()/100)
+                            ).setScale(2, RoundingMode.HALF_UP)} ₽",
                             fontFamily = montserratFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.W500,
                             modifier = Modifier.padding(top = 5.dp)
                         )
                         Text(
-                            text = "${product.packages[0].price} ₽",
+                            text = "${product
+                                .packages
+                                .first { it.variantType == productWeight ||
+                                        it.variantType == VariantType.PACK}
+                                .price} ₽",
                             fontFamily = montserratFamily,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.W300,
@@ -548,31 +557,13 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                                 onDismissRequest = { expanded = false },
                                 modifier = Modifier.background(Grey20)
                             ) {
-                                DropdownItem(
-                                    teaWeight = VariantType.FIFTY_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.HUNDRED_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.TWO_HUNDRED_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.FIVE_HUNDRED_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.PACK,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
+                                product.packages.forEach { it ->
+                                    DropdownItem(
+                                        teaWeight = it.variantType,
+                                        expandedChange = { expanded = it },
+                                        weightChange = { productWeight = it }
+                                    )
+                                }
                             }
                         }
                     }

@@ -19,7 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +41,7 @@ import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
+import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
@@ -83,6 +86,9 @@ var orderCount = ""
 @Composable
 fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context, navController: NavController){
     orderCount = user?.ordersCount.toString()
+    var bonusInfo by remember {
+        mutableStateOf(false)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -121,7 +127,11 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
                     modifier = Modifier
                         .padding(start = 10.dp, end = 10.dp, bottom = 30.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .clickable(onClick = {})
+                        .clickable(
+                            onClick = {
+                                bonusInfo = true
+                            }
+                        )
                         .shadow(4.dp, shape = RoundedCornerShape(10.dp))
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(5.dp)
@@ -204,6 +214,11 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
                 )
             })
         ProfileCard(icon = R.drawable.delete_icon, title = "Удалить аккаунт")
+    }
+    if(bonusInfo){
+        BottomSheetBonuses(header = "Что такое бонусы?", textId = R.string.BonusInfo) {
+            bonusInfo = it
+        }
     }
 }
 
