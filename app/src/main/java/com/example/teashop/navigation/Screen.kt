@@ -9,7 +9,7 @@ open class Screen (val route: String){
 
     object Profile: Screen("profile_screen")
 
-    object Catalog: Screen("catalog_screen/{topName}")
+    object Catalog: Screen("catalog_screen/{config}")
 
     object Product: Screen("product_screen/{product}")
 

@@ -3,13 +3,13 @@ package com.example.teashop.data.model.pagination.product
 import com.example.teashop.data.model.variant.VariantType
 
 data class ProductFilter(
-    val onlyPopular: Boolean,
-    val onlyNew: Boolean,
-    val onlyFavorite: Boolean,
-    val categoryId: Int,
-    val searchString: String?,
-    val inStock: Boolean,
-    val minPrice: Double,
-    val maxPrice: Double,
-    val variantTypes: List<VariantType>?
+    var onlyPopular: Boolean = false,
+    var onlyNew: Boolean = false,
+    var onlyFavorite: Boolean = false,
+    val categoryId: Int = 1,
+    val searchString: String? = "",
+    var inStock: Boolean = false,
+    var minPrice: Double = 0.0,
+    var maxPrice: Double = 0.0,
+    val variantTypes: MutableList<VariantType>? = mutableListOf()
 )

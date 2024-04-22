@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.example.teashop.R
+import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
@@ -169,7 +170,10 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
         ProfileCard(
             icon = R.drawable.favorit_icon,
             title = "Избранное",
-            onClick = {navController.navigate("catalog_screen/Избранное")}
+            onClick = {
+                navController.currentBackStackEntry?.savedStateHandle?.set("config", CatalogConfig.FAVORITE)
+                navController.navigate("catalog_screen/${CatalogConfig.FAVORITE}")
+            }
         )
         ProfileCard(
             icon = R.drawable.user_data_icon,

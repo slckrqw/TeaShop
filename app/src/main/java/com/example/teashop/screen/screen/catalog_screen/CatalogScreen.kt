@@ -49,11 +49,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
+import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.enums.ScreenConfig
 import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.data.model.product.ProductShort
-import com.example.teashop.data.model.filters.Filters
+import com.example.teashop.data.model.pagination.product.ProductFilter
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeProductCard2
@@ -68,15 +69,26 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 var sortingId = 1
-var filterParams = Filters(
-    priceMin = 0.0,
-    priceMax = 0.0,
-    packageType = VariantType.FIFTY_GRAMS,
-    inStock = false
-)
+var filterParams = ProductFilter()
 
 @Composable
-fun LaunchCatalogScreen(navController: NavController, topName: String?){
+fun LaunchCatalogScreen(navController: NavController, config: CatalogConfig?){
+    val topName: String
+    when(config){
+        CatalogConfig.NEW -> {
+            topName = CatalogConfig.NEW.value
+            filterParams.onlyNew = true
+        }
+        CatalogConfig.POPULAR -> {
+            topName = CatalogConfig.POPULAR.value
+            filterParams.onlyPopular = true
+        }
+        CatalogConfig.FAVORITE -> {
+            topName = CatalogConfig.FAVORITE.value
+            filterParams.onlyFavorite = true
+        }
+        null -> topName = "Error"
+    }
     Navigation(navController = navController) {
         MakeCatalogScreen(
             productsList = DataSource().loadShortProducts(),
@@ -193,10 +205,10 @@ fun TopCardCatalog(
                                 screenChange = { searchSwitch = it })
                             IconButton(
                                 onClick = {
-                                          when(screenTemp){
-                                              ScreenConfig.SINGLE-> screenChange(ScreenConfig.ROW)
-                                              ScreenConfig.ROW-> screenChange(ScreenConfig.SINGLE)
-                                          }
+                                      when(screenTemp){
+                                          ScreenConfig.SINGLE-> screenChange(ScreenConfig.ROW)
+                                          ScreenConfig.ROW-> screenChange(ScreenConfig.SINGLE)
+                                      }
                                 },
                                 modifier = Modifier
                                     .padding(start = 10.dp)
@@ -265,7 +277,7 @@ fun TopCardCatalog(
                 BottomSortingCatalog(expandedChange = { sortingSheet = it })
             }
             if (filterSheet) {
-                bottomFilterCatalog(expandedChange = {filterSheet = it})
+                BottomFilterCatalog(expandedChange = {filterSheet = it})
             }
         }
     }
@@ -273,10 +285,14 @@ fun TopCardCatalog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(Filters?){
-    val filterRequest = Filters()
+fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
+
     var switchOn by remember{mutableStateOf(false)}
-    var pushToBack = false
+    switchOn = when(filterParams.inStock){
+        true -> true
+        false -> false
+    }
+
     ModalBottomSheet(
         onDismissRequest = { expandedChange(false) },
         containerColor = White10,
@@ -300,16 +316,16 @@ fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(Filters?){
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 FilterCatalogField(
-                    priceValue = filterParams.priceMin,
+                    priceValue = filterParams.minPrice,
                     price = {
-                        filterParams.priceMin = it.toDouble()
+                        filterParams.minPrice = it.toDouble()
                     },
                     goalString = "От"
                 )
                 FilterCatalogField(
-                    priceValue = filterParams.priceMax,
+                    priceValue = filterParams.maxPrice,
                     price = {
-                        filterParams.priceMax = it.toDouble()
+                        filterParams.maxPrice = it.toDouble()
                     },
                     goalString = "До"
                 )
@@ -341,7 +357,7 @@ fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(Filters?){
                     onCheckedChange = {
                             filterParams.inStock = it
                             switchOn = !switchOn
-                        },
+                    },
                     colors = SwitchDefaults.colors(
                         checkedBorderColor = White10,
                         uncheckedBorderColor = White10,
@@ -354,8 +370,11 @@ fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(Filters?){
             }
             Button(
                 onClick = {
-                    pushToBack = true
                     expandedChange(false)
+                    if(filterParams.minPrice > filterParams.maxPrice){
+                        filterParams.minPrice = 0.0
+                        filterParams.maxPrice = 0.0
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
                 modifier = Modifier
@@ -372,15 +391,14 @@ fun bottomFilterCatalog(expandedChange: (Boolean) -> Unit):(Filters?){
             }
         }
     }
-    return if(pushToBack){
-        pushToBack = false
-        filterRequest
-    } else null
 }
 
 @Composable
 fun RowScope.WeightButton(weight: VariantType){
     var colorChange by rememberSaveable{mutableStateOf(false)}
+    filterParams.variantTypes?.let {
+        colorChange = filterParams.variantTypes!!.contains(weight)
+    }
     val buttonColor: Color = when(colorChange){
         true -> Green10
         false -> Grey10
@@ -388,7 +406,11 @@ fun RowScope.WeightButton(weight: VariantType){
     Button(
         onClick = {
             colorChange = !colorChange
-            filterParams.packageType = weight
+            if(colorChange){
+                filterParams.variantTypes?.add(weight)
+            }else{
+                filterParams.variantTypes?.remove(weight)
+            }
         },
         colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
         contentPadding = PaddingValues(0.dp),
@@ -408,13 +430,18 @@ fun RowScope.WeightButton(weight: VariantType){
 
 @Composable
 fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goalString: String){
-    var priceValueField by remember{mutableStateOf("")}
+
+    var priceValueField by remember{
+        mutableStateOf(
+            when(priceValue){
+                0.0 -> ""
+                else -> priceValue.toString()
+            }
+        )
+    }
+
     TextField(
-        value = if(priceValue == 0.0){
-            priceValueField
-        }else{
-            priceValue.toString()
-        },
+        value = priceValueField,
         shape = RoundedCornerShape(15.dp),
         placeholder = {
             Text(
@@ -443,10 +470,16 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
         ),
         singleLine = true
     )
-    if(priceValueField == ""){
+    if(priceValueField == "" && priceValue == 0.0){
+
         price("0")
-    }else{
+
+    } else if(priceValueField == "" && priceValue != 0.0){
+
+    } else{
+
         price(priceValueField)
+
     }
 
 }

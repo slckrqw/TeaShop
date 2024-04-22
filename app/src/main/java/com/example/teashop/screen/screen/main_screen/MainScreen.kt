@@ -1,16 +1,20 @@
 package com.example.teashop.screen.screen.main_screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,16 +25,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.DEFAULT_BALANCE
 import com.example.teashop.R
+import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.product.ProductShort
@@ -47,6 +57,7 @@ import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
 
 import com.example.teashop.reusable_interface.cards.RowOfCards
+import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
@@ -99,7 +110,15 @@ fun NewProductsBanner(navController: NavController) {
             contentDescription = null,
             modifier = Modifier
                 .clip(RoundedCornerShape(15.dp))
-                .clickable(onClick = { navController.navigate("catalog_screen/Новинки") })
+                .clickable(
+                    onClick = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "config",
+                            CatalogConfig.NEW
+                        )
+                        navController.navigate("catalog_screen/${CatalogConfig.NEW}")
+                    }
+                )
                 .fillMaxSize(),
             contentScale = ContentScale.Crop
         )
@@ -135,6 +154,13 @@ fun NewProductsBanner(navController: NavController) {
 @Composable
 fun BonusInfoCard(){
     val currentBalance by remember{ mutableIntStateOf(DEFAULT_BALANCE) }
+    var bonusInfo by remember{ mutableStateOf(false)}
+    var bonusToSpend by remember {
+        mutableStateOf(false)
+    }
+    var bonusToCollect by remember {
+        mutableStateOf(false)
+    }
     Card(modifier = Modifier
         .background(Grey20)
         .padding(top = 15.dp, start = 15.dp, end = 15.dp)
@@ -151,7 +177,11 @@ fun BonusInfoCard(){
                 modifier = Modifier
                     .padding(top = 10.dp, end = 10.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .clickable(onClick = {})
+                    .clickable(
+                        onClick = {
+                            bonusInfo = true
+                        }
+                    )
                     .size(20.dp)
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -173,7 +203,7 @@ fun BonusInfoCard(){
                         .padding(bottom = 5.dp)
                 ) {
                     Button(
-                        onClick = {},
+                        onClick = {bonusToSpend = true},
                         colors = ButtonDefaults.buttonColors(containerColor = White10),
                         modifier = Modifier
                             .weight(1f)
@@ -189,7 +219,7 @@ fun BonusInfoCard(){
                         )
                     }
                     Button(
-                        onClick = {},
+                        onClick = {bonusToCollect = true},
                         colors = ButtonDefaults.buttonColors(containerColor = White10),
                         modifier = Modifier
                             .weight(1f)
@@ -234,6 +264,52 @@ fun BonusInfoCard(){
                     }
                 }
             }
+        }
+    }
+    if(bonusInfo){
+        BottomSheetBonuses(header = "Что такое бонусы?", textId = R.string.BonusInfo) {
+            bonusInfo = it
+        }
+    }
+    if(bonusToSpend){
+        BottomSheetBonuses(header = "Как потратить?", textId = R.string.BonusHowToSpend) {
+            bonusToSpend = it
+        }
+    }
+    if(bonusToCollect){
+        BottomSheetBonuses(header = "Как получить?", textId = R.string.BonusHowToCollect) {
+            bonusToCollect = it
+        }
+    }
+}
+
+@SuppressLint("UnusedBoxWithConstraintsScope")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheetBonuses(header: String,textId: Int, expandedChange: (Boolean) -> Unit){
+    ModalBottomSheet(
+        onDismissRequest = { expandedChange(false) }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp, bottom = 30.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = header,
+                fontSize = 20.sp,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W400,
+                color = Green10
+            )
+            Text(
+                text = stringResource(textId),
+                fontSize = 20.sp,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W400,
+                color = Black10
+            )
         }
     }
 }

@@ -199,14 +199,20 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "${product.packages[0].price*(1-(product.discount.toDouble()/100))} ₽",
+                        text = "${product
+                            .packages
+                            .first { it.variantName == productWeight }
+                            .price*(1-product.discount.toDouble()/100)} ₽",
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.W500,
                         modifier = Modifier.padding(top = 5.dp)
                     )
                     Text(
-                        text = "${product.packages[0].price} ₽",
+                        text = "${product
+                            .packages
+                            .first { it.variantName == productWeight }
+                            .price} ₽",
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.W300,
@@ -246,31 +252,13 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                                 onDismissRequest = { expanded = false },
                                 modifier = Modifier.background(Grey20)
                             ) {
-                                DropdownItem(
-                                    teaWeight = VariantType.FIFTY_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.HUNDRED_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.TWO_HUNDRED_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.FIVE_HUNDRED_GRAMS,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
-                                DropdownItem(
-                                    teaWeight = VariantType.PACK,
-                                    expandedChange = {expanded = it},
-                                    weightChange = {productWeight = it}
-                                )
+                                product.packages.forEach { it ->
+                                    DropdownItem(
+                                        teaWeight = it.variantName,
+                                        expandedChange = { expanded = it },
+                                        weightChange = { productWeight = it }
+                                    )
+                                }
                             }
                         }
                     }
@@ -338,10 +326,18 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                 .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
                 .fillMaxWidth()
                 .background(White10)
-                .clickable(onClick = {
-                    navController.currentBackStackEntry?.savedStateHandle?.set("product", product)
-                    navController.navigate("product_screen/$product")
-                }
+                .clickable(
+                    onClick = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "product",
+                            com.example.teashop.data.model
+                                .DataSource()
+                                .loadFullProducts()[0]
+                        )
+                        navController.navigate(
+                            Screen.Product.route
+                        )
+                    }
                 )
                 .shadow(2.dp, shape = RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.TopEnd

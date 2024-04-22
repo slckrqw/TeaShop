@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
+import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.ui.theme.White10
@@ -47,7 +48,12 @@ fun LaunchSearchScreen(navController: NavController){
 fun MakeSearchScreen(navController: NavController){
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
         MakeSearchCard()
-        NewProductsBanner(onClick = {navController.navigate("catalog_screen/Новинки")})
+        NewProductsBanner(
+            onClick = {
+                navController.currentBackStackEntry?.savedStateHandle?.set("config", CatalogConfig.NEW)
+                navController.navigate("catalog_screen/${CatalogConfig.NEW}")
+            }
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -81,7 +87,12 @@ fun MakeSearchScreen(navController: NavController){
                 }
             )
         }
-        PopularProductsBanner(onClick = {navController.navigate("catalog_screen/Популярное")})
+        PopularProductsBanner(
+            onClick = {
+                navController.currentBackStackEntry?.savedStateHandle?.set("config", CatalogConfig.POPULAR)
+                navController.navigate("catalog_screen/${CatalogConfig.POPULAR}")
+            }
+        )
     }
 }
 @Composable

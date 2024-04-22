@@ -61,7 +61,12 @@ fun MakeBasketScreen(navController: NavController){
     val productCnt = 1
 
     Column{
-       MakeTopCard(drawableId = R.drawable.back_arrow, text = "Корзина", iconSwitch = false, navController = navController)
+       MakeTopCard(
+           drawableId = R.drawable.back_arrow,
+           text = "Корзина",
+           iconSwitch = false,
+           navController = navController
+       )
         if (basketList.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -202,7 +207,10 @@ fun MakeBasketScreen(navController: NavController){
                     }
                 }
                 item {
-                    MakeAgreeBottomButton(onClick = {navController.navigate("order_screen")}, text = "К оформлению")
+                    MakeAgreeBottomButton(
+                        onClick = {navController.navigate("order_screen")},
+                        text = "К оформлению"
+                    )
                 }
             }
         }

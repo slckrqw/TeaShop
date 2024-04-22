@@ -14,7 +14,7 @@ data class User(
     val bucket: Bucket,
     val addresses: List<Address>,
     val name: String,
-    val surname: String,
+    val surname: String?,
     val email: String,
     val teaBonuses: Int,
     val ordersCount: Int,
