@@ -59,7 +59,7 @@ fun LaunchProfileScreen(navController: NavController){
         viewModel.getLoggedUserInfo(
             tokenStorage.getToken(context)!!,
             onError = {
-                Toast.makeText(context, "Упс, вы не еще не авторизировались", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Упс, вы не еще не авторизировались", Toast.LENGTH_SHORT).show()
                 tokenStorage.deleteToken(context)
                 navController.navigate(
                     Screen.Log.route,

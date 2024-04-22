@@ -291,6 +291,7 @@ fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
     switchOn = when(filterParams.inStock){
         true -> true
         false -> false
+        null -> false
     }
 
     ModalBottomSheet(
@@ -316,14 +317,14 @@ fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 FilterCatalogField(
-                    priceValue = filterParams.minPrice,
+                    priceValue = filterParams.minPrice ?: 0.0,
                     price = {
                         filterParams.minPrice = it.toDouble()
                     },
                     goalString = "От"
                 )
                 FilterCatalogField(
-                    priceValue = filterParams.maxPrice,
+                    priceValue = filterParams.maxPrice ?: 0.0,
                     price = {
                         filterParams.maxPrice = it.toDouble()
                     },
@@ -371,7 +372,7 @@ fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
             Button(
                 onClick = {
                     expandedChange(false)
-                    if(filterParams.minPrice > filterParams.maxPrice){
+                    if((filterParams.minPrice  ?: 0.0) > (filterParams.maxPrice ?: 0.0)){
                         filterParams.minPrice = 0.0
                         filterParams.maxPrice = 0.0
                     }

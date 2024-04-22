@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.order.Order
 import com.example.teashop.screen.screen.basket_screen.LaunchBasketScreen
@@ -41,8 +39,6 @@ import com.example.teashop.screen.screen.profile_screen.LaunchUserFeedbackScreen
 import com.example.teashop.screen.screen.search_screen.LaunchSearchScreen
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
-
-const val DEFAULT_BALANCE = 0
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

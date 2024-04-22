@@ -1,20 +1,18 @@
 package com.example.teashop.screen.screen.main_screen
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,8 +28,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,21 +38,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.teashop.DEFAULT_BALANCE
+import androidx.navigation.navOptions
 import com.example.teashop.R
 import com.example.teashop.data.enums.CatalogConfig
-import com.example.teashop.data.model.DataSource
-import com.example.teashop.data.model.product.ProductFull
+import com.example.teashop.data.model.pagination.product.ProductFilter
+import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
 
 import com.example.teashop.reusable_interface.cards.RowOfCards
@@ -65,14 +67,60 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun LaunchMainScreen(navController: NavController){
+fun LaunchMainScreen(navController: NavController, viewModel: MainScreenViewModel = viewModel()){
+    val userView by viewModel.user.observeAsState()
+    val productView by viewModel.product.observeAsState()
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+
+    LaunchedEffect(Unit) {
+        val token = tokenStorage.getToken(context)
+        token?.let {
+            viewModel.getLoggedUserInfo(
+                it,
+                onError = {
+                    Toast.makeText(context, "Упс, вы не еще не авторизировались", Toast.LENGTH_SHORT).show()
+                    tokenStorage.deleteToken(context)
+                    navController.navigate(
+                        Screen.Log.route,
+                        navOptions = navOptions {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                        }
+                    )
+                }
+            )
+        }
+
+        viewModel.getAllPopularProducts(
+            token,
+            ProductPagingRequest(
+                filter = ProductFilter(
+                    onlyPopular = false
+                )
+            ),
+            onError = {
+                Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    val bonusCount = userView?.teaBonuses ?: 0
+
     Navigation(navController = navController) {
-        MakeMainScreen(productsList = DataSource().loadShortProducts(), navController = navController)
+        MakeMainScreen(
+            productsList = productView,
+            navController = navController,
+            bonusCount = bonusCount
+        )
     }
 }
 
 @Composable
-fun MakeMainScreen(productsList: List<ProductShort?>, navController: NavController){
+fun MakeMainScreen(productsList: List<ProductShort?>?, navController: NavController, bonusCount: Int){
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -80,21 +128,24 @@ fun MakeMainScreen(productsList: List<ProductShort?>, navController: NavControll
         item {
             MakeSearchCard()
             NewProductsBanner(navController)
-            BonusInfoCard()
+            BonusInfoCard(bonusCount)
             PopularProductsText()//TODO place text into start position
         }
-        items(productsList.size) { product ->//TODO solve problem of indexes
-            if (product % 2 == 0) {
-                RowOfCards(
-                    navController,
-                    product1 = productsList[product],
-                    product2 = productsList[product+1]
-                )
+        productsList?.let {
+            items(it.size, key = { index -> it[index]?.id ?: index }) { index ->
+                if (index % 2 == 0) {
+                    val product1 = it[index]
+                    val product2 = if (index + 1 < it.size) it[index + 1] else null
+                    RowOfCards(
+                        navController,
+                        product1 = product1,
+                        product2 = product2
+                    )
+                }
             }
         }
     }
 }
-
 
 @Composable
 fun NewProductsBanner(navController: NavController) {
@@ -152,8 +203,7 @@ fun NewProductsBanner(navController: NavController) {
 
 
 @Composable
-fun BonusInfoCard(){
-    val currentBalance by remember{ mutableIntStateOf(DEFAULT_BALANCE) }
+fun BonusInfoCard(bonusCount: Int){
     var bonusInfo by remember{ mutableStateOf(false)}
     var bonusToSpend by remember {
         mutableStateOf(false)
@@ -248,7 +298,7 @@ fun BonusInfoCard(){
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${stringResource(R.string.bonusCardBalanceStatus)} $currentBalance",
+                            text = "${stringResource(R.string.bonusCardBalanceStatus)} $bonusCount",
                             fontSize = 16.sp,
                             fontFamily = montserratFamily,
                             fontWeight = FontWeight.W800,

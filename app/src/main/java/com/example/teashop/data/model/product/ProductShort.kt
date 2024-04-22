@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
 data class ProductShort(
     val id: Long = 1234,
     val article:String = "1234",
-    val isFavorite: Boolean = false,
+    val favorite: Boolean = false,
     val packages: List<PackageShort> = listOf(PackageShort()),
     val title: String = "Зелёный чай",
     val discount: Int = 5,

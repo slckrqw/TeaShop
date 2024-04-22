@@ -56,7 +56,6 @@ fun LaunchBasketScreen(navController: NavController){
 
 @Composable
 fun MakeBasketScreen(navController: NavController){
-
     val basketList = DataSource().loadShortProducts()
     val productCnt = 1
 

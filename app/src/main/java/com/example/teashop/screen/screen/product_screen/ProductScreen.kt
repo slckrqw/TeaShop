@@ -39,7 +39,6 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -49,7 +48,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
-import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.navigation.Navigation

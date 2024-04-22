@@ -1,6 +1,8 @@
 package com.example.teashop.reusable_interface.cards
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,22 +43,29 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.packages.PackageShort
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Screen
+import com.example.teashop.screen.screen.product_screen.ProductViewModel
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -63,6 +74,9 @@ import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.time.Duration
 import javax.sql.DataSource
 
 @SuppressLint("UnnecessaryComposedModifier")
@@ -93,7 +107,14 @@ fun RowOfCards(
         modifier = Modifier.fillMaxWidth()
     ){
         MakeProductCard(navController = navController, product = product1)
-        MakeProductCard(navController = navController,product = product2)
+        if (product2 != null) {
+            MakeProductCard(
+                navController = navController,
+                product = product2,
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
     }
 }
 
@@ -101,11 +122,18 @@ fun RowOfCards(
 @Composable
 fun RowScope.MakeProductCard(navController: NavController, product: ProductShort?) {
     var productWeight by remember { mutableStateOf(VariantType.FIFTY_GRAMS) }
-    var iconClicksCnt by remember {
-        mutableIntStateOf(1)
-    }
     var expanded by remember{ mutableStateOf(false) }
-    var heartIconId: Int
+    var heartIconId by remember {
+        mutableIntStateOf(R.drawable.heart_icon_disabled)
+    }
+    var favorite by remember {
+        mutableStateOf(product!!.favorite)
+    }
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+    val productViewModel: ProductViewModel = viewModel()
 
     if(product != null) {
         Box(
@@ -162,7 +190,11 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                     fontSize = 13.sp,
                     fontWeight = FontWeight.W500,
                     color = Black10,
-                    modifier = Modifier.padding(start = 10.dp)
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .wrapContentHeight(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -199,10 +231,14 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "${product
-                            .packages
-                            .first { it.variantName == productWeight }
-                            .price*(1-product.discount.toDouble()/100)} ₽",
+                        text = "${
+                            BigDecimal(
+                                product.packages
+                                    .first { it.variantType == productWeight || 
+                                            it.variantType == VariantType.PACK }
+                                    .price*(1-product.discount.toDouble()/100)
+                            ).setScale(2, RoundingMode.HALF_UP)
+                        } ₽",
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.W500,
@@ -211,7 +247,8 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                     Text(
                         text = "${product
                             .packages
-                            .first { it.variantName == productWeight }
+                            .first { it.variantType == productWeight ||
+                                    it.variantType == VariantType.PACK}
                             .price} ₽",
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
@@ -254,7 +291,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                             ) {
                                 product.packages.forEach { it ->
                                     DropdownItem(
-                                        teaWeight = it.variantName,
+                                        teaWeight = it.variantType,
                                         expandedChange = { expanded = it },
                                         weightChange = { productWeight = it }
                                     )
@@ -263,7 +300,34 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                         }
                     }
                     IconButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            val token = tokenStorage.getToken(context)
+                            if (token == null) {
+                                makeToast(
+                                    context,
+                                    "Для действия необходимо авторизироваться"
+                                )
+                                navController.navigate(Screen.Log.route)
+                                return@IconButton
+                            }
+
+                            val productToBucket = ProductToBucket(
+                                product.packages.first { it.variantType == productWeight }.id,
+                                1
+                            )
+
+                            productViewModel.addProductToBucket(
+                                token,
+                                productToBucket,
+                                onSuccess = {
+                                    makeToast(context, "Товар добавлен в корзину!")
+                                },
+                                onError = {
+                                    makeToast(context, "Упс, что-то пошло не так")
+                                }
+                            )
+
+                        },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = Green10),
                         modifier = Modifier
                             .padding(end = 5.dp, bottom = 5.dp)
@@ -285,17 +349,40 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                 modifier = Modifier
                     .clickableWithoutRipple(
                         interactionSource = MutableInteractionSource(),
-                        onClick = { iconClicksCnt++ }
+                        onClick = {
+                            val token = tokenStorage.getToken(context)
+                            if (token == null) {
+                                makeToast(
+                                    context,
+                                    "Для действия необходимо авторизироваться"
+                                )
+                                navController.navigate(Screen.Log.route)
+                                return@clickableWithoutRipple
+                            }
+
+                            productViewModel.setFavorite(
+                                token,
+                                product.id,
+                                onSuccess = {
+                                    makeToast(context, it)
+                                    favorite = !favorite
+                                    heartIconId = if (!favorite) {
+                                        R.drawable.heart_icon_disabled
+                                    } else {
+                                        R.drawable.hearticon
+                                    }
+                                },
+                                onError = {
+                                    makeToast(context, "Упс, что-то пошло не так")
+                                }
+                            )
+                        }
                     )
                     .padding(5.dp)
             ) {
-                when (iconClicksCnt) {
-                    1 -> heartIconId = R.drawable.heart_icon_disabled
-                    2 -> heartIconId = R.drawable.hearticon
-                    else -> {
-                        iconClicksCnt = 1
-                        heartIconId = R.drawable.heart_icon_disabled
-                    }
+                heartIconId = when (favorite) {
+                    false -> R.drawable.heart_icon_disabled
+                    true -> R.drawable.hearticon
                 }
                 Icon(
                     painterResource(heartIconId),
@@ -308,6 +395,10 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
             }
         }
     }
+}
+
+private fun makeToast(context: Context, text: String) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
 
 @SuppressLint("UnrememberedMutableInteractionSource")

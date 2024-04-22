@@ -155,7 +155,7 @@ fun MakeSignInScreen(
                 onClick = {
                     if (!userEmail.contains("@")) {
                         Toast.makeText(context, "Укажите корректный адрес электронной почты",
-                            Toast.LENGTH_LONG).show()
+                            Toast.LENGTH_SHORT).show()
                         return@Button
                     }
 
@@ -168,11 +168,11 @@ fun MakeSignInScreen(
                         registrationViewModel.registration(
                             registrationRequest,
                             onSuccess = {
-                                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                                 navController.navigate(Screen.Log.route)
                             },
                             onError = {
-                                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                             }
                         )
                     } else {
@@ -194,11 +194,11 @@ fun MakeSignInScreen(
                                         }
                                     )
                                 } else {
-                                    // TODO navigate to AdminSection
+                                    //TODO navigate to AdminSection
                                 }
                             },
                             onError = {
-                                Toast.makeText(context, "Неправильный логин или пароль", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Неправильный логин или пароль", Toast.LENGTH_SHORT).show()
                             }
                         )
                     }

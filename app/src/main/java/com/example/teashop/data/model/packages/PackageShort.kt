@@ -7,6 +7,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class PackageShort(
     val id: Long = 1,
-    val variantName: VariantType = VariantType.FIFTY_GRAMS,
+    val variantType: VariantType = VariantType.FIFTY_GRAMS,
     val price: Double = 250.0
 ): Parcelable
