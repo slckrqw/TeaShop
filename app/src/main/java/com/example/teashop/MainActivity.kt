@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.teashop.data.enums.CatalogConfig
+import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.order.Order
 import com.example.teashop.screen.screen.basket_screen.LaunchBasketScreen
 import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
@@ -88,7 +89,8 @@ fun TeaShopApp(){
 
         composable(Screen.Catalog.route){
             val config: CatalogConfig? = navController.previousBackStackEntry?.savedStateHandle?.get("config")
-            LaunchCatalogScreen(navController, config = config)
+            val category: Category? = navController.previousBackStackEntry?.savedStateHandle?.get("category")
+            LaunchCatalogScreen(navController, config, category)
         }
 
         composable(Screen.Product.route){

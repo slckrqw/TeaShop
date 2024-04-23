@@ -1,5 +1,7 @@
 package com.example.teashop.screen.screen.catalog_screen
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -29,7 +32,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,15 +53,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.enums.CatalogConfig
-import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.enums.ScreenConfig
 import com.example.teashop.data.enums.SearchSwitch
+import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.pagination.product.ProductFilter
+import com.example.teashop.data.model.pagination.product.ProductPagingRequest
+import com.example.teashop.data.model.pagination.product.ProductSortType
+import com.example.teashop.data.model.pagination.product.ProductSorter
 import com.example.teashop.data.model.variant.VariantType
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.reusable_interface.cards.MakeProductCard2
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
@@ -68,13 +79,17 @@ import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
-var sortingId = 1
-var filterParams = ProductFilter()
-
 @Composable
-fun LaunchCatalogScreen(navController: NavController, config: CatalogConfig?){
+fun LaunchCatalogScreen(
+    navController: NavController,
+    config: CatalogConfig?,
+    category: Category?,
+    viewModel: CatalogScreenViewModel = viewModel(),
+    filterParams: ProductFilter = ProductFilter(),
+    sorterParams: ProductSorter = ProductSorter()
+){
     val topName: String
-    when(config){
+    when(config) {
         CatalogConfig.NEW -> {
             topName = CatalogConfig.NEW.value
             filterParams.onlyNew = true
@@ -87,50 +102,95 @@ fun LaunchCatalogScreen(navController: NavController, config: CatalogConfig?){
             topName = CatalogConfig.FAVORITE.value
             filterParams.onlyFavorite = true
         }
-        null -> topName = "Error"
+        null -> {
+            topName = category?.name ?: ""
+            filterParams.categoryId = category?.id
+        }
     }
+    val productView by viewModel.product.observeAsState()
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.getAllProducts(
+            tokenStorage.getToken(context),
+            ProductPagingRequest(
+                filter = filterParams,
+                sorter = sorterParams
+            ),
+            onError = {
+                Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     Navigation(navController = navController) {
         MakeCatalogScreen(
-            productsList = DataSource().loadShortProducts(),
+            productsList = productView,
             navController = navController,
-            topName = topName
+            topName = topName,
+            filterParams = filterParams,
+            sorterParams = sorterParams,
+            viewModel = viewModel,
+            context = context
         )
     }
 }
+
 @Composable
-fun MakeCatalogScreen(productsList: List<ProductShort?>, navController: NavController, topName: String?) {
+fun MakeCatalogScreen(
+    productsList: List<ProductShort?>?,
+    navController: NavController,
+    topName: String?,
+    filterParams: ProductFilter,
+    sorterParams: ProductSorter,
+    viewModel: CatalogScreenViewModel,
+    context: Context
+) {
+    val lazyListState = remember { LazyListState() }
     var screenConfig by rememberSaveable{ mutableStateOf(ScreenConfig.ROW) }
     Column {
         TopCardCatalog(
             screenChange = { screenConfig = it },
             screenConfig,
             topName,
-            navController
+            navController,
+            sorterParams,
+            filterParams,
+            viewModel,
+            context,
+            lazyListState
         )
         LazyColumn(
+            state = lazyListState,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            items(productsList.size) { product ->//TODO solve problem of indexes
-                when (screenConfig) {
-                    ScreenConfig.SINGLE -> {
-                       MakeProductCard2(
-                           navController = navController,
-                           productsList[product]
-                       )
-                    }
-
-                    ScreenConfig.ROW -> Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (product % 2 == 0) {
-                            RowOfCards(
-                                navController,
-                                product1 = productsList[product],
-                                product2 = productsList[product + 1]
+            productsList?.let {
+                items(it.size, key = { index -> it[index]?.id ?: index }) { index ->
+                    when (screenConfig) {
+                        ScreenConfig.SINGLE -> {
+                            MakeProductCard2(
+                                navController = navController,
+                                productsList[index]
                             )
+                        }
+                        ScreenConfig.ROW -> Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (index % 2 == 0) {
+                                val product1 = it[index]
+                                val product2 = if (index + 1 < it.size) it[index + 1] else null
+                                RowOfCards(
+                                    navController,
+                                    product1 = product1,
+                                    product2 = product2
+                                )
+                            }
                         }
                     }
                 }
@@ -144,21 +204,24 @@ fun TopCardCatalog(
     screenChange: (ScreenConfig) -> Unit = {},
     screenTemp: ScreenConfig,
     topName: String?,
-    navController: NavController
+    navController: NavController,
+    sorterParams: ProductSorter,
+    filterParams: ProductFilter,
+    viewModel: CatalogScreenViewModel,
+    context: Context,
+    lazyListState: LazyListState
 ){
     var filterSheet by remember{mutableStateOf(false)}
     var sortingSheet by remember{mutableStateOf(false)}
-    val sortingText:Int = when(sortingId){
-        1->R.string.sortingTextCatalog1
-        2->R.string.sortingTextCatalog2
-        3->R.string.sortingTextCatalog3
-        4->R.string.sortingTextCatalog4
-        else -> {R.string.sortingTextCatalog1}
+    val sortingText:Int = when(sorterParams.sortType){
+        ProductSortType.POPULAR->R.string.sortingTextCatalog1
+        ProductSortType.MORE_RATE->R.string.sortingTextCatalog2
+        ProductSortType.EXPENSIVE->R.string.sortingTextCatalog3
+        ProductSortType.CHEAP->R.string.sortingTextCatalog4
     }
     var searchSwitch by remember{mutableStateOf(SearchSwitch.FILTERS)}
     when(searchSwitch) {
-        SearchSwitch.SEARCH -> MakeSearchCard(searchCardHide = {searchSwitch = it})
-
+        SearchSwitch.SEARCH -> MakeSearchCard(searchCardHide = {searchSwitch = it}) // TODO search by text
         SearchSwitch.FILTERS -> {
             Card(
                 shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
@@ -277,10 +340,10 @@ fun TopCardCatalog(
                 }
             }
             if (sortingSheet) {
-                BottomSortingCatalog(expandedChange = { sortingSheet = it })
+                BottomSortingCatalog(expandedChange = { sortingSheet = it }, filterParams, sorterParams, viewModel, context, lazyListState)
             }
             if (filterSheet) {
-                BottomFilterCatalog(expandedChange = {filterSheet = it})
+                BottomFilterCatalog(expandedChange = {filterSheet = it}, filterParams, sorterParams, viewModel, context, lazyListState)
             }
         }
     }
@@ -288,8 +351,17 @@ fun TopCardCatalog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
-
+fun BottomFilterCatalog(
+    expandedChange: (Boolean) -> Unit,
+    filterParams: ProductFilter,
+    sorterParams: ProductSorter,
+    viewModel: CatalogScreenViewModel,
+    context: Context,
+    lazyListState: LazyListState
+){
+    val tokenStorage = remember {
+        TokenStorage()
+    }
     var switchOn by remember{mutableStateOf(false)}
     switchOn = when(filterParams.inStock){
         true -> true
@@ -322,14 +394,24 @@ fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
                 FilterCatalogField(
                     priceValue = filterParams.minPrice ?: 0.0,
                     price = {
-                        filterParams.minPrice = it.toDouble()
+                        val inputPrice = it.toDoubleOrNull()
+                        if (inputPrice == null) {
+                            Toast.makeText(context, "Укажите верный формат цены", Toast.LENGTH_SHORT).show()
+                        } else {
+                            filterParams.minPrice = inputPrice
+                        }
                     },
                     goalString = "От"
                 )
                 FilterCatalogField(
                     priceValue = filterParams.maxPrice ?: 0.0,
                     price = {
-                        filterParams.maxPrice = it.toDouble()
+                        val inputPrice = it.toDoubleOrNull()
+                        if (inputPrice == null) {
+                            Toast.makeText(context, "Укажите верный формат цены", Toast.LENGTH_SHORT).show()
+                        } else {
+                            filterParams.maxPrice = inputPrice
+                        }
                     },
                     goalString = "До"
                 )
@@ -337,10 +419,10 @@ fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
             Row(
                 modifier = Modifier.padding(start = 10.dp)
             ) {
-                WeightButton(weight = VariantType.FIFTY_GRAMS)
-                WeightButton(weight = VariantType.HUNDRED_GRAMS)
-                WeightButton(weight = VariantType.TWO_HUNDRED_GRAMS)
-                WeightButton(weight = VariantType.FIVE_HUNDRED_GRAMS)
+                WeightButton(weight = VariantType.FIFTY_GRAMS, filterParams)
+                WeightButton(weight = VariantType.HUNDRED_GRAMS, filterParams)
+                WeightButton(weight = VariantType.TWO_HUNDRED_GRAMS, filterParams)
+                WeightButton(weight = VariantType.FIVE_HUNDRED_GRAMS, filterParams)
             }
             Row(
                 modifier = Modifier
@@ -376,9 +458,19 @@ fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
                 onClick = {
                     expandedChange(false)
                     if((filterParams.minPrice  ?: 0.0) > (filterParams.maxPrice ?: 0.0)){
-                        filterParams.minPrice = 0.0
-                        filterParams.maxPrice = 0.0
+                        filterParams.minPrice = null
+                        filterParams.maxPrice = null
                     }
+                    viewModel.getAllProducts(
+                        tokenStorage.getToken(context),
+                        ProductPagingRequest(
+                            filter = filterParams,
+                            sorter = sorterParams
+                        ),
+                        onError = {
+                            Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
+                        }
+                    )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
                 modifier = Modifier
@@ -398,7 +490,7 @@ fun BottomFilterCatalog(expandedChange: (Boolean) -> Unit){
 }
 
 @Composable
-fun RowScope.WeightButton(weight: VariantType){
+fun RowScope.WeightButton(weight: VariantType, filterParams: ProductFilter){
     var colorChange by rememberSaveable{mutableStateOf(false)}
     filterParams.variantTypes?.let {
         colorChange = filterParams.variantTypes!!.contains(weight)
@@ -434,7 +526,6 @@ fun RowScope.WeightButton(weight: VariantType){
 
 @Composable
 fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goalString: String){
-
     var priceValueField by remember{
         mutableStateOf(
             when(priceValue){
@@ -456,7 +547,9 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
                 color = Black10
             )
         },
-        onValueChange = {priceValueField = it},
+        onValueChange = {
+            priceValueField = it.replace("-", "")
+        },
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp)
             .weight(1f),
@@ -475,22 +568,23 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
         singleLine = true
     )
     if(priceValueField == "" && priceValue == 0.0){
-
         price("0")
-
     } else if(priceValueField == "" && priceValue != 0.0){
-
     } else{
-
         price(priceValueField)
-
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSortingCatalog(expandedChange: (Boolean)->Unit){
+fun BottomSortingCatalog(
+    expandedChange: (Boolean)->Unit,
+    filterParams: ProductFilter,
+    sorterParams: ProductSorter,
+    viewModel: CatalogScreenViewModel,
+    context: Context,
+    lazyListState: LazyListState
+){
     ModalBottomSheet(
         onDismissRequest = {expandedChange(false)},
         containerColor = White10,
@@ -504,28 +598,37 @@ fun BottomSortingCatalog(expandedChange: (Boolean)->Unit){
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
             )
-            SheetTextCatalog(1, expandedChange)
-            SheetTextCatalog(2, expandedChange)
-            SheetTextCatalog(3, expandedChange)
-            SheetTextCatalog(4, expandedChange)
+            SheetTextCatalog(ProductSortType.POPULAR, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(ProductSortType.MORE_RATE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(ProductSortType.EXPENSIVE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(ProductSortType.CHEAP, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
         }
     }
 }
 
 @Composable
-fun SheetTextCatalog(textId: Int, expandedChange: (Boolean)->Unit){
-
-    val stringId: Int = when(textId){
-        1->R.string.sortingTextCatalog1
-        2->R.string.sortingTextCatalog2
-        3->R.string.sortingTextCatalog3
-        4->R.string.sortingTextCatalog4
-        else -> {R.string.sortingTextCatalog1}
+fun SheetTextCatalog(
+    textType: ProductSortType,
+    expandedChange: (Boolean)->Unit,
+    filterParams: ProductFilter,
+    sorterParams: ProductSorter,
+    viewModel: CatalogScreenViewModel,
+    context: Context,
+    lazyListState: LazyListState
+){
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+    val stringId: Int = when(textType){
+        ProductSortType.POPULAR->R.string.sortingTextCatalog1
+        ProductSortType.MORE_RATE->R.string.sortingTextCatalog2
+        ProductSortType.EXPENSIVE->R.string.sortingTextCatalog3
+        ProductSortType.CHEAP->R.string.sortingTextCatalog4
     }
 
     val cardColor: Color
     val textColor: Color
-    if(textId == sortingId){
+    if(textType == sorterParams.sortType){
         cardColor = Green10
         textColor = White10
     }
@@ -556,8 +659,18 @@ fun SheetTextCatalog(textId: Int, expandedChange: (Boolean)->Unit){
                     .fillMaxWidth()
                     .clickable(
                         onClick = {
-                            sortingId = textId
+                            sorterParams.sortType = textType
                             expandedChange(false)
+                            viewModel.getAllProducts(
+                                tokenStorage.getToken(context),
+                                ProductPagingRequest(
+                                    filter = filterParams,
+                                    sorter = sorterParams
+                                ),
+                                onError = {
+                                    Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
+                                }
+                            )
                         }
                     )
             )

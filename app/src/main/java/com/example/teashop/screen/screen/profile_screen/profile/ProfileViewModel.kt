@@ -25,4 +25,15 @@ class ProfileViewModel: ViewModel() {
             }
         }
     }
+
+    fun deleteAccount(token: String, onSuccess: (String) -> Unit, onError: () -> Unit) {
+        viewModelScope.launch {
+            val response = UserRepository().deleteAccount("Bearer $token")
+            if (response.isSuccessful) {
+
+            } else {
+                onError()
+            }
+        }
+    }
 }

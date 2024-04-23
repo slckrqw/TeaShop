@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
+import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.navigation.Navigation
@@ -84,7 +85,10 @@ fun MakeCategoryScreen(categoryList: List<Category>?, navController: NavControll
                             .height(50.dp)
                             .shadow(elevation = 1.dp, shape = RoundedCornerShape(10.dp))
                             .background(White10)
-                            .clickable(onClick = { navController.navigate("catalog_screen/${categoryList[category].name}") })
+                            .clickable(onClick = {
+                                navController.currentBackStackEntry?.savedStateHandle?.set("category", categoryList[category])
+                                navController.navigate("catalog_screen/${category}")
+                            })
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

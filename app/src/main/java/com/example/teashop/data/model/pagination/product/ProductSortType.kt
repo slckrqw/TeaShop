@@ -1,7 +1,7 @@
 package com.example.teashop.data.model.pagination.product
 
 enum class ProductSortType {
-    CHEEP,
+    CHEAP,
     EXPENSIVE,
     POPULAR,
     MORE_RATE

@@ -82,15 +82,14 @@ fun LaunchProfileScreen(navController: NavController){
     }
 
     Navigation(navController = navController){
-        MakeProfileScreen(userView, tokenStorage, context, navController)
+        MakeProfileScreen(userView, viewModel, tokenStorage, context, navController)
     }
 }
 
 var orderCount = ""
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context, navController: NavController){
+fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: TokenStorage, context: Context, navController: NavController){
     orderCount = user?.ordersCount.toString()
     var bonusInfo by remember {
         mutableStateOf(false)
@@ -262,6 +261,27 @@ fun MakeProfileScreen(user: User?, tokenStorage: TokenStorage, context: Context,
             }
         )
         exitAccount = false
+    }
+    if (deleteAccount) {
+        viewModel.deleteAccount(
+            tokenStorage.getToken(context) ?: "",
+            onSuccess = {
+                Toast.makeText(context, "Вы успешно удалили аккаунт", Toast.LENGTH_SHORT).show()
+            },
+            onError = {
+                Toast.makeText(context, "Упс, ошибка", Toast.LENGTH_SHORT).show()
+            })
+        tokenStorage.deleteToken(context)
+
+        navController.navigate(
+            Screen.Log.route,
+            navOptions = navOptions {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                }
+            }
+        )
+        deleteAccount = false
     }
 }
 

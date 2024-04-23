@@ -6,10 +6,10 @@ data class ProductFilter(
     var onlyPopular: Boolean? = false,
     var onlyNew: Boolean? = false,
     var onlyFavorite: Boolean? = false,
-    val categoryId: Int? = null,
-    val searchString: String? = null,
+    var categoryId: Int? = null,
+    var searchString: String? = null,
     var inStock: Boolean? = false,
-    var minPrice: Double? = null,
-    var maxPrice: Double? = null,
-    val variantTypes: MutableList<VariantType>? = null
+    var minPrice: Double? = 0.0,
+    var maxPrice: Double? = 0.0,
+    var variantTypes: MutableList<VariantType>? = mutableListOf()
 )

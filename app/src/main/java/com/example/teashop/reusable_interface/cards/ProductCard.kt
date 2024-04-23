@@ -121,7 +121,13 @@ fun RowOfCards(
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun RowScope.MakeProductCard(navController: NavController, product: ProductShort?) {
-    var productWeight by remember { mutableStateOf(VariantType.FIFTY_GRAMS) }
+    var productWeight by remember { mutableStateOf(if ((product?.packages?.get(0)?.variantType
+            ?: VariantType.FIFTY_GRAMS) == VariantType.PACK
+    ) {
+        VariantType.PACK
+    } else {
+        VariantType.FIFTY_GRAMS
+    })}
     var expanded by remember{ mutableStateOf(false) }
     var heartIconId by remember {
         mutableIntStateOf(R.drawable.heart_icon_disabled)
@@ -366,6 +372,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                                 onSuccess = {
                                     makeToast(context, it)
                                     favorite = !favorite
+                                    product.favorite = favorite
                                     heartIconId = if (!favorite) {
                                         R.drawable.heart_icon_disabled
                                     } else {
@@ -404,13 +411,27 @@ private fun makeToast(context: Context, text: String) {
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun MakeProductCard2(navController: NavController, product: ProductShort?) {
-    var productWeight by remember { mutableStateOf(VariantType.FIFTY_GRAMS) }
-    var iconClicksCnt by remember {
-        mutableIntStateOf(1)
-    }
+    var productWeight by remember { mutableStateOf(if ((product?.packages?.get(0)?.variantType
+            ?: VariantType.FIFTY_GRAMS) == VariantType.PACK
+    ) {
+        VariantType.PACK
+    } else {
+        VariantType.FIFTY_GRAMS
+    })}
     var expanded by remember{ mutableStateOf(false) }
-    var heartIconId: Int
+    var heartIconId by remember {
+        mutableIntStateOf(R.drawable.heart_icon_disabled)
+    }
+    var favorite by remember {
+        mutableStateOf(product!!.favorite)
+    }
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+    val productViewModel: ProductViewModel = viewModel()
     val dropMenuWidth = 120
+
     if(product != null) {
         Box(
             modifier = Modifier
@@ -468,7 +489,9 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         fontFamily = montserratFamily,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.W500,
-                        color = Black10
+                        color = Black10,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = "Артикул: ${product.article}",
@@ -569,7 +592,33 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         }
                     }
                     IconButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            val token = tokenStorage.getToken(context)
+                            if (token == null) {
+                                makeToast(
+                                    context,
+                                    "Для действия необходимо авторизироваться"
+                                )
+                                navController.navigate(Screen.Log.route)
+                                return@IconButton
+                            }
+
+                            val productToBucket = ProductToBucket(
+                                product.packages.first { it.variantType == productWeight }.id,
+                                1
+                            )
+
+                            productViewModel.addProductToBucket(
+                                token,
+                                productToBucket,
+                                onSuccess = {
+                                    makeToast(context, "Товар добавлен в корзину!")
+                                },
+                                onError = {
+                                    makeToast(context, "Упс, что-то пошло не так")
+                                }
+                            )
+                        },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = Green10),
                         modifier = Modifier
                             .padding(end = 5.dp, bottom = 5.dp)
@@ -592,17 +641,41 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                 modifier = Modifier
                     .clickableWithoutRipple(
                         interactionSource = MutableInteractionSource(),
-                        onClick = { iconClicksCnt++ }
+                        onClick = {
+                            val token = tokenStorage.getToken(context)
+                            if (token == null) {
+                                makeToast(
+                                    context,
+                                    "Для действия необходимо авторизироваться"
+                                )
+                                navController.navigate(Screen.Log.route)
+                                return@clickableWithoutRipple
+                            }
+
+                            productViewModel.setFavorite(
+                                token,
+                                product.id,
+                                onSuccess = {
+                                    makeToast(context, it)
+                                    favorite = !favorite
+                                    product.favorite = favorite
+                                    heartIconId = if (!favorite) {
+                                        R.drawable.heart_icon_disabled
+                                    } else {
+                                        R.drawable.hearticon
+                                    }
+                                },
+                                onError = {
+                                    makeToast(context, "Упс, что-то пошло не так")
+                                }
+                            )
+                        }
                     )
                     .padding(5.dp)
             ) {
-                when (iconClicksCnt) {
-                    1 -> heartIconId = R.drawable.heart_icon_disabled
-                    2 -> heartIconId = R.drawable.hearticon
-                    else -> {
-                        iconClicksCnt = 1
-                        heartIconId = R.drawable.heart_icon_disabled
-                    }
+                heartIconId = when (favorite) {
+                    false -> R.drawable.heart_icon_disabled
+                    true -> R.drawable.hearticon
                 }
                 Icon(
                     painterResource(heartIconId),

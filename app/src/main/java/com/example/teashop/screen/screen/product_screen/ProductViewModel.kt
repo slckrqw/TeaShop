@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.repository.BucketRepository
 import com.example.teashop.data.repository.ProductRepository
@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 
 class ProductViewModel: ViewModel() {
-    private val _products = MutableLiveData<List<ProductShort?>>()
-    val product: LiveData<List<ProductShort?>>
+    private val _products = MutableLiveData<ProductFull?>()
+    val product: LiveData<ProductFull?>
         get() = _products
 
     fun setFavorite(
@@ -51,4 +51,20 @@ class ProductViewModel: ViewModel() {
         }
     }
 
+    fun getProductById(
+        id: Long,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        viewModelScope.launch {
+            val response = ProductRepository().getProductById(id)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    onSuccess()
+                }
+            } else {
+                onError()
+            }
+        }
+    }
 }
