@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -28,6 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -94,8 +98,15 @@ fun MakeSignInScreen(
     var userEmail by remember{
         mutableStateOf("")
     }
-    var userPassword by remember{
+    var userPassword by remember {
         mutableStateOf("")
+    }
+    var passwordVisibility by remember {
+        mutableStateOf(false)
+    }
+    val icon = when(passwordVisibility){
+        true -> R.drawable.eye
+        false -> R.drawable.hide
     }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -146,10 +157,63 @@ fun MakeSignInScreen(
                 onValueChange = {userEmail = it},
                 icon = R.drawable.email_icon
             )
-            UserField(
-                header = "Пароль",
-                onValueChange = {userPassword = it},
-                icon = R.drawable.password_icon,
+            TextField(
+                value = userPassword,
+                onValueChange = {
+                    if (userPassword.length < MAX_SIZE)
+                        userPassword = it
+                },
+                shape = RoundedCornerShape(15.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Grey10,
+                    unfocusedIndicatorColor = Grey10,
+                    focusedContainerColor = White10,
+                    unfocusedContainerColor = White10,
+                    disabledContainerColor = White10,
+                    disabledTextColor = Black10,
+                    focusedTextColor = Black10,
+                ),
+                placeholder = {
+                    Text(
+                        text = "Пароль",
+                        fontFamily = montserratFamily,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.W400,
+                        color = Grey10
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.password_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(25.dp),
+                        tint = Grey10
+                    )
+                },
+                trailingIcon = {
+                   Icon(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(
+                                onClick = {
+                                    passwordVisibility = !passwordVisibility
+                                }
+                            )
+                            .size(25.dp),
+                        tint = Grey10
+                   )
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                modifier = Modifier
+                    .padding(start = 30.dp, end = 30.dp, top = 10.dp)
+                    .fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = when(passwordVisibility){
+                    false -> VisualTransformation.None
+                    true -> PasswordVisualTransformation()
+                }
             )
             Button(
                 onClick = {

@@ -338,7 +338,8 @@ fun BonusInfoCard(bonusCount: Int){
 @Composable
 fun BottomSheetBonuses(header: String,textId: Int, expandedChange: (Boolean) -> Unit){
     ModalBottomSheet(
-        onDismissRequest = { expandedChange(false) }
+        onDismissRequest = { expandedChange(false) },
+        containerColor = White10
     ) {
         Column(
             modifier = Modifier

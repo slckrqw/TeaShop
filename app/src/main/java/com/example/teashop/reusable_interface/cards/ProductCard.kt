@@ -443,8 +443,8 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                 Box(
                     modifier = Modifier
                         .padding(end = 10.dp)
-                        .height(200.dp)
-                        .widthIn(0.dp, 200.dp),
+                        .size(200.dp)
+                        .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -461,6 +461,7 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         .height(200.dp)
                         .padding(end = 10.dp)
                         .background(White10)
+                        .weight(1f)
                 ) {
                     Text(
                         text = product.title,

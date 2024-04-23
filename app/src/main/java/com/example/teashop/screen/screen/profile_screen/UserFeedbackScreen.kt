@@ -23,9 +23,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -57,7 +59,7 @@ fun LaunchUserFeedbackScreen(navController: NavController){
 @Composable
 fun MakeUserFeedbackScreen(navController: NavController){
 
-    val feedbackList: MutableList<Review> = DataSource().loadFeedback().toMutableList()
+    val feedbackList = DataSource().loadFeedback().toMutableStateList()
     val product = DataSource().loadShortProducts()[0]
 
     LazyColumn {

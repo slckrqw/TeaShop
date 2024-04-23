@@ -16,7 +16,6 @@ import com.example.teashop.reusable_interface.MakeNaviBar
 fun Navigation(navController: NavController, content: @Composable (PaddingValues) -> Unit) {
     Scaffold(
         containerColor = Color.Transparent,
-        modifier = Modifier.height(45.dp),
         bottomBar = {
            MakeNaviBar(navController = navController)
         },
