@@ -9,9 +9,11 @@ import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.repository.ProductRepository
 import com.example.teashop.data.repository.UserRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
 class MainScreenViewModel: ViewModel() {
+    private val exceptionHandler = CoroutineExceptionHandler { _, _ -> }
     private val _user = MutableLiveData<User?>()
     private val _products = MutableLiveData<List<ProductShort?>>()
     val user: LiveData<User?>
@@ -20,7 +22,7 @@ class MainScreenViewModel: ViewModel() {
         get() = _products
 
     fun getLoggedUserInfo(token: String, onError: () -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             val response = UserRepository().getLoggedUserInfo("Bearer $token")
             if (response.isSuccessful) {
                 response.body()?.let {
@@ -37,7 +39,7 @@ class MainScreenViewModel: ViewModel() {
         productPagingRequest: ProductPagingRequest,
         onError: () -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             val bToken = token?.let {
                 "Bearer $token"
             }

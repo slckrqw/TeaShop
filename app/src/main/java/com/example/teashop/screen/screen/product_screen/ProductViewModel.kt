@@ -8,20 +8,22 @@ import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.repository.BucketRepository
 import com.example.teashop.data.repository.ProductRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
 class ProductViewModel: ViewModel() {
-    private val _products = MutableLiveData<ProductFull?>()
+    private val exceptionHandler = CoroutineExceptionHandler { _, _ -> }
+    private val _product = MutableLiveData<ProductFull?>()
     val product: LiveData<ProductFull?>
-        get() = _products
+        get() = _product
 
     fun setFavorite(
         token: String, id: Long,
         onSuccess: (String) -> Unit,
         onError: () -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             val response: Response<String> = ProductRepository().setFavorite("Bearer $token", id)
             if (response.isSuccessful) {
                 response.body()?.let {
@@ -39,7 +41,7 @@ class ProductViewModel: ViewModel() {
         onSuccess: () -> Unit,
         onError: () -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             val response = BucketRepository().addProductToBucket("Bearer $token", request)
             if (response.isSuccessful) {
                 response.body()?.let {
@@ -53,14 +55,13 @@ class ProductViewModel: ViewModel() {
 
     fun getProductById(
         id: Long,
-        onSuccess: () -> Unit,
         onError: () -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             val response = ProductRepository().getProductById(id)
             if (response.isSuccessful) {
                 response.body()?.let {
-                    onSuccess()
+                    _product.value = it
                 }
             } else {
                 onError()

@@ -21,8 +21,6 @@ import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
 import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
-import com.example.teashop.data.model.product.ProductShort
-import com.example.teashop.data.model.review.Review
 import com.example.teashop.data.model.user.User
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
@@ -90,12 +88,14 @@ fun TeaShopApp(){
         composable(Screen.Catalog.route){
             val config: CatalogConfig? = navController.previousBackStackEntry?.savedStateHandle?.get("config")
             val category: Category? = navController.previousBackStackEntry?.savedStateHandle?.get("category")
-            LaunchCatalogScreen(navController, config, category)
+            val searchString: String? = navController.previousBackStackEntry?.savedStateHandle?.get("searchString")
+            LaunchCatalogScreen(navController, config, category, searchString)
         }
 
         composable(Screen.Product.route){
-            val product: ProductFull? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
-            LaunchProductScreen(product = product, navController = navController)
+            val productId: Long? =  navController.previousBackStackEntry?.savedStateHandle?.get("productId")
+            val isFavorite: Boolean? = navController.previousBackStackEntry?.savedStateHandle?.get("isFavorite")
+            LaunchProductScreen(navController, productId, isFavorite)
         }
 
         composable(Screen.Category.route) {
@@ -107,8 +107,8 @@ fun TeaShopApp(){
         }
 
         composable(Screen.Feedback.route){
-            val reviewList: List<Review>? = navController.previousBackStackEntry?.savedStateHandle?.get("reviewList")
-            LaunchFeedbackScreen(navController = navController, reviewList = reviewList)
+            val productId: Long? = navController.previousBackStackEntry?.savedStateHandle?.get("productId")
+            LaunchFeedbackScreen(navController = navController, productId = productId)
         }
 
         composable(Screen.NewFeedback.route){

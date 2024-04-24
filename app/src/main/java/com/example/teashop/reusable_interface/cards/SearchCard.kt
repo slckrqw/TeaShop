@@ -32,7 +32,7 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun MakeSearchCard(searchCardHide: (SearchSwitch)->Unit = {}){
+fun MakeSearchCard(searchCardHide: (SearchSwitch, String)->Unit){
     var searchRequest by remember{ mutableStateOf("") }
     Card(modifier = Modifier
         .fillMaxWidth(),
@@ -55,7 +55,7 @@ fun MakeSearchCard(searchCardHide: (SearchSwitch)->Unit = {}){
             },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
-                onSearch = {searchCardHide(SearchSwitch.FILTERS)}),
+                onSearch = {searchCardHide(SearchSwitch.FILTERS, searchRequest)}),
             leadingIcon = { Icon(painter = painterResource(R.drawable.searchicon), null) },
             onValueChange = {searchRequest = it},
             colors = TextFieldDefaults.colors(

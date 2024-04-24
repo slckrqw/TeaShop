@@ -47,7 +47,17 @@ fun LaunchSearchScreen(navController: NavController){
 @Composable
 fun MakeSearchScreen(navController: NavController){
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
-        MakeSearchCard()
+        MakeSearchCard(searchCardHide = { _, searchString ->
+            navController.currentBackStackEntry?.savedStateHandle?.set(
+                "config",
+                CatalogConfig.SEARCH
+            )
+            navController.currentBackStackEntry?.savedStateHandle?.set(
+                "searchString",
+                searchString
+            )
+            navController.navigate("catalog_screen/${CatalogConfig.SEARCH}")
+        })
         NewProductsBanner(
             onClick = {
                 navController.currentBackStackEntry?.savedStateHandle?.set("config", CatalogConfig.NEW)

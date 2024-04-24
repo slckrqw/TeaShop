@@ -10,5 +10,6 @@ data class PackageBucket(
     val variant: Variant,
     val price: Double,
     val product: ProductBucket,
+    val plusTeaBonuses : Int,
     val quantityInBucket: Int
 ): Parcelable

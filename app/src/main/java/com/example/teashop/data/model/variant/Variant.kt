@@ -6,6 +6,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Variant(
     val id: Int,
-    val title: String
+    val title: VariantType
 ): Parcelable
 

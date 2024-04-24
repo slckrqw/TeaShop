@@ -1,6 +1,8 @@
 package com.example.teashop.screen.screen.product_screen
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,8 +30,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,22 +42,26 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
+import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
-import com.example.teashop.reusable_interface.cards.DropdownItem
 import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
@@ -66,6 +73,33 @@ import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 import java.math.BigDecimal
 import java.math.RoundingMode
+
+@Composable
+fun LaunchProductScreen(
+    navController: NavController,
+    productId: Long?,
+    isFavorite: Boolean?,
+    viewModel: ProductViewModel = viewModel()
+){
+    val context = LocalContext.current
+    val productView by viewModel.product.observeAsState()
+
+    LaunchedEffect(Unit) {
+        productId?.let {
+            viewModel.getProductById(
+                it
+            ) {
+                Toast.makeText(context, "Невозможно получить данный продукт", Toast.LENGTH_SHORT)
+                    .show()
+                navController.navigate(Screen.Main.route)
+            }
+        }
+    }
+
+    Navigation(navController = navController) {
+        MakeProductScreen(productView, navController, viewModel, isFavorite)
+    }
+}
 
 @SuppressLint("UnnecessaryComposedModifier")
 private fun Modifier.clickableWithoutRipple(
@@ -83,36 +117,54 @@ private fun Modifier.clickableWithoutRipple(
     }
 )
 
-@Composable
-fun LaunchProductScreen(navController: NavController, product: ProductFull?){
-    Navigation(navController = navController) {
-        MakeProductScreen(product = product, navController = navController)
-    }
-}
-
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
-fun MakeProductScreen(product: ProductFull?, navController: NavController){
+fun MakeProductScreen(
+    product: ProductFull?,
+    navController: NavController,
+    productViewModel: ProductViewModel,
+    isFavorite: Boolean?
+){
     val heartColor: Color
     val heartIcon: Int
-    var heartTemp by remember{mutableIntStateOf(0)}
-    var expanded by remember{mutableStateOf(false)}
-    var productWeight by remember{ mutableStateOf(VariantType.FIFTY_GRAMS) }
+    var productWeight by remember {
+        mutableStateOf(if ((product?.packages?.get(0)?.variant?.title
+                ?: VariantType.FIFTY_GRAMS) == VariantType.PACK
+        ) {
+            VariantType.PACK
+        } else {
+            VariantType.FIFTY_GRAMS
+        })
+    }
+    if (productWeight == VariantType.FIFTY_GRAMS) {
+        if ((product?.packages?.get(0)?.variant?.title
+                ?: VariantType.FIFTY_GRAMS) == VariantType.PACK) {
+            productWeight = VariantType.PACK
+        }
+    }
+    var expanded by remember{ mutableStateOf(false) }
+    var favorite by remember {
+        mutableStateOf(isFavorite)
+    }
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+
     var bonusInfo by remember{
         mutableStateOf(false)
     }
 
-    when(heartTemp){
-        0 -> {
+    when(favorite){
+        false -> {
             heartColor = Green10
             heartIcon = R.drawable.heart_icon_disabled
         }
-        1 -> {
+        true -> {
             heartColor = Red10
             heartIcon = R.drawable.hearticon
         }
         else -> {
-            heartTemp = 0
             heartColor = Green10
             heartIcon = R.drawable.heart_icon_disabled
         }
@@ -158,7 +210,29 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                     modifier = Modifier
                                         .clickableWithoutRipple(
                                             interactionSource = MutableInteractionSource(),
-                                            onClick = { heartTemp++ }
+                                            onClick = {
+                                                val token = tokenStorage.getToken(context)
+                                                if (token == null) {
+                                                    makeToast(
+                                                        context,
+                                                        "Для действия необходимо авторизироваться"
+                                                    )
+                                                    navController.navigate(Screen.Log.route)
+                                                    return@clickableWithoutRipple
+                                                }
+
+                                                productViewModel.setFavorite(
+                                                    token,
+                                                    product.id,
+                                                    onSuccess = {
+                                                        makeToast(context, it)
+                                                        favorite = !favorite!!
+                                                    },
+                                                    onError = {
+                                                        makeToast(context, "Упс, что-то пошло не так")
+                                                    }
+                                                )
+                                            }
                                         )
                                         .padding(end = 10.dp, top = 10.dp)
                                         .size(30.dp),
@@ -186,7 +260,9 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                             fontSize = 15.sp,
                             fontWeight = FontWeight.W500,
                             color = Black10,
-                            modifier = Modifier.padding(start = 5.dp, bottom = 5.dp)
+                            modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -203,8 +279,8 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                     text = "${
                                         BigDecimal(
                                         product.packages
-                                            .first { it.variant == productWeight ||
-                                                    it.variant == VariantType.PACK }
+                                            .first { it.variant.title == productWeight ||
+                                                    it.variant.title == VariantType.PACK }
                                             .price*(1-product.discount.toDouble()/100)
                                     ).setScale(2, RoundingMode.HALF_UP)} ₽",
                                     fontFamily = montserratFamily,
@@ -214,8 +290,8 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 Text(
                                     text = "${product
                                         .packages
-                                        .first { it.variant == productWeight ||
-                                                it.variant == VariantType.PACK}
+                                        .first { it.variant.title == productWeight ||
+                                                it.variant.title == VariantType.PACK}
                                         .price} ₽",
                                     fontFamily = montserratFamily,
                                     fontSize = 13.sp,
@@ -259,7 +335,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                         ) {
                                             product.packages.forEach { it ->
                                                 DropdownItem(
-                                                    teaWeight = it.variant,
+                                                    teaWeight = it.variant.title,
                                                     expandedChange = { expanded = it },
                                                     weightChange = { productWeight = it }
                                                 )
@@ -268,7 +344,39 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                     }
                                 }
                                 Button(
-                                    onClick = {},
+                                    onClick = {
+                                        val token = tokenStorage.getToken(context)
+                                        if (token == null) {
+                                            makeToast(
+                                                context,
+                                                "Для действия необходимо авторизироваться"
+                                            )
+                                            navController.navigate(Screen.Log.route)
+                                            return@Button
+                                        }
+
+                                        val productToBucket = ProductToBucket(
+                                            product.packages.first { it.variant.title == productWeight }.id,
+                                            1
+                                        )
+
+                                        productViewModel.addProductToBucket(
+                                            token,
+                                            productToBucket,
+                                            onSuccess = {
+                                                makeToast(
+                                                    context,
+                                                    "Товар добавлен в корзину!"
+                                                )
+                                            },
+                                            onError = {
+                                                makeToast(
+                                                    context,
+                                                    "Упс, что-то пошло не так"
+                                                )
+                                            }
+                                        )
+                                    },
                                     colors = ButtonDefaults.buttonColors(containerColor = Green10),
                                     contentPadding = PaddingValues(0.dp),
                                     modifier = Modifier
@@ -320,7 +428,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                             Text(
                                 text = "+ ${BigDecimal(
                                     product.packages
-                                        .first{it.variant == productWeight}
+                                        .first{it.variant.title == productWeight}
                                         .price*0.05
                                 ).setScale(0,RoundingMode.HALF_UP)} бонусных рублей",
                                 fontFamily = montserratFamily,
@@ -388,7 +496,7 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
 
                         Button(
                             onClick = {
-                                navController.currentBackStackEntry?.savedStateHandle?.set("reviewList", DataSource().loadFeedback())
+                                navController.currentBackStackEntry?.savedStateHandle?.set("productId", product.id)
                                 navController.navigate(Screen.Feedback.route)
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Green10),
@@ -447,6 +555,10 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
             }
         }
     }
+}
+
+private fun makeToast(context: Context, text: String) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
 
 @Composable

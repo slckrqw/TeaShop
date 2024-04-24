@@ -151,10 +151,10 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                 .clickable(
                     onClick = {
                         navController.currentBackStackEntry?.savedStateHandle?.set(
-                            "product",
-                            com.example.teashop.data.model
-                                .DataSource()
-                                .loadFullProducts()[0]
+                            "productId", product.id
+                        )
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "isFavorite", product.favorite
                         )
                         navController.navigate(
                             Screen.Product.route
@@ -441,10 +441,10 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                 .clickable(
                     onClick = {
                         navController.currentBackStackEntry?.savedStateHandle?.set(
-                            "product",
-                            com.example.teashop.data.model
-                                .DataSource()
-                                .loadFullProducts()[0]
+                            "productId", product.id
+                        )
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "isFavorite", product.favorite
                         )
                         navController.navigate(
                             Screen.Product.route

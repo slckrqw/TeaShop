@@ -7,9 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.repository.ProductRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
 class CatalogScreenViewModel: ViewModel() {
+    private val exceptionHandler = CoroutineExceptionHandler { _, _ -> }
     private val _products = MutableLiveData<List<ProductShort?>>()
     val product: LiveData<List<ProductShort?>>
         get() = _products
@@ -19,7 +21,7 @@ class CatalogScreenViewModel: ViewModel() {
         productPagingRequest: ProductPagingRequest,
         onError: () -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             val bToken = token?.let {
                 "Bearer $token"
             }

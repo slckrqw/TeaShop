@@ -62,6 +62,7 @@ import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.pagination.product.ProductFilter
+import com.example.teashop.data.model.pagination.product.productFilterSaver
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.pagination.product.ProductSortType
 import com.example.teashop.data.model.pagination.product.ProductSorter
@@ -84,10 +85,14 @@ fun LaunchCatalogScreen(
     navController: NavController,
     config: CatalogConfig?,
     category: Category?,
+    searchString: String?,
     viewModel: CatalogScreenViewModel = viewModel(),
-    filterParams: ProductFilter = ProductFilter(),
     sorterParams: ProductSorter = ProductSorter()
 ){
+    val filterParams by rememberSaveable(stateSaver = productFilterSaver()) {
+        mutableStateOf(ProductFilter())
+    }
+
     val topName: String
     when(config) {
         CatalogConfig.NEW -> {
@@ -101,6 +106,14 @@ fun LaunchCatalogScreen(
         CatalogConfig.FAVORITE -> {
             topName = CatalogConfig.FAVORITE.value
             filterParams.onlyFavorite = true
+        }
+        CatalogConfig.SEARCH -> {
+            topName = CatalogConfig.SEARCH.value
+            filterParams.searchString = if (filterParams.searchString == null) {
+                searchString
+            } else {
+                filterParams.searchString
+            }
         }
         null -> {
             topName = category?.name ?: ""
@@ -220,8 +233,24 @@ fun TopCardCatalog(
         ProductSortType.CHEAP->R.string.sortingTextCatalog4
     }
     var searchSwitch by remember{mutableStateOf(SearchSwitch.FILTERS)}
+    val tokenStorage = remember {
+        TokenStorage()
+    }
     when(searchSwitch) {
-        SearchSwitch.SEARCH -> MakeSearchCard(searchCardHide = {searchSwitch = it}) // TODO search by text
+        SearchSwitch.SEARCH -> MakeSearchCard(searchCardHide = { newSearchSwitch, searchString ->
+            searchSwitch = newSearchSwitch
+            filterParams.searchString = searchString
+            viewModel.getAllProducts(
+                tokenStorage.getToken(context),
+                ProductPagingRequest(
+                    filter = filterParams,
+                    sorter = sorterParams
+                ),
+                onError = {
+                    Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
+                }
+            )
+        })
         SearchSwitch.FILTERS -> {
             Card(
                 shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
@@ -668,7 +697,13 @@ fun SheetTextCatalog(
                                     sorter = sorterParams
                                 ),
                                 onError = {
-                                    Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "Получение списка продуктов временно недоступно",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                        .show()
                                 }
                             )
                         }

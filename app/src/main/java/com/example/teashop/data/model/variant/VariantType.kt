@@ -1,6 +1,5 @@
 package com.example.teashop.data.model.variant
 
-
 enum class VariantType(val value: String) {
     FIFTY_GRAMS("50 грамм"),
     HUNDRED_GRAMS("100 грамм"),

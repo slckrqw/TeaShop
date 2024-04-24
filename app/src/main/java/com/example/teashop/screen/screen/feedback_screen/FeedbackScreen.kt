@@ -1,5 +1,6 @@
 package com.example.teashop.screen.screen.feedback_screen
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,16 +30,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
-import com.example.teashop.data.model.product.ProductFull
-import com.example.teashop.data.model.product.ProductShort
+import com.example.teashop.data.model.pagination.product.ProductPagingRequest
+import com.example.teashop.data.model.pagination.review.ReviewFilter
+import com.example.teashop.data.model.pagination.review.ReviewPagingRequest
+import com.example.teashop.data.model.pagination.review.ReviewSorter
 import com.example.teashop.data.model.review.Review
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.cards.MakeFeedbackCard
@@ -47,28 +55,58 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 
-private var filter: String = "Новые"
+private var filter: String = "Новые" //TODO add review sort
 
 @Composable
-fun LaunchFeedbackScreen(navController: NavController, reviewList: List<Review>?){
+fun LaunchFeedbackScreen(
+    navController: NavController,
+    productId: Long?,
+    viewModel: FeedbackViewModel = viewModel(),
+    reviewSorter: ReviewSorter = ReviewSorter(),
+    reviewFilter: ReviewFilter = ReviewFilter()
+){
+    val reviewView by viewModel.review.observeAsState()
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+    productId?.let {
+        reviewFilter.productId = it
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.getAllReviewByProduct(
+            tokenStorage.getToken(context),
+            ReviewPagingRequest(
+                filter = reviewFilter,
+                sorter = reviewSorter
+            ),
+            onError = {
+                Toast.makeText(context, "Получение списка отзывов временно недоступно", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+
     Navigation(navController = navController) {
         MakeFeedbackScreen(
             navController,
-            reviewList
+            reviewView
         )
     }
 }
 @Composable
-fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>?){
-
+fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?){
     var expandedChange by remember{mutableStateOf(false)}
     var reviewListSum = 0.0
     var averageRate = 0.0
     reviewList?.let {
-        reviewList.forEach {
-            reviewListSum += it.stars
+        if (reviewList.isNotEmpty()) {
+            reviewList.forEach {
+                reviewListSum += it?.stars ?: 0
+            }
+            averageRate = reviewListSum / reviewList.size
         }
-        averageRate = reviewListSum / reviewList.size
     }
 
     Column(
@@ -123,7 +161,7 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>?){
                         contentDescription = null
                     )
                     Text(
-                        text = "$averageRate",
+                        text = averageRate.toString(),
                         fontFamily = montserratFamily,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.W500
@@ -166,8 +204,8 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review>?){
         }
         LazyColumn {
             reviewList?.let {
-                items(reviewList.size) { review ->
-                    MakeFeedbackCard(reviewList[review])
+                items(reviewList.size, { reviewList[it]!!.id}) { review ->
+                    reviewList[review]?.let { MakeFeedbackCard(it) }
                 }
             }
         }
@@ -204,7 +242,6 @@ fun BottomSheetCatalog(expandedChange: (Boolean)->Unit){
 
 @Composable
 fun SheetTextCatalog(text: String, expandedChange: (Boolean)->Unit){
-
     val cardColor: Color
     val textColor: Color
     if(text == filter){

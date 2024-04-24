@@ -126,7 +126,17 @@ fun MakeMainScreen(productsList: List<ProductShort?>?, navController: NavControl
         verticalArrangement = Arrangement.Center
     ) {
         item {
-            MakeSearchCard()
+            MakeSearchCard(searchCardHide = { _, searchString ->
+                navController.currentBackStackEntry?.savedStateHandle?.set(
+                    "config",
+                    CatalogConfig.SEARCH
+                )
+                navController.currentBackStackEntry?.savedStateHandle?.set(
+                    "searchString",
+                    searchString
+                )
+                navController.navigate("catalog_screen/${CatalogConfig.SEARCH}")
+            })
             NewProductsBanner(navController)
             BonusInfoCard(bonusCount)
             PopularProductsText()//TODO place text into start position

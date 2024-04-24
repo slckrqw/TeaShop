@@ -169,7 +169,7 @@ fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: To
                                 color = Black10
                             )
                             Text(
-                                text = (user?.teaBonuses.toString() ?: "") + " Бонусов",
+                                text = user?.teaBonuses.toString() + " Бонусов",
                                 fontFamily = montserratFamily,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.W500,

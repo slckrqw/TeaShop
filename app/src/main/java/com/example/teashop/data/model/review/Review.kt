@@ -1,8 +1,6 @@
 package com.example.teashop.data.model.review
 
-import android.os.Parcelable
 import com.example.teashop.data.model.image.Image
-import kotlinx.parcelize.Parcelize
 import java.time.ZonedDateTime
 
 data class Review(
