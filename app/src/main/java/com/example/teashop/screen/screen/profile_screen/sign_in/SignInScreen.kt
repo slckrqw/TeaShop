@@ -102,7 +102,7 @@ fun MakeSignInScreen(
         mutableStateOf("")
     }
     var passwordVisibility by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
     val icon = when(passwordVisibility){
         true -> R.drawable.eye

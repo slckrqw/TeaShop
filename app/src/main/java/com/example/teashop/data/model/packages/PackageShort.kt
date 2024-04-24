@@ -1,6 +1,8 @@
 package com.example.teashop.data.model.packages
 
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.example.teashop.data.model.variant.VariantType
 import kotlinx.parcelize.Parcelize
 

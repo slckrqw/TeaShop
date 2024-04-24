@@ -11,7 +11,7 @@ data class Review(
     var userName: String = "kirpich",
     var stars: Int = 3,
     var reviewText: String = "aboba",
-    var images: List<Image>? = listOf(Image()),
+    var images: List<Image>? = listOf(Image(),Image(),Image(),Image(),Image()),
     var productId: Long = 1234,
     var productTitle: String = "Зелёный чай",
     var productImage: Image = Image()

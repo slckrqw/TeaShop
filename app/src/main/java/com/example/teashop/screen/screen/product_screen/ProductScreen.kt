@@ -318,7 +318,11 @@ fun MakeProductScreen(product: ProductFull?, navController: NavController){
                                 contentDescription = null
                             )
                             Text(
-                                text = "+  бонусных рублей",
+                                text = "+ ${BigDecimal(
+                                    product.packages
+                                        .first{it.variant == productWeight}
+                                        .price*0.05
+                                ).setScale(0,RoundingMode.HALF_UP)} бонусных рублей",
                                 fontFamily = montserratFamily,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.W500,

@@ -34,6 +34,7 @@ import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun LaunchOrderDescriptionScreen(navController: NavController, order: Order?){
@@ -67,6 +68,13 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order?){
                             .fillMaxHeight(),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Text(
+                            text = "Дата заказа: "+order.createdDate.format(DateTimeFormatter.ISO_OFFSET_DATE),
+                            fontSize = 14.sp,
+                            fontFamily = montserratFamily,
+                            fontWeight = FontWeight.W600,
+                            color = Black10
+                        )
                         OrderStatusText(order = order, fontSize = 15)
                         Text(
                             text = "Трек-номер: ${order.trackNumber}",

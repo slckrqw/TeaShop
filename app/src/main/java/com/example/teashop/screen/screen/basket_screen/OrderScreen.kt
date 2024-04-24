@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -18,6 +19,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
+import com.example.teashop.data.model.address.Address
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
@@ -46,15 +49,17 @@ import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
 fun LaunchOrderScreen(navController: NavController){
+    val addressList = remember{ mutableStateListOf(Address()) }
     Navigation(navController = navController) {
         MakeOrderScreen(
-            navController = navController
+            navController = navController,
+            addressList = addressList
         )
     }
 }
 
 @Composable
-fun MakeOrderScreen(navController: NavController){
+fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
 
     var productCnt = 1
     var basketList = DataSource().loadFullProducts()
@@ -70,8 +75,10 @@ fun MakeOrderScreen(navController: NavController){
     var receiverPhone by remember {
         mutableStateOf("")
     }
-
     var writeOffBonus by remember {
+        mutableStateOf(false)
+    }
+    var selectedAddress by remember {
         mutableStateOf(false)
     }
 
@@ -98,7 +105,8 @@ fun MakeOrderScreen(navController: NavController){
                     colors = CardDefaults.cardColors(containerColor = White10),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = {
+                        .clickable(
+                            onClick = {
                                 navController.navigate(Screen.AddressChange.route)
                             }
                         )
@@ -125,6 +133,46 @@ fun MakeOrderScreen(navController: NavController){
                             color = Black10,
                         )
                     }
+                }
+            }
+        }
+        items(addressList.size){address ->
+            Card(
+                colors = CardDefaults.cardColors(containerColor = White10),
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .fillMaxWidth()
+                    .clickable(
+                        onClick = {
+                            selectedAddress = !selectedAddress
+                        }
+                    )
+            ){
+                Row(
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Icon(
+                        painter = painterResource(R.drawable.address_icon),
+                        modifier = Modifier
+                            .padding(end = 20.dp)
+                            .size(30.dp),
+                        tint = when(selectedAddress)
+                        {
+                                true -> Green10
+                                false -> Grey10
+                        },
+                        contentDescription = null
+                    )
+                    Text(
+                        text = "${addressList[address].address}, ${addressList[address].city}",
+                        fontFamily = montserratFamily,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.W500,
+                        color = Black10,
+                    )
                 }
             }
         }

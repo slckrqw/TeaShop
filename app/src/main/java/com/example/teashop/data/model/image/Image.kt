@@ -1,6 +1,8 @@
 package com.example.teashop.data.model.image
 
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

@@ -5,6 +5,7 @@ import com.example.teashop.data.model.order.OrderStatus
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.review.Review
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 class DataSource {
@@ -42,7 +43,7 @@ class DataSource {
 
     fun loadOrders(): List<Order>{
         return listOf(
-            Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124", createdDate = ZonedDateTime.now()),
+            Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124", createdDate = ZonedDateTime.now(ZoneOffset.UTC)),
             Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124", createdDate = ZonedDateTime.now()),
             Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124", createdDate = ZonedDateTime.now()),
             Order(id = 1234567890, bonusesAccrued = 15, bonusesSpent = 5, status = OrderStatus.CONFIRMED, totalCost = 5000.0, trackNumber = "124151514124", createdDate = ZonedDateTime.now()),
