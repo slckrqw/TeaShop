@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,7 @@ import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.order.Order
 import com.example.teashop.data.model.order.OrderStatus
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Red10
@@ -48,16 +50,22 @@ fun LaunchOrdersScreen(navController: NavController){
 @Composable
 fun MakeOrdersScreen(navController: NavController){
     val ordersList = DataSource().loadOrders()
-    LazyColumn {
-        item {
-            MakeTopCard(
-                drawableId = R.drawable.back_arrow,
-                text = "Мои заказы",
-                navController = navController
-            )
-        }
-        items(ordersList.size){order ->
-            MakeOrderCard(order = ordersList[order], navController)
+    Column (
+        modifier = Modifier.fillMaxSize()
+    ){
+        MakeTopCard(
+            drawableId = R.drawable.back_arrow,
+            text = "Мои заказы",
+            navController = navController
+        )
+        if(ordersList.isEmpty()){
+            MakeEmptyListScreen(type = "Заказов")
+        } else {
+            LazyColumn {
+                items(ordersList.size) { order ->
+                    MakeOrderCard(order = ordersList[order], navController)
+                }
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
+import com.example.teashop.data.enums.SortingType
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.pagination.review.ReviewFilter
@@ -47,6 +49,7 @@ import com.example.teashop.data.model.review.Review
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
+import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeFeedbackCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -55,7 +58,7 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 
-private var filter: String = "Новые" //TODO add review sort
+var sorting = SortingType.NEW //TODO add review sort
 
 @Composable
 fun LaunchFeedbackScreen(
@@ -97,6 +100,10 @@ fun LaunchFeedbackScreen(
 }
 @Composable
 fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?){
+    var sortingText by remember {
+        mutableStateOf("Новые")
+    }
+    sortingText = sorting.value
     var expandedChange by remember{mutableStateOf(false)}
     var reviewListSum = 0.0
     var averageRate = 0.0
@@ -108,7 +115,7 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?)
             averageRate = reviewListSum / reviewList.size
         }
     }
-
+    
     Column(
         modifier = Modifier.fillMaxSize()
     ){
@@ -127,7 +134,10 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?)
                     .clip(RoundedCornerShape(10.dp))
                     .clickable(
                         onClick = {
-                            navController.currentBackStackEntry?.savedStateHandle?.set("product", DataSource().loadFullProducts()[0])
+                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                "product",
+                                DataSource().loadFullProducts()[0]
+                            )
                             navController.navigate(Screen.NewFeedback.route)
                         }
                     )
@@ -136,81 +146,85 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?)
                 contentDescription = null
             )
         }
-        Card(
-            modifier = Modifier
-                .padding(bottom = 10.dp)
-                .fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = White10)
-        ) {
-            Column(
-                modifier = Modifier.padding(start = 10.dp, bottom = 5.dp, top = 5.dp)
+        if(reviewList?.isEmpty() == true){
+            MakeEmptyListScreen(type = "Отзывов")
+        }else {
+            Card(
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = White10)
             ) {
-                Text(
-                    text = "Общий рейтинг",
-                    fontFamily = montserratFamily,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.W500
-                )
+                Column(
+                    modifier = Modifier.padding(start = 10.dp, bottom = 5.dp, top = 5.dp)
+                ) {
+                    Text(
+                        text = "Общий рейтинг",
+                        fontFamily = montserratFamily,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.W500
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.star),
+                            tint = Yellow10,
+                            modifier = Modifier.size(30.dp),
+                            contentDescription = null
+                        )
+                        Text(
+                            text = averageRate.toString(),
+                            fontFamily = montserratFamily,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.W500
+                        )
+                        Text(
+                            text = "${reviewList?.size} отзывов",
+                            fontFamily = montserratFamily,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.W300,
+                            modifier = Modifier.padding(start = 15.dp)
+                        )
+                    }
+                }
+            }
+            Card(
+                colors = CardDefaults.cardColors(containerColor = White10),
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable(onClick = { expandedChange = true })
+            ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(start = 10.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.star),
-                        tint = Yellow10,
-                        modifier = Modifier.size(30.dp),
+                        painter = painterResource(id = R.drawable.sorting_icon),
+                        tint = Green10,
+                        modifier = Modifier.size(20.dp),
                         contentDescription = null
                     )
                     Text(
-                        text = averageRate.toString(),
-                        fontFamily = montserratFamily,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.W500
-                    )
-                    Text(
-                        text = "${reviewList?.size} отзывов",
+                        text = sortingText,
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.W300,
-                        modifier = Modifier.padding(start = 15.dp)
+                        fontWeight = FontWeight.W400,
                     )
                 }
             }
-        }
-        Card(
-            colors = CardDefaults.cardColors(containerColor = White10),
-            modifier = Modifier
-                .padding(bottom = 10.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .clickable(onClick = { expandedChange = true })
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(start = 10.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.sorting_icon),
-                    tint = Green10,
-                    modifier = Modifier.size(20.dp),
-                    contentDescription = null
-                )
-                Text(
-                    text = filter,
-                    fontFamily = montserratFamily,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.W400,
-                )
-            }
-        }
-        LazyColumn {
-            reviewList?.let {
-                items(reviewList.size, { reviewList[it]!!.id}) { review ->
-                    reviewList[review]?.let { MakeFeedbackCard(it) }
+            LazyColumn {
+                reviewList?.let {
+                    items(reviewList.size, { reviewList[it]!!.id }) { review ->
+                        reviewList[review]?.let { MakeFeedbackCard(it) }
+                    }
                 }
             }
-        }
-        if (expandedChange) {
-            BottomSheetCatalog(expandedChange = { expandedChange = it })
+            if (expandedChange) {
+                BottomSheetCatalog(expandedChange = { expandedChange = it })
+            }
         }
     }
 }
@@ -232,19 +246,19 @@ fun BottomSheetCatalog(expandedChange: (Boolean)->Unit){
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 20.dp)
             )
-            SheetTextCatalog("Новые", expandedChange)
-            SheetTextCatalog("Старые", expandedChange)
-            SheetTextCatalog("Отрицательные", expandedChange)
-            SheetTextCatalog("Положительные", expandedChange)
+            SheetTextCatalog(SortingType.NEW, expandedChange)
+            SheetTextCatalog(SortingType.OLD, expandedChange)
+            SheetTextCatalog(SortingType.NEGATIVE, expandedChange)
+            SheetTextCatalog(SortingType.POSITIVE, expandedChange)
         }
     }
 }
 
 @Composable
-fun SheetTextCatalog(text: String, expandedChange: (Boolean)->Unit){
+fun SheetTextCatalog(text: SortingType, expandedChange: (Boolean)->Unit){
     val cardColor: Color
     val textColor: Color
-    if(text == filter){
+    if(text == sorting){
         cardColor = Green10
         textColor = White10
     }
@@ -262,7 +276,7 @@ fun SheetTextCatalog(text: String, expandedChange: (Boolean)->Unit){
     ){
         Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.height(40.dp)) {
             Text(
-                text = text,
+                text = text.value,
                 fontFamily = montserratFamily,
                 fontWeight = FontWeight.W700,
                 fontSize = 15.sp,
@@ -270,11 +284,12 @@ fun SheetTextCatalog(text: String, expandedChange: (Boolean)->Unit){
                 modifier = Modifier
                     .padding(start = 5.dp)
                     .fillMaxWidth()
-                    .clickable(onClick = {
-                        filter = text
-                        expandedChange(false)
-                    }
-                )
+                    .clickable(
+                        onClick = {
+                            sorting = text
+                            expandedChange(false)
+                        }
+                    )
             )
         }
     }

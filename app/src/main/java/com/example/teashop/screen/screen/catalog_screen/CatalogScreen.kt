@@ -69,6 +69,7 @@ import com.example.teashop.data.model.pagination.product.ProductSorter
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeProductCard2
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
 import com.example.teashop.reusable_interface.cards.RowOfCards
@@ -176,33 +177,38 @@ fun MakeCatalogScreen(
             context,
             lazyListState
         )
-        LazyColumn(
-            state = lazyListState,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            productsList?.let {
-                items(it.size, key = { index -> it[index]?.id ?: index }) { index ->
-                    when (screenConfig) {
-                        ScreenConfig.SINGLE -> {
-                            MakeProductCard2(
-                                navController = navController,
-                                productsList[index]
-                            )
-                        }
-                        ScreenConfig.ROW -> Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            if (index % 2 == 0) {
-                                val product1 = it[index]
-                                val product2 = if (index + 1 < it.size) it[index + 1] else null
-                                RowOfCards(
-                                    navController,
-                                    product1 = product1,
-                                    product2 = product2
+        if(productsList?.isEmpty() == true){
+            MakeEmptyListScreen(type = "Товаров")
+        }else {
+            LazyColumn(
+                state = lazyListState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                productsList?.let {
+                    items(it.size, key = { index -> it[index]?.id ?: index }) { index ->
+                        when (screenConfig) {
+                            ScreenConfig.SINGLE -> {
+                                MakeProductCard2(
+                                    navController = navController,
+                                    productsList[index]
                                 )
+                            }
+
+                            ScreenConfig.ROW -> Row(
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                if (index % 2 == 0) {
+                                    val product1 = it[index]
+                                    val product2 = if (index + 1 < it.size) it[index + 1] else null
+                                    RowOfCards(
+                                        navController,
+                                        product1 = product1,
+                                        product2 = product2
+                                    )
+                                }
                             }
                         }
                     }

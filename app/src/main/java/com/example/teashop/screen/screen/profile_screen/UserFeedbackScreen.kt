@@ -42,6 +42,7 @@ import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.navigation.Navigation
+import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeFeedbackCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -59,100 +60,106 @@ fun LaunchUserFeedbackScreen(navController: NavController){
 @Composable
 fun MakeUserFeedbackScreen(navController: NavController){
 
-    val feedbackList = DataSource().loadFeedback().toMutableStateList()
+    val feedbackList = DataSource().loadFeedback().toMutableList()
     val product = DataSource().loadShortProducts()[0]
 
-    LazyColumn {
-        item{
-            MakeTopCard(
-                drawableId = R.drawable.back_arrow,
-                text = "Мои отзывы",
-                navController = navController
-            )
-        }
-        items(feedbackList.size){feedback ->
-            Column(
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        MakeTopCard(
+            drawableId = R.drawable.back_arrow,
+            text = "Мои отзывы",
+            navController = navController
+        )
+        if(feedbackList.isEmpty()){
+            MakeEmptyListScreen(type = "Отзывов")
+        }else {
+            LazyColumn {
+                items(feedbackList.size) { feedback ->
+                    Column(
 
-            ){
-                Card(
-                    modifier = Modifier
-                        .padding(bottom = 2.dp)
-                        .fillMaxWidth()
-                        .height(35.dp),
-                    colors = CardDefaults.cardColors(containerColor = White10)
-                ){
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 5.dp, horizontal = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Row(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .padding(bottom = 2.dp)
+                                .fillMaxWidth()
+                                .height(35.dp),
+                            colors = CardDefaults.cardColors(containerColor = White10)
                         ) {
-                            product?.let {
-                                Image(
-                                    painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
-                                    contentDescription = null,
-                                    modifier = Modifier.padding(end = 10.dp)
-                                )
-                                Text(
-                                    text = product.title,
-                                    fontFamily = montserratFamily,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.W400,
-                                    color = Black10
-                                )
-                            }
-                        }
-                        Box {
-                            var expanded by remember{
-                                mutableStateOf(false)
-                            }
-                            Icon(
-                                painter = painterResource(R.drawable.dropdown_icon),
-                                contentDescription = null,
-                                tint = Black10,
-                                modifier = Modifier.clickable(
-                                    onClick = {
-                                        expanded = true
-                                    }
-                                )
-                            )
-                            DropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false },
+                            Row(
                                 modifier = Modifier
-                                    .background(Grey20)
+                                    .fillMaxSize()
+                                    .padding(vertical = 5.dp, horizontal = 10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = "Удалить",
-                                            fontFamily = montserratFamily,
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.W200,
-                                            color = Black10,
-                                            modifier = Modifier.padding(start = 5.dp)
+                                Row(
+                                    modifier = Modifier.fillMaxHeight(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    product?.let {
+                                        Image(
+                                            painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 10.dp)
                                         )
-                                    },
-                                    onClick = {
-                                        expanded = false
-                                        feedbackList.removeAt(feedback)
-                                    },
-                                    contentPadding = PaddingValues(2.dp),
-                                    modifier = Modifier
-                                        .height(25.dp)
-                                        .width(70.dp)
-                                        .background(Grey20)
-                                )
+                                        Text(
+                                            text = product.title,
+                                            fontFamily = montserratFamily,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.W400,
+                                            color = Black10
+                                        )
+                                    }
+                                }
+                                Box {
+                                    var expanded by remember {
+                                        mutableStateOf(false)
+                                    }
+                                    Icon(
+                                        painter = painterResource(R.drawable.dropdown_icon),
+                                        contentDescription = null,
+                                        tint = Black10,
+                                        modifier = Modifier.clickable(
+                                            onClick = {
+                                                expanded = true
+                                            }
+                                        )
+                                    )
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false },
+                                        modifier = Modifier
+                                            .background(Grey20)
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = "Удалить",
+                                                    fontFamily = montserratFamily,
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.W200,
+                                                    color = Black10,
+                                                    modifier = Modifier.padding(start = 5.dp)
+                                                )
+                                            },
+                                            onClick = {
+                                                expanded = false
+                                                feedbackList.removeAt(feedback)
+                                            },
+                                            contentPadding = PaddingValues(2.dp),
+                                            modifier = Modifier
+                                                .height(25.dp)
+                                                .width(70.dp)
+                                                .background(Grey20)
+                                        )
+                                    }
+                                }
                             }
                         }
+                        MakeFeedbackCard(review = feedbackList[feedback])
                     }
                 }
-                MakeFeedbackCard(review = feedbackList[feedback])
             }
         }
     }
