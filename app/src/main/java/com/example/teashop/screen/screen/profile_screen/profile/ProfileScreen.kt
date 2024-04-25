@@ -43,6 +43,7 @@ import com.example.teashop.R
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.logic.bonusDeclension
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
 import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
@@ -176,7 +177,7 @@ fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: To
                             )
                             Text(
                                 text = user?.teaBonuses?.let {
-                                    "$it Бонусов"
+                                    "$it" + bonusDeclension(it)
                                 } ?: "0 Бонусов",
                                 fontFamily = montserratFamily,
                                 fontSize = 20.sp,

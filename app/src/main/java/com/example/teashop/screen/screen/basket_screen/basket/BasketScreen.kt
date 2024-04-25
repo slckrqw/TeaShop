@@ -48,6 +48,7 @@ import com.example.teashop.data.model.bucket.Bucket
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.logic.bonusDeclension
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
@@ -212,7 +213,8 @@ fun MakeBasketScreen(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                         Text(
-                                            text = "+ ${currentItem.plusTeaBonuses} бонусов",
+                                            text = "+ ${currentItem.plusTeaBonuses}" +
+                                                    bonusDeclension(currentItem.plusTeaBonuses),
                                             fontFamily = montserratFamily,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.W400,

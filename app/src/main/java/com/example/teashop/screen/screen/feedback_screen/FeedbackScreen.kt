@@ -46,6 +46,7 @@ import com.example.teashop.data.model.pagination.review.ReviewSorter
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.logic.reviewDeclension
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
 import com.example.teashop.reusable_interface.MakeEmptyListScreen
@@ -209,13 +210,16 @@ fun MakeFeedbackScreen(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.W500
                         )
-                        Text(
-                            text = "${reviewList.size} отзывов",
-                            fontFamily = montserratFamily,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.W300,
-                            modifier = Modifier.padding(start = 15.dp)
-                        )
+                        product?.let{
+                            Text(
+                                text = "${reviewList.size}" +
+                                        reviewDeclension(reviewList.size),
+                                fontFamily = montserratFamily,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.W300,
+                                modifier = Modifier.padding(start = 15.dp)
+                            )
+                        }
                     }
                 }
             }

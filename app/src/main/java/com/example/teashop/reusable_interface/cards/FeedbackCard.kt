@@ -1,6 +1,7 @@
 package com.example.teashop.reusable_interface.cards
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -22,10 +24,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.review.Review
+import com.example.teashop.ui.theme.Grey10
+import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun MakeFeedbackCard(review: Review){
@@ -37,15 +42,31 @@ fun MakeFeedbackCard(review: Review){
             .fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(start = 10.dp)
+            modifier = Modifier.padding(10.dp)
         ) {
-            review.userName?.let {
-                Text(
-                    text = it,
-                    fontFamily = montserratFamily,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.W400,
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                review.userName?.let {
+                    Text(
+                        text = it,
+                        fontFamily = montserratFamily,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.W400,
+                    )
+                }
+                review.createdTime?.let {
+                    Text(
+                        text = it.format(DateTimeFormatter.ISO_OFFSET_DATE),
+                        fontFamily = montserratFamily,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.W400,
+                        color = Grey10
+                    )
+                }
             }
             Row(
                 modifier = Modifier.padding(bottom = 5.dp)
@@ -93,7 +114,6 @@ fun MakeFeedbackCard(review: Review){
                             contentScale = ContentScale.Inside,
                             contentDescription = null,
                             modifier = Modifier
-                                .padding(end = 10.dp, bottom = 5.dp)
                                 .size(100.dp)
                         )
                     }

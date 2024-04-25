@@ -60,6 +60,7 @@ import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.logic.reviewDeclension
 import com.example.teashop.navigation.Screen
 import com.example.teashop.screen.screen.product_screen.ProductViewModel
 import com.example.teashop.ui.theme.Black10
@@ -214,7 +215,8 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = "${product.countOfReviews} отзывов",
+                        text = "${product.countOfReviews}" +
+                                reviewDeclension(product.countOfReviews),
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.W300,
@@ -511,7 +513,8 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                             fontWeight = FontWeight.W500
                         )
                         Text(
-                            text = "${product.countOfReviews} отзывов",
+                            text = "${product.countOfReviews}" +
+                                    reviewDeclension(product.countOfReviews),
                             fontFamily = montserratFamily,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.W300,

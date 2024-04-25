@@ -59,6 +59,7 @@ import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.logic.reviewDeclension
 import com.example.teashop.navigation.Navigation
 import com.example.teashop.navigation.Screen
 import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
@@ -490,7 +491,8 @@ fun MakeProductScreen(
                             modifier = Modifier.padding(start = 5.dp)
                         )
                         Text(
-                            text = "${product.countOfReviews} отзывов",
+                            text = "${product.countOfReviews}"+
+                                    reviewDeclension(product.countOfReviews),
                             fontFamily = montserratFamily,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.W300,
