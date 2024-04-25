@@ -25,7 +25,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.ui.theme.Grey10
-import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
