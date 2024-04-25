@@ -140,22 +140,24 @@ fun LaunchCatalogScreen(
         )
     }
 
-    Navigation(navController = navController) {
-        MakeCatalogScreen(
-            productsList = productView,
-            navController = navController,
-            topName = topName,
-            filterParams = filterParams,
-            sorterParams = sorterParams,
-            viewModel = viewModel,
-            context = context
-        )
+    productView?.let { products ->
+        Navigation(navController = navController) {
+            MakeCatalogScreen(
+                productsList = products,
+                navController = navController,
+                topName = topName,
+                filterParams = filterParams,
+                sorterParams = sorterParams,
+                viewModel = viewModel,
+                context = context
+            )
+        }
     }
 }
 
 @Composable
 fun MakeCatalogScreen(
-    productsList: List<ProductShort?>?,
+    productsList: List<ProductShort?>,
     navController: NavController,
     topName: String?,
     filterParams: ProductFilter,
@@ -177,7 +179,7 @@ fun MakeCatalogScreen(
             context,
             lazyListState
         )
-        if(productsList?.isEmpty() == true){
+        if(productsList.isEmpty()){
             MakeEmptyListScreen(type = "Товаров")
         }else {
             LazyColumn(
@@ -185,7 +187,7 @@ fun MakeCatalogScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                productsList?.let {
+                productsList.let {
                     items(it.size, key = { index -> it[index]?.id ?: index }) { index ->
                         when (screenConfig) {
                             ScreenConfig.SINGLE -> {
@@ -194,7 +196,6 @@ fun MakeCatalogScreen(
                                     productsList[index]
                                 )
                             }
-
                             ScreenConfig.ROW -> Row(
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 verticalAlignment = Alignment.CenterVertically,

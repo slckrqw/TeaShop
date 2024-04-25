@@ -11,6 +11,6 @@ data class Bucket(
     val totalSumWithDiscount: Double,
     val totalDiscount: Double,
     val plusTeaBonuses: Int,
-    val product: List<PackageBucket>?,
+    val products: MutableList<PackageBucket>?,
     val modifiedDate: ZonedDateTime
 ): Parcelable

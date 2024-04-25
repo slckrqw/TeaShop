@@ -81,8 +81,10 @@ fun LaunchProfileScreen(navController: NavController){
         )
     }
 
-    Navigation(navController = navController){
-        MakeProfileScreen(userView, viewModel, tokenStorage, context, navController)
+    userView?.let {
+        Navigation(navController = navController){
+            MakeProfileScreen(userView, viewModel, tokenStorage, context, navController)
+        }
     }
 }
 
@@ -90,7 +92,9 @@ var orderCount = ""
 
 @Composable
 fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: TokenStorage, context: Context, navController: NavController){
-    orderCount = user?.ordersCount.toString()
+    user?.ordersCount?.let {
+        orderCount = it.toString()
+    }
     var bonusInfo by remember {
         mutableStateOf(false)
     }
@@ -132,7 +136,9 @@ fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: To
                         modifier = Modifier.size(40.dp)
                     )
                     Text(
-                        text = "Привет, " + (user?.name ?: ""),
+                        text = user?.name?.let {
+                            "Привет, $it"
+                        } ?: "Привет",
                         fontFamily = montserratFamily,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.W500,
@@ -169,7 +175,9 @@ fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: To
                                 color = Black10
                             )
                             Text(
-                                text = user?.teaBonuses.toString() + " Бонусов",
+                                text = user?.teaBonuses?.let {
+                                    "$it Бонусов"
+                                } ?: "0 Бонусов",
                                 fontFamily = montserratFamily,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.W500,
@@ -213,7 +221,9 @@ fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: To
         ProfileCard(
             icon = R.drawable.feedback_icon,
             title = "Мои отзывы",
-            onClick = {navController.navigate(Screen.UserFeedback.route)}
+            onClick = {
+                navController.navigate(Screen.UserFeedback.route)
+            }
         )
         ProfileCard(icon = R.drawable.info_profile_icon, title = "О приложении")
         ProfileCard(

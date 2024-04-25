@@ -1,5 +1,6 @@
 package com.example.teashop.screen.screen.feedback_screen
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -40,11 +40,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.enums.SortingType
-import com.example.teashop.data.model.DataSource
-import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.pagination.review.ReviewFilter
 import com.example.teashop.data.model.pagination.review.ReviewPagingRequest
 import com.example.teashop.data.model.pagination.review.ReviewSorter
+import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.Navigation
@@ -63,23 +62,25 @@ var sorting = SortingType.NEW //TODO add review sort
 @Composable
 fun LaunchFeedbackScreen(
     navController: NavController,
-    productId: Long?,
+    product: ProductFull?,
     viewModel: FeedbackViewModel = viewModel(),
     reviewSorter: ReviewSorter = ReviewSorter(),
-    reviewFilter: ReviewFilter = ReviewFilter()
+    reviewFilter: ReviewFilter = ReviewFilter(),
 ){
     val reviewView by viewModel.review.observeAsState()
     val context = LocalContext.current
     val tokenStorage = remember {
         TokenStorage()
     }
-    productId?.let {
+    product?.id?.let {
         reviewFilter.productId = it
     }
+    var existsReview by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        val token = tokenStorage.getToken(context)
         viewModel.getAllReviewByProduct(
-            tokenStorage.getToken(context),
+            token,
             ReviewPagingRequest(
                 filter = reviewFilter,
                 sorter = reviewSorter
@@ -88,18 +89,45 @@ fun LaunchFeedbackScreen(
                 Toast.makeText(context, "Получение списка отзывов временно недоступно", Toast.LENGTH_SHORT).show()
             }
         )
+
+        if (token.isNullOrEmpty()) {
+            existsReview = true
+        } else {
+            reviewFilter.productId?.let {
+                viewModel.existsReview(
+                    token,
+                    it,
+                    onSuccess = {
+                        existsReview = true
+                    }
+                )
+            }
+        }
     }
 
-
-    Navigation(navController = navController) {
-        MakeFeedbackScreen(
-            navController,
-            reviewView
-        )
+    reviewView?.let { reviews ->
+        Navigation(navController = navController) {
+            MakeFeedbackScreen(
+                navController,
+                reviews,
+                product,
+                existsReview,
+                tokenStorage,
+                context,
+            )
+        }
     }
 }
+
 @Composable
-fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?){
+fun MakeFeedbackScreen(
+    navController: NavController,
+    reviewList: List<Review?>,
+    product: ProductFull?,
+    existsReview: Boolean,
+    tokenStorage: TokenStorage,
+    context: Context
+){
     var sortingText by remember {
         mutableStateOf("Новые")
     }
@@ -107,7 +135,7 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?)
     var expandedChange by remember{mutableStateOf(false)}
     var reviewListSum = 0.0
     var averageRate = 0.0
-    reviewList?.let {
+    reviewList.let {
         if (reviewList.isNotEmpty()) {
             reviewList.forEach {
                 reviewListSum += it?.stars ?: 0
@@ -127,26 +155,28 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?)
                 text = "Отзывы",
                 navController = navController
             )
-            Icon(
-                painter = painterResource(R.drawable.plus_icon),
-                modifier = Modifier
-                    .padding(bottom = 10.dp, end = 10.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .clickable(
-                        onClick = {
-                            navController.currentBackStackEntry?.savedStateHandle?.set(
-                                "product",
-                                DataSource().loadFullProducts()[0]
-                            )
-                            navController.navigate(Screen.NewFeedback.route)
-                        }
-                    )
-                    .size(20.dp),
-                tint = White10,
-                contentDescription = null
-            )
+            if (!existsReview) {
+                Icon(
+                    painter = painterResource(R.drawable.plus_icon),
+                    modifier = Modifier
+                        .padding(bottom = 10.dp, end = 10.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable(
+                            onClick = {
+                                navController.currentBackStackEntry?.savedStateHandle?.set(
+                                    "product",
+                                    product
+                                )
+                                navController.navigate(Screen.NewFeedback.route)
+                            }
+                        )
+                        .size(20.dp),
+                    tint = White10,
+                    contentDescription = null
+                )
+            }
         }
-        if(reviewList?.isEmpty() == true){
+        if(reviewList.isEmpty()){
             MakeEmptyListScreen(type = "Отзывов")
         }else {
             Card(
@@ -180,7 +210,7 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?)
                             fontWeight = FontWeight.W500
                         )
                         Text(
-                            text = "${reviewList?.size} отзывов",
+                            text = "${reviewList.size} отзывов",
                             fontFamily = montserratFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.W300,
@@ -216,9 +246,9 @@ fun MakeFeedbackScreen(navController: NavController, reviewList: List<Review?>?)
                 }
             }
             LazyColumn {
-                reviewList?.let {
-                    items(reviewList.size, { reviewList[it]!!.id }) { review ->
-                        reviewList[review]?.let { MakeFeedbackCard(it) }
+                reviewList.let {
+                    items(it.size, {  index -> it[index]?.id ?: index }) { review ->
+                        reviewList[review]?.let { item -> MakeFeedbackCard(item) }
                     }
                 }
             }

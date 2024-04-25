@@ -55,7 +55,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
-import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
@@ -96,8 +95,10 @@ fun LaunchProductScreen(
         }
     }
 
-    Navigation(navController = navController) {
-        MakeProductScreen(productView, navController, viewModel, isFavorite)
+    productView?.let { product ->
+        Navigation(navController = navController) {
+            MakeProductScreen(product, navController, viewModel, isFavorite)
+        }
     }
 }
 
@@ -120,7 +121,7 @@ private fun Modifier.clickableWithoutRipple(
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun MakeProductScreen(
-    product: ProductFull?,
+    product: ProductFull,
     navController: NavController,
     productViewModel: ProductViewModel,
     isFavorite: Boolean?
@@ -128,8 +129,7 @@ fun MakeProductScreen(
     val heartColor: Color
     val heartIcon: Int
     var productWeight by remember {
-        mutableStateOf(if ((product?.packages?.get(0)?.variant?.title
-                ?: VariantType.FIFTY_GRAMS) == VariantType.PACK
+        mutableStateOf(if ((product.packages[0].variant.title) == VariantType.PACK
         ) {
             VariantType.PACK
         } else {
@@ -137,8 +137,7 @@ fun MakeProductScreen(
         })
     }
     if (productWeight == VariantType.FIFTY_GRAMS) {
-        if ((product?.packages?.get(0)?.variant?.title
-                ?: VariantType.FIFTY_GRAMS) == VariantType.PACK) {
+        if ((product.packages[0].variant.title) == VariantType.PACK) {
             productWeight = VariantType.PACK
         }
     }
@@ -170,389 +169,393 @@ fun MakeProductScreen(
         }
     }
 
-    if(product != null) {
-        LazyColumn(modifier = Modifier.fillMaxHeight()) {
-            item {
-                Card(
-                    shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp),
-                    colors = CardDefaults.cardColors(containerColor = White10),
-                    modifier = Modifier.padding(bottom = 5.dp)
-                ) {
-                    Column {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(360.dp)
-                        ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
-                                contentScale = ContentScale.FillBounds,
-                                modifier = Modifier.fillMaxSize(),
-                                contentDescription = null
-                            )
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.back_arrow),
-                                    tint = Green10,
-                                    modifier = Modifier
-                                        .clickableWithoutRipple(
-                                            interactionSource = MutableInteractionSource(),
-                                            onClick = { navController.popBackStack() }
-                                        )
-                                        .padding(start = 10.dp, top = 10.dp)
-                                        .size(25.dp),
-                                    contentDescription = null
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .clickableWithoutRipple(
-                                            interactionSource = MutableInteractionSource(),
-                                            onClick = {
-                                                val token = tokenStorage.getToken(context)
-                                                if (token == null) {
-                                                    makeToast(
-                                                        context,
-                                                        "Для действия необходимо авторизироваться"
-                                                    )
-                                                    navController.navigate(Screen.Log.route)
-                                                    return@clickableWithoutRipple
-                                                }
-
-                                                productViewModel.setFavorite(
-                                                    token,
-                                                    product.id,
-                                                    onSuccess = {
-                                                        makeToast(context, it)
-                                                        favorite = !favorite!!
-                                                    },
-                                                    onError = {
-                                                        makeToast(context, "Упс, что-то пошло не так")
-                                                    }
-                                                )
-                                            }
-                                        )
-                                        .padding(end = 10.dp, top = 10.dp)
-                                        .size(30.dp),
-                                    ) {
-                                    Icon(
-                                        painter = painterResource(heartIcon),
-                                        tint = heartColor,
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        }
-                        Text(
-                            text = "Артикул: ${product.article}",
-                            fontFamily = montserratFamily,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.W200,
-                            color = Black10,
-                            modifier = Modifier.padding(start = 5.dp)
-                        )
-                        Text(
-                            text = product.title,
-                            fontFamily = montserratFamily,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.W500,
-                            color = Black10,
-                            modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+    LazyColumn(modifier = Modifier.fillMaxHeight()) {
+        item {
+            Card(
+                shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp),
+                colors = CardDefaults.cardColors(containerColor = White10),
+                modifier = Modifier.padding(bottom = 5.dp)
+            ) {
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(360.dp)
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.fillMaxSize(),
+                            contentDescription = null
                         )
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(start = 5.dp, bottom = 10.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Text(
-                                    text = "${
-                                        BigDecimal(
-                                        product.packages
-                                            .first { it.variant.title == productWeight ||
-                                                    it.variant.title == VariantType.PACK }
-                                            .price*(1-product.discount.toDouble()/100)
-                                    ).setScale(2, RoundingMode.HALF_UP)} ₽",
-                                    fontFamily = montserratFamily,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.W700
-                                )
-                                Text(
-                                    text = "${product
-                                        .packages
-                                        .first { it.variant.title == productWeight ||
-                                                it.variant.title == VariantType.PACK}
-                                        .price} ₽",
-                                    fontFamily = montserratFamily,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.W300,
-                                    style = TextStyle(textDecoration = TextDecoration.LineThrough),
-                                    modifier = Modifier.padding(start = 10.dp)
-                                )
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(end = 10.dp)
-                            ) {
-                                Button(
-                                    onClick = { expanded = true },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Grey20),
-                                    modifier = Modifier
-                                        .width(100.dp)
-                                        .height(30.dp),
-                                    contentPadding = PaddingValues(0.dp),
-                                    shape = RoundedCornerShape(
-                                        topStart = 5.dp,
-                                        bottomStart = 5.dp
-                                    )
-                                ) {
-                                    Box(
-                                        contentAlignment = Alignment.CenterStart,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        Text(
-                                            text = productWeight.value,
-                                            fontFamily = montserratFamily,
-                                            fontSize = 15.sp,
-                                            fontWeight = FontWeight.W200,
-                                            color = Black10,
-                                            modifier = Modifier.padding(start = 5.dp)
-                                        )
-                                        DropdownMenu(
-                                            expanded = expanded,
-                                            onDismissRequest = { expanded = false },
-                                            modifier = Modifier.background(Grey20)
-                                        ) {
-                                            product.packages.forEach { it ->
-                                                DropdownItem(
-                                                    teaWeight = it.variant.title,
-                                                    expandedChange = { expanded = it },
-                                                    weightChange = { productWeight = it }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                Button(
-                                    onClick = {
-                                        val token = tokenStorage.getToken(context)
-                                        if (token == null) {
-                                            makeToast(
-                                                context,
-                                                "Для действия необходимо авторизироваться"
-                                            )
-                                            navController.navigate(Screen.Log.route)
-                                            return@Button
-                                        }
-
-                                        val productToBucket = ProductToBucket(
-                                            product.packages.first { it.variant.title == productWeight }.id,
-                                            1
-                                        )
-
-                                        productViewModel.addProductToBucket(
-                                            token,
-                                            productToBucket,
-                                            onSuccess = {
-                                                makeToast(
-                                                    context,
-                                                    "Товар добавлен в корзину!"
-                                                )
-                                            },
-                                            onError = {
-                                                makeToast(
-                                                    context,
-                                                    "Упс, что-то пошло не так"
-                                                )
-                                            }
-                                        )
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Green10),
-                                    contentPadding = PaddingValues(0.dp),
-                                    modifier = Modifier
-                                        .height(30.dp)
-                                        .width(100.dp),
-                                    shape = RoundedCornerShape(
-                                        topEnd = 5.dp,
-                                        bottomEnd = 5.dp
-                                    )
-                                ) {
-                                    Text(
-                                        text = "В корзину",
-                                        fontFamily = montserratFamily,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = White10
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            item {
-                Card(
-                    shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = White10),
-                    modifier = Modifier
-                        .padding(bottom = 5.dp)
-                        .height(50.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(start = 5.dp)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.bonus_collect),
-                                modifier = Modifier.size(25.dp),
+                                painter = painterResource(R.drawable.back_arrow),
                                 tint = Green10,
-                                contentDescription = null
-                            )
-                            Text(
-                                text = "+ ${BigDecimal(
-                                    product.packages
-                                        .first{it.variant.title == productWeight}
-                                        .price*0.05
-                                ).setScale(0,RoundingMode.HALF_UP)} бонусных рублей",
-                                fontFamily = montserratFamily,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.W500,
-                                modifier = Modifier.padding(start = 5.dp)
-                            )
-                        }
-                        Icon(
-                            painter = painterResource(R.drawable.info_icon),
-                            tint = Green10,
-                            modifier = Modifier
-                                .padding(end = 15.dp)
-                                .size(25.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable(
-                                    onClick = {
-                                        bonusInfo = true
-                                    }
-                                ),
-                            contentDescription = null
-                        )
-                    }
-                }
-            }
-
-            item {
-                Card(
-                    shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = White10),
-                    modifier = Modifier
-                        .padding(bottom = 5.dp)
-                        .fillMaxWidth()
-                        .height(50.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.star),
-                                tint = Yellow10,
                                 modifier = Modifier
-                                    .padding(start = 5.dp)
+                                    .clickableWithoutRipple(
+                                        interactionSource = MutableInteractionSource(),
+                                        onClick = { navController.popBackStack() }
+                                    )
+                                    .padding(start = 10.dp, top = 10.dp)
                                     .size(25.dp),
                                 contentDescription = null
                             )
-                            Text(
-                                text = "${product.averageRating}",
-                                fontFamily = montserratFamily,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.W500,
-                                modifier = Modifier.padding(start = 5.dp)
-                            )
-                            Text(
-                                text = "${product.countOfReviews} отзывов",
-                                fontFamily = montserratFamily,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.W300,
-                                modifier = Modifier.padding(start = 10.dp)
-                            )
-                        }
+                            Box(
+                                modifier = Modifier
+                                    .clickableWithoutRipple(
+                                        interactionSource = MutableInteractionSource(),
+                                        onClick = {
+                                            val token = tokenStorage.getToken(context)
+                                            if (token == null) {
+                                                makeToast(
+                                                    context,
+                                                    "Для действия необходимо авторизироваться"
+                                                )
+                                                navController.navigate(Screen.Log.route)
+                                                return@clickableWithoutRipple
+                                            }
 
-                        Button(
-                            onClick = {
-                                navController.currentBackStackEntry?.savedStateHandle?.set("productId", product.id)
-                                navController.navigate(Screen.Feedback.route)
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Green10),
-                            contentPadding = PaddingValues(0.dp),
-                            shape = RoundedCornerShape(5.dp),
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .width(170.dp)
-                                .height(25.dp)
+                                            productViewModel.setFavorite(
+                                                token,
+                                                product.id,
+                                                onSuccess = {
+                                                    makeToast(context, it)
+                                                    favorite = !favorite!!
+                                                },
+                                                onError = {
+                                                    makeToast(context, "Упс, что-то пошло не так")
+                                                }
+                                            )
+                                        }
+                                    )
+                                    .padding(end = 10.dp, top = 10.dp)
+                                    .size(30.dp),
+                                ) {
+                                Icon(
+                                    painter = painterResource(heartIcon),
+                                    tint = heartColor,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        text = "Артикул: ${product.article}",
+                        fontFamily = montserratFamily,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.W200,
+                        color = Black10,
+                        modifier = Modifier.padding(start = 5.dp)
+                    )
+                    Text(
+                        text = product.title,
+                        fontFamily = montserratFamily,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.W500,
+                        color = Black10,
+                        modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(start = 5.dp, bottom = 10.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
                         ) {
                             Text(
-                                text = "Перейти к отзывам",
+                                text = "${
+                                    BigDecimal(
+                                    product.packages
+                                        .first { it.variant.title == productWeight ||
+                                                it.variant.title == VariantType.PACK }
+                                        .price*(1-product.discount.toDouble()/100)
+                                ).setScale(2, RoundingMode.HALF_UP)} ₽",
                                 fontFamily = montserratFamily,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.W500,
-                                color = White10
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.W700,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
+                            Text(
+                                text = "${product
+                                    .packages
+                                    .first { it.variant.title == productWeight ||
+                                            it.variant.title == VariantType.PACK}
+                                    .price} ₽",
+                                fontFamily = montserratFamily,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.W300,
+                                style = TextStyle(textDecoration = TextDecoration.LineThrough),
+                                modifier = Modifier.padding(start = 10.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(end = 10.dp)
+                        ) {
+                            Button(
+                                onClick = { expanded = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = Grey20),
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(30.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(
+                                    topStart = 5.dp,
+                                    bottomStart = 5.dp
+                                )
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.CenterStart,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Text(
+                                        text = productWeight.value,
+                                        fontFamily = montserratFamily,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.W200,
+                                        color = Black10,
+                                        modifier = Modifier.padding(start = 5.dp)
+                                    )
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false },
+                                        modifier = Modifier.background(Grey20)
+                                    ) {
+                                        product.packages.forEach { it ->
+                                            DropdownItem(
+                                                teaWeight = it.variant.title,
+                                                expandedChange = { expanded = it },
+                                                weightChange = { productWeight = it }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Button(
+                                onClick = {
+                                    val token = tokenStorage.getToken(context)
+                                    if (token == null) {
+                                        makeToast(
+                                            context,
+                                            "Для действия необходимо авторизироваться"
+                                        )
+                                        navController.navigate(Screen.Log.route)
+                                        return@Button
+                                    }
+
+                                    val productToBucket = ProductToBucket(
+                                        product.packages.first { it.variant.title == productWeight }.id,
+                                        1
+                                    )
+
+                                    productViewModel.addProductToBucket(
+                                        token,
+                                        productToBucket,
+                                        onSuccess = {
+                                            makeToast(
+                                                context,
+                                                "Товар добавлен в корзину!"
+                                            )
+                                        },
+                                        onError = {
+                                            makeToast(
+                                                context,
+                                                "Упс, что-то пошло не так"
+                                            )
+                                        }
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Green10),
+                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier
+                                    .height(30.dp)
+                                    .width(100.dp),
+                                shape = RoundedCornerShape(
+                                    topEnd = 5.dp,
+                                    bottomEnd = 5.dp
+                                )
+                            ) {
+                                Text(
+                                    text = "В корзину",
+                                    fontFamily = montserratFamily,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = White10,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
             }
+        }
 
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 5.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = White10)
+        item {
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                colors = CardDefaults.cardColors(containerColor = White10),
+                modifier = Modifier
+                    .padding(bottom = 5.dp)
+                    .height(50.dp)
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Описание",
-                        fontFamily = montserratFamily,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.W500,
-                        modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
-                    )
-                    Text(
-                        text = product.description,
-                        fontFamily = montserratFamily,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.W400,
-                        modifier = Modifier.padding(
-                            start = 10.dp,
-                            bottom = 5.dp,
-                            end = 10.dp
-                        ),
-                        lineHeight = 13.sp
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 5.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.bonus_collect),
+                            modifier = Modifier.size(25.dp),
+                            tint = Green10,
+                            contentDescription = null
+                        )
+                        Text(
+                            text = "+ ${BigDecimal(
+                                product.packages
+                                    .first{it.variant.title == productWeight}
+                                    .price*0.05
+                            ).setScale(0,RoundingMode.HALF_UP)} бонусных рублей",
+                            fontFamily = montserratFamily,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.W500,
+                            modifier = Modifier.padding(start = 5.dp)
+                        )
+                    }
+                    Icon(
+                        painter = painterResource(R.drawable.info_icon),
+                        tint = Green10,
+                        modifier = Modifier
+                            .padding(end = 15.dp)
+                            .size(25.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(
+                                onClick = {
+                                    bonusInfo = true
+                                }
+                            ),
+                        contentDescription = null
                     )
                 }
             }
         }
-        if(bonusInfo){
-            BottomSheetBonuses(header = "Что такое бонусы?", textId = R.string.BonusInfo) {
-                bonusInfo = it
+
+        item {
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                colors = CardDefaults.cardColors(containerColor = White10),
+                modifier = Modifier
+                    .padding(bottom = 5.dp)
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(R.drawable.star),
+                            tint = Yellow10,
+                            modifier = Modifier
+                                .padding(start = 5.dp)
+                                .size(25.dp),
+                            contentDescription = null
+                        )
+                        Text(
+                            text = "${product.averageRating}",
+                            fontFamily = montserratFamily,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.W500,
+                            modifier = Modifier.padding(start = 5.dp)
+                        )
+                        Text(
+                            text = "${product.countOfReviews} отзывов",
+                            fontFamily = montserratFamily,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.W300,
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            navController.currentBackStackEntry?.savedStateHandle?.set("product", product)
+                            navController.navigate(Screen.Feedback.route)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Green10),
+                        contentPadding = PaddingValues(0.dp),
+                        shape = RoundedCornerShape(5.dp),
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .width(170.dp)
+                            .height(25.dp)
+                    ) {
+                        Text(
+                            text = "Перейти к отзывам",
+                            fontFamily = montserratFamily,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.W500,
+                            color = White10
+                        )
+                    }
+                }
             }
+        }
+
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 5.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = CardDefaults.cardColors(containerColor = White10)
+            ) {
+                Text(
+                    text = "Описание",
+                    fontFamily = montserratFamily,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.W500,
+                    modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
+                )
+                Text(
+                    text = product.description,
+                    fontFamily = montserratFamily,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.W400,
+                    modifier = Modifier.padding(
+                        start = 10.dp,
+                        bottom = 5.dp,
+                        end = 10.dp
+                    ),
+                    lineHeight = 13.sp
+                )
+            }
+        }
+    }
+    if(bonusInfo){
+        BottomSheetBonuses(header = "Что такое бонусы?", textId = R.string.BonusInfo) {
+            bonusInfo = it
         }
     }
 }

@@ -16,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.order.Order
-import com.example.teashop.screen.screen.basket_screen.LaunchBasketScreen
+import com.example.teashop.screen.screen.basket_screen.basket.LaunchBasketScreen
 import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
 import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
@@ -32,10 +32,10 @@ import com.example.teashop.screen.screen.profile_screen.sign_in.LaunchRegScreen
 import com.example.teashop.screen.screen.catalog_screen.LaunchCatalogScreen
 import com.example.teashop.navigation.Screen
 import com.example.teashop.screen.screen.basket_screen.LaunchAddressChangeScreen
-import com.example.teashop.screen.screen.profile_screen.LaunchOrderDescriptionScreen
-import com.example.teashop.screen.screen.profile_screen.LaunchOrdersScreen
+import com.example.teashop.screen.screen.profile_screen.order.LaunchOrderDescriptionScreen
+import com.example.teashop.screen.screen.profile_screen.order.LaunchOrdersScreen
 import com.example.teashop.screen.screen.profile_screen.user_data.LaunchUserDataScreen
-import com.example.teashop.screen.screen.profile_screen.LaunchUserFeedbackScreen
+import com.example.teashop.screen.screen.profile_screen.feedback.LaunchUserFeedbackScreen
 import com.example.teashop.screen.screen.search_screen.LaunchSearchScreen
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
@@ -107,8 +107,8 @@ fun TeaShopApp(){
         }
 
         composable(Screen.Feedback.route){
-            val productId: Long? = navController.previousBackStackEntry?.savedStateHandle?.get("productId")
-            LaunchFeedbackScreen(navController = navController, productId = productId)
+            val product: ProductFull? = navController.previousBackStackEntry?.savedStateHandle?.get("product")
+            LaunchFeedbackScreen(navController = navController, product = product)
         }
 
         composable(Screen.NewFeedback.route){

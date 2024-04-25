@@ -1,4 +1,4 @@
-package com.example.teashop.screen.screen.profile_screen
+package com.example.teashop.screen.screen.profile_screen.order
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -19,8 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,7 +73,7 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order?){
                             fontWeight = FontWeight.W600,
                             color = Black10
                         )
-                        OrderStatusText(order = order, fontSize = 15)
+                        //OrderStatusText(order = order, fontSize = 15) TODO FIX
                         Text(
                             text = "Трек-номер: ${order.trackNumber}",
                             fontSize = 14.sp,

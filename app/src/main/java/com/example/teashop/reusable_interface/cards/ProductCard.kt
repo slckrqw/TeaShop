@@ -45,7 +45,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -55,11 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.navOptions
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
-import com.example.teashop.data.model.packages.PackageShort
-import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
@@ -76,8 +72,6 @@ import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.time.Duration
-import javax.sql.DataSource
 
 @SuppressLint("UnnecessaryComposedModifier")
 private fun Modifier.clickableWithoutRipple(

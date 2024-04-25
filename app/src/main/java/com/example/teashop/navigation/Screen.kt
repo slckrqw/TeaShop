@@ -27,7 +27,7 @@ open class Screen (val route: String){
 
     object Orders: Screen ("orders_screen")
 
-    object OrderDescription: Screen("description_screen/{order}")
+    object OrderDescription: Screen("description_screen/{orderId}")
 
     object UserData: Screen("userData_screen")
 

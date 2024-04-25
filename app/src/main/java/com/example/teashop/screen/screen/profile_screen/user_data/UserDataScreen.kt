@@ -40,24 +40,26 @@ import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
 fun LaunchUserDataScreen(navController: NavController, user: User?){
-    Navigation(navController = navController){
-        MakeUserDataScreen(navController = navController, user = user)
+    user?.let { item ->
+        Navigation(navController = navController){
+            MakeUserDataScreen(navController = navController, user = item)
+        }
     }
 }
 
 @Composable
-fun MakeUserDataScreen(navController: NavController, user: User?){
+fun MakeUserDataScreen(navController: NavController, user: User){
     val context: Context = LocalContext.current
     val tokenStorage = TokenStorage()
     val userDataViewModel: UserDataViewModel = viewModel()
     var userName by remember {
-        mutableStateOf(user?.name)
+        mutableStateOf(user.name)
     }
     var userSurname by remember {
-        mutableStateOf(user?.surname)
+        mutableStateOf(user.surname)
     }
     var userEmail by remember{
-        mutableStateOf(user?.email)
+        mutableStateOf(user.email)
     }
     var userFirstPassword by remember{
         mutableStateOf("")
@@ -89,8 +91,8 @@ fun MakeUserDataScreen(navController: NavController, user: User?){
                         color = Black10,
                         modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
                     )
-                    MakeFullTextField(header = "Имя", onValueChange = { userName = it }, inputValue = user?.name)
-                    MakeFullTextField(header = "Фамилия", onValueChange = { userSurname = it }, bottomPadding = 0, inputValue = user?.surname)
+                    MakeFullTextField(header = "Имя", onValueChange = { userName = it }, inputValue = user.name)
+                    MakeFullTextField(header = "Фамилия", onValueChange = { userSurname = it }, bottomPadding = 0, inputValue = user.surname)
                 }
             }
             Card(
@@ -107,7 +109,7 @@ fun MakeUserDataScreen(navController: NavController, user: User?){
                         color = Black10,
                         modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
                     )
-                    MakeFullTextField(header = "Email", onValueChange = { userEmail = it }, inputValue = user?.email)
+                    MakeFullTextField(header = "Email", onValueChange = { userEmail = it }, inputValue = user.email)
                     MakeFullTextField(header = "Пароль", onValueChange = { userFirstPassword = it })
                     MakeFullTextField(header = "Новый пароль", onValueChange = { userPassword = it }, bottomPadding = 0)
                 }
@@ -115,11 +117,11 @@ fun MakeUserDataScreen(navController: NavController, user: User?){
         }
         MakeAgreeBottomButton(
             onClick = {
-                if (userName.isNullOrEmpty() || userSurname.isNullOrEmpty() || userEmail.isNullOrEmpty()) {
+                if (userName.isEmpty() || userSurname.isNullOrEmpty() || userEmail.isEmpty()) {
                     makeToast(context,"Заполните все данные корректно")
                     return@MakeAgreeBottomButton
                 }
-                if (!userEmail!!.contains("@")) {
+                if (!userEmail.contains("@")) {
                     makeToast(context,"Укажите корректный адрес электронной почты")
                     return@MakeAgreeBottomButton
                 }
@@ -131,9 +133,9 @@ fun MakeUserDataScreen(navController: NavController, user: User?){
                 }
 
                 val userSave = UserSave(
-                    userName!!.trim(),
+                    userName.trim(),
                     userSurname!!.trim(),
-                    userEmail!!.trim(),
+                    userEmail.trim(),
                     if (userPassword.trim().isEmpty()) userPassword.replace(" ", "")
                     else null,
                 )

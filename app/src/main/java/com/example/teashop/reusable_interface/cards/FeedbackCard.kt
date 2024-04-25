@@ -1,7 +1,6 @@
 package com.example.teashop.reusable_interface.cards
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,8 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
-import com.example.teashop.data.model.DataSource
-import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
@@ -42,16 +39,18 @@ fun MakeFeedbackCard(review: Review){
         Column(
             modifier = Modifier.padding(start = 10.dp)
         ) {
-            Text(
-                text = review.userName,
-                fontFamily = montserratFamily,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.W400,
-            )
+            review.userName?.let {
+                Text(
+                    text = it,
+                    fontFamily = montserratFamily,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.W400,
+                )
+            }
             Row(
                 modifier = Modifier.padding(bottom = 5.dp)
             ) {
-                while (starsRateCnt < review.stars) {
+                while (starsRateCnt < review.stars!!) {
                     Icon(
                         painter = painterResource(id = R.drawable.star),
                         tint = Yellow10,
@@ -62,13 +61,15 @@ fun MakeFeedbackCard(review: Review){
                 }
             }
             starsRateCnt = 0
-            Text(
-                text = review.reviewText,
-                fontFamily = montserratFamily,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(bottom = 5.dp)
-            )
+            review.reviewText?.let {
+                Text(
+                    text = it,
+                    fontFamily = montserratFamily,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.W400,
+                    modifier = Modifier.padding(bottom = 5.dp)
+                )
+            }
             /*Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.padding(bottom = 5.dp)
@@ -92,7 +93,7 @@ fun MakeFeedbackCard(review: Review){
                             contentScale = ContentScale.Inside,
                             contentDescription = null,
                             modifier = Modifier
-                                .padding(end = 10.dp)
+                                .padding(end = 10.dp, bottom = 5.dp)
                                 .size(100.dp)
                         )
                     }
@@ -107,6 +108,5 @@ fun MakeFeedbackCard(review: Review){
 @Composable
 fun GreetingPreviewFeedbackCard() {
     TeaShopTheme {
-        MakeFeedbackCard(review = DataSource().loadFeedback()[0])
     }
 }
