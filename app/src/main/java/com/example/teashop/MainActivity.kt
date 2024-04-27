@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.teashop.admin_screen.LaunchAdminOrders
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.order.Order
@@ -22,6 +23,7 @@ import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.data.model.user.User
+import com.example.teashop.navigation.admin.AdminScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
 import com.example.teashop.screen.screen.main_screen.LaunchMainScreen
@@ -30,7 +32,7 @@ import com.example.teashop.screen.screen.profile_screen.sign_in.LaunchLogScreen
 import com.example.teashop.screen.screen.profile_screen.profile.LaunchProfileScreen
 import com.example.teashop.screen.screen.profile_screen.sign_in.LaunchRegScreen
 import com.example.teashop.screen.screen.catalog_screen.LaunchCatalogScreen
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.screen.screen.basket_screen.LaunchAddressChangeScreen
 import com.example.teashop.screen.screen.profile_screen.order.LaunchOrderDescriptionScreen
 import com.example.teashop.screen.screen.profile_screen.order.LaunchOrdersScreen
@@ -148,6 +150,10 @@ fun TeaShopApp(){
         
         composable(Screen.AddressChange.route){
             LaunchAddressChangeScreen(navController = navController)
+        }
+
+        composable(AdminScreen.Orders.route){
+            LaunchAdminOrders(navController = navController)
         }
     }
 }

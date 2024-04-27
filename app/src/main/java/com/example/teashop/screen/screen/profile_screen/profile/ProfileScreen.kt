@@ -44,8 +44,8 @@ import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.logic.bonusDeclension
-import com.example.teashop.navigation.Navigation
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10

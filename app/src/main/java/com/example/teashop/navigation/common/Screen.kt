@@ -1,4 +1,4 @@
-package com.example.teashop.navigation
+package com.example.teashop.navigation.common
 
 open class Screen (val route: String){
     object Main: Screen("main_screen")
@@ -25,7 +25,7 @@ open class Screen (val route: String){
 
     object Log: Screen("log_screen")
 
-    object Orders: Screen ("orders_screen")
+    object Orders: Screen("orders_screen")
 
     object OrderDescription: Screen("description_screen/{orderId}")
 

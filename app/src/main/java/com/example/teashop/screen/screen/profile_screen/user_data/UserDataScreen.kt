@@ -28,8 +28,8 @@ import com.example.teashop.R
 import com.example.teashop.data.model.saves.UserSave
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
-import com.example.teashop.navigation.Navigation
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeTopCard

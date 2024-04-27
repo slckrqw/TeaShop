@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.order.Order
-import com.example.teashop.navigation.Navigation
+import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.TeaShopTheme

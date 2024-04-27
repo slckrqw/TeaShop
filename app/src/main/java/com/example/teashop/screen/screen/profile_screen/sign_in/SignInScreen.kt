@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,8 +40,9 @@ import com.example.teashop.data.model.user.UserRole
 import com.example.teashop.data.model.auth.AuthRequest
 import com.example.teashop.data.model.auth.RegistrationRequest
 import com.example.teashop.data.storage.TokenStorage
-import com.example.teashop.navigation.Navigation
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.admin.AdminScreen
+import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
@@ -258,7 +257,7 @@ fun MakeSignInScreen(
                                         }
                                     )
                                 } else {
-                                    //TODO navigate to AdminSection
+                                    navController.navigate(AdminScreen.Orders.route)
                                 }
                             },
                             onError = {

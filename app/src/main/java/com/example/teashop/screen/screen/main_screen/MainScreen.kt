@@ -54,8 +54,8 @@ import com.example.teashop.data.model.pagination.product.ProductFilter
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.storage.TokenStorage
-import com.example.teashop.navigation.Navigation
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
 
 import com.example.teashop.reusable_interface.cards.RowOfCards

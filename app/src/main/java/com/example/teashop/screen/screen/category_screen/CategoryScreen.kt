@@ -32,10 +32,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
-import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.category.ParentCategory
-import com.example.teashop.navigation.Navigation
+import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.TeaShopTheme

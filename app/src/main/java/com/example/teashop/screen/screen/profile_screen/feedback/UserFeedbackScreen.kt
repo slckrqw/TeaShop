@@ -48,8 +48,8 @@ import com.example.teashop.data.model.pagination.review.ReviewPagingRequest
 import com.example.teashop.data.model.pagination.review.ReviewSorter
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.data.storage.TokenStorage
-import com.example.teashop.navigation.Navigation
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeFeedbackCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard

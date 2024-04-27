@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -34,8 +33,8 @@ import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.address.Address
-import com.example.teashop.navigation.Navigation
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeTopCard

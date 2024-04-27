@@ -49,8 +49,8 @@ import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.logic.bonusDeclension
-import com.example.teashop.navigation.Navigation
-import com.example.teashop.navigation.Screen
+import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -258,7 +258,8 @@ fun MakeBasketScreen(
                                                                         currentItem.quantityInBucket - 1
                                                                     ),
                                                                     onSuccess = {
-                                                                        navController.navigate(Screen.Basket.route)
+                                                                        navController.navigate(
+                                                                            Screen.Basket.route)
                                                                     },
                                                                     onError = {error ->
                                                                         error?.let {errorStr ->
@@ -278,7 +279,8 @@ fun MakeBasketScreen(
                                                                             context,
                                                                             "Продукт удален из корзины"
                                                                         )
-                                                                        navController.navigate(Screen.Basket.route)
+                                                                        navController.navigate(
+                                                                            Screen.Basket.route)
                                                                     },
                                                                     onError = {
                                                                         makeToast(

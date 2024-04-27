@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.navigation.Navigation
+import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.MakeFullTextField
 import com.example.teashop.reusable_interface.MakeHalfTextField
