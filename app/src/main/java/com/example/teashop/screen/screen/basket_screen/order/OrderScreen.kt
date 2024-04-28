@@ -230,7 +230,7 @@ fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
                 )
             }
         }
-//        item{ //TODO ЗАЛУПААААААААА
+//        item{ //TODO
 //            MakeSummaryCard(productCnt = productCnt, productList = basketList)
 //        }
         item{
