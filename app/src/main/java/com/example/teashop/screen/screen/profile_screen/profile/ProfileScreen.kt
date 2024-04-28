@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -143,7 +144,9 @@ fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: To
                         fontFamily = montserratFamily,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.W500,
-                        color = White10
+                        color = White10,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 Card(

@@ -1,4 +1,4 @@
-package com.example.teashop.screen.screen.basket_screen
+package com.example.teashop.screen.screen.basket_screen.order
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,12 +34,13 @@ import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.address.Address
+import com.example.teashop.data.model.bucket.Bucket
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeTopCard
-import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
@@ -47,7 +49,15 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun LaunchOrderScreen(navController: NavController){
+fun LaunchOrderScreen(
+    navController: NavController,
+    bucket: Bucket?
+){
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+
     val addressList = remember{ mutableStateListOf(Address()) }
     Navigation(navController = navController) {
         MakeOrderScreen(
@@ -59,7 +69,6 @@ fun LaunchOrderScreen(navController: NavController){
 
 @Composable
 fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
-
     var productCnt = 1
     var basketList = DataSource().loadFullProducts()
     var receiverName by remember {
@@ -221,9 +230,9 @@ fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
                 )
             }
         }
-        item{
-            MakeSummaryCard(productCnt = productCnt, productList = basketList)
-        }
+//        item{ //TODO ЗАЛУПААААААААА
+//            MakeSummaryCard(productCnt = productCnt, productList = basketList)
+//        }
         item{
             MakeAgreeBottomButton(onClick = { /*TODO*/ }, text = "Оформить заказ")
         }

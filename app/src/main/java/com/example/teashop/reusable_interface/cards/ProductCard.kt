@@ -339,7 +339,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                             .size(30.dp)
                     ) {
                         Icon(
-                            painterResource(id = R.drawable.product_basket),//TODO fix size of basket icon
+                            painterResource(id = R.drawable.product_basket),
                             tint = White10,
                             modifier = Modifier.size(15.dp),
                             contentDescription = null

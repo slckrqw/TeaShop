@@ -59,7 +59,7 @@ fun MakeFeedbackCard(review: Review){
                 }
                 review.createdTime?.let {
                     Text(
-                        text = it.format(DateTimeFormatter.ISO_OFFSET_DATE),
+                        text = it.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.W400,

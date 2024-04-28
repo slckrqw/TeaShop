@@ -30,7 +30,6 @@ import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeOrderCard
-import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Red10
 import com.example.teashop.ui.theme.TeaShopTheme
@@ -99,8 +98,9 @@ fun MakeOrdersScreen(
         }
     }
 }
+
 @Composable
-fun OrderStatusText(order: OrderShort, fontSize: Int){
+fun OrderStatusText(orderStatus: OrderStatus, fontSize: Int){
     val fontStyle = TextStyle(
         fontSize = fontSize.sp,
         fontFamily = montserratFamily,
@@ -110,33 +110,29 @@ fun OrderStatusText(order: OrderShort, fontSize: Int){
         Text(
             text = "Статус: ",
             style = fontStyle,
-            color = Black10
+            color = Green10
         )
-        when (order.status) {
+        when (orderStatus) {
             OrderStatus.NEW -> Text(
                 text = "Новый",
                 style = fontStyle,
-                color = Black10
+                color = Green10
             )
-
             OrderStatus.CONFIRMED -> Text(
                 text = "Подтверждён",
                 style = fontStyle,
-                color = Black10
+                color = Green10
             )
-
             OrderStatus.ON_THE_WAY -> Text(
                 text = "В пути",
                 style = fontStyle,
-                color = Black10
+                color = Green10
             )
-
             OrderStatus.DELIVERED -> Text(
                 text = "Доставлен",
                 style = fontStyle,
                 color = Green10
             )
-
             OrderStatus.CANCELLED -> Text(
                 text = "Отменён",
                 style = fontStyle,

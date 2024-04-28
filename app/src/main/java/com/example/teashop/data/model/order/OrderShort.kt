@@ -8,6 +8,6 @@ data class OrderShort(
     val status: OrderStatus,
     val createdDate: ZonedDateTime,
     val packageOrders: List<PackageOrder>,
-    val trackNumber: String,
+    val trackNumber: String?,
     val totalCost: Double
 )

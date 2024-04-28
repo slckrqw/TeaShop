@@ -179,7 +179,7 @@ fun MakeFeedbackScreen(
         }
         if(reviewList.isEmpty()){
             MakeEmptyListScreen(type = "Отзывов")
-        }else {
+        } else {
             Card(
                 modifier = Modifier
                     .padding(bottom = 10.dp)

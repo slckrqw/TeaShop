@@ -14,8 +14,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.teashop.data.model.product.ProductFull
-import com.example.teashop.screen.screen.basket_screen.SumTextRow
+import com.example.teashop.screen.screen.basket_screen.order.SumTextRow
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Red10
@@ -23,7 +22,12 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun MakeSummaryCard(productCnt: Int, productList: List<ProductFull?>){
+fun MakeSummaryCard(
+    productCnt: Int,
+    bonusesSpent: Int,
+    bonusesAccrued: Int,
+    totalCost: Double
+){
     Card(
         colors = CardDefaults.cardColors(containerColor = White10),
         shape = RectangleShape,
@@ -49,11 +53,14 @@ fun MakeSummaryCard(productCnt: Int, productList: List<ProductFull?>){
             )
             SumTextRow(
                 header = "Начислится бонусы",
-                answer = "+", //TODO summary price
+                answer = "+$bonusesAccrued",
                 textColor = Green10
             )
-            SumTextRow(header = "Списание бонусов", answer = "-0", textColor = Red10)
-
+            SumTextRow(
+                header = "Списание бонусов",
+                answer = "-$bonusesSpent",
+                textColor = Red10
+            )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -67,7 +74,7 @@ fun MakeSummaryCard(productCnt: Int, productList: List<ProductFull?>){
                     color = Black10
                 )
                 Text(
-                    text = " руб.", //TODO ${productList[productCnt].price}
+                    text = "$totalCost руб.",
                     fontFamily = montserratFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.W600,

@@ -15,10 +15,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.teashop.admin_screen.LaunchAdminOrders
 import com.example.teashop.data.enums.CatalogConfig
+import com.example.teashop.data.model.bucket.Bucket
 import com.example.teashop.data.model.category.Category
-import com.example.teashop.data.model.order.Order
 import com.example.teashop.screen.screen.basket_screen.basket.LaunchBasketScreen
-import com.example.teashop.screen.screen.basket_screen.LaunchOrderScreen
+import com.example.teashop.screen.screen.basket_screen.order.LaunchOrderScreen
 import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
@@ -33,7 +33,7 @@ import com.example.teashop.screen.screen.profile_screen.profile.LaunchProfileScr
 import com.example.teashop.screen.screen.profile_screen.sign_in.LaunchRegScreen
 import com.example.teashop.screen.screen.catalog_screen.LaunchCatalogScreen
 import com.example.teashop.navigation.common.Screen
-import com.example.teashop.screen.screen.basket_screen.LaunchAddressChangeScreen
+import com.example.teashop.screen.screen.basket_screen.order.LaunchAddressChangeScreen
 import com.example.teashop.screen.screen.profile_screen.order.LaunchOrderDescriptionScreen
 import com.example.teashop.screen.screen.profile_screen.order.LaunchOrdersScreen
 import com.example.teashop.screen.screen.profile_screen.user_data.LaunchUserDataScreen
@@ -119,7 +119,8 @@ fun TeaShopApp(){
         }
 
         composable(Screen.Order.route){
-            LaunchOrderScreen(navController = navController)
+            val bucket: Bucket? = navController.previousBackStackEntry?.savedStateHandle?.get("bucket")
+            LaunchOrderScreen(navController = navController, bucket = bucket)
         }
 
         composable(Screen.Reg.route){
@@ -135,8 +136,8 @@ fun TeaShopApp(){
         }
 
         composable(Screen.OrderDescription.route){
-            val order: Order? = navController.previousBackStackEntry?.savedStateHandle?.get("order")
-            LaunchOrderDescriptionScreen(navController = navController, order = order)
+            val orderId: Long? = navController.previousBackStackEntry?.savedStateHandle?.get("orderId")
+            LaunchOrderDescriptionScreen(navController = navController, orderId = orderId)
         }
         
         composable(Screen.UserData.route){

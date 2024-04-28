@@ -364,7 +364,8 @@ fun MakeBasketScreen(
                 item {
                     MakeAgreeBottomButton(
                         onClick = {
-                            navController.navigate("order_screen")
+                            navController.currentBackStackEntry?.savedStateHandle?.set("bucket", bucket)
+                            navController.navigate(Screen.Order.route)
                         },
                         text = "К оформлению"
                     )

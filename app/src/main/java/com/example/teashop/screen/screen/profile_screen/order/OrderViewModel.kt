@@ -25,7 +25,7 @@ class OrderViewModel: ViewModel() {
         orderPagingRequest: OrderPagingRequest,
         onError: () -> Unit
     ) {
-        viewModelScope.launch() {
+        viewModelScope.launch(exceptionHandler) {
             val response = OrderRepository().getOrdersByFilter("Bearer $token", orderPagingRequest)
             if (response.isSuccessful) {
                 response.body()?.let {
@@ -42,7 +42,7 @@ class OrderViewModel: ViewModel() {
         id: Long,
         onError: () -> Unit
     ) {
-        viewModelScope.launch() {
+        viewModelScope.launch(exceptionHandler) {
             val response = OrderRepository().getFullOrderInfo("Bearer $token", id)
             if (response.isSuccessful) {
                 response.body()?.let {

@@ -11,5 +11,5 @@ data class Address(
     val flat: Short? = 5,
     val floor: Short = 150,
     val entrance: Short? = 2,
-    val intercomCode: String = "не работает"
+    val intercomCode: String? = "не работает"
 ):Parcelable

@@ -1,4 +1,4 @@
-package com.example.teashop.screen.screen.basket_screen
+package com.example.teashop.screen.screen.basket_screen.order
 
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Arrangement

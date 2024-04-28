@@ -64,13 +64,13 @@ fun MakeOrderCard(order: OrderShort, navController: NavController){
                 color = Black10
             )
             Text(
-                text = "Трек-номер: ${order.trackNumber}",
+                text = "Трек-номер: ${order.trackNumber ?: "Отсутствует"}",
                 fontSize = 10.sp,
                 fontFamily = montserratFamily,
                 fontWeight = FontWeight.W400,
                 color = Black10
             )
-            OrderStatusText(order = order, 10)
+            OrderStatusText(orderStatus = order.status, 10)
             Row {
                 order.packageOrders.forEach {
                     Image(

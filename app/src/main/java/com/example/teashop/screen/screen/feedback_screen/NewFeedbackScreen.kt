@@ -302,7 +302,7 @@ fun uriToMultipartPart(context: Context, uri: Uri): MultipartBody.Part {
 
     val requestBody = inputStream?.let {
         RequestBody.create(mediaType, it.readBytes())
-    } ?: throw IllegalArgumentException("Failed to create RequestBody from Uri")
+    } ?: throw IllegalArgumentException("Невозможно загрузить изображение")
     val uniqueFileName = "${UUID.randomUUID()}.webp"
 
     return MultipartBody.Part.createFormData("files", uniqueFileName, requestBody)
