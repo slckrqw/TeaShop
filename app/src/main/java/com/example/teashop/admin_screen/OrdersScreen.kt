@@ -2,6 +2,8 @@ package com.example.teashop.admin_screen
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,21 +24,26 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,28 +62,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.order.OrderShort
+import com.example.teashop.data.model.order.OrderStatus
 import com.example.teashop.data.model.pagination.order.OrderFilter
 import com.example.teashop.data.model.pagination.order.OrderPagingRequest
 import com.example.teashop.data.model.pagination.order.OrderSortType
 import com.example.teashop.data.model.pagination.order.OrderSorter
-import com.example.teashop.data.model.pagination.product.ProductFilter
-import com.example.teashop.data.model.pagination.product.ProductPagingRequest
-import com.example.teashop.data.model.pagination.product.ProductSortType
-import com.example.teashop.data.model.pagination.product.ProductSorter
-import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.reusable_interface.cards.MakeOrderCard
-import com.example.teashop.screen.screen.catalog_screen.BottomFilterCatalog
-import com.example.teashop.screen.screen.catalog_screen.BottomSortingCatalog
-import com.example.teashop.screen.screen.catalog_screen.CatalogScreenViewModel
 import com.example.teashop.screen.screen.catalog_screen.IconsTopCatalog
-import com.example.teashop.screen.screen.profile_screen.order.OrderViewModel
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import kotlin.time.Duration.Companion.days
 
 
 @Composable
@@ -90,7 +91,7 @@ fun LaunchAdminOrders(
     val tokenStorage = remember {
         TokenStorage()
     }
-
+    orderFilter.byCurrentUser = false
     LaunchedEffect(Unit) {
         tokenStorage.getToken(context)?.let {
             viewModel.getAllOrders(
@@ -108,31 +109,38 @@ fun LaunchAdminOrders(
     orderView?.let {orders ->
         MakeOrdersScreen(
             orderList = orders,
-            navController = navController
+            navController = navController,
+            sorterParams = orderSorter,
+            filterParams = orderFilter,
+            context = context,
+            lazyListState = LazyListState(),
+            viewModel = viewModel
         )
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MakeOrdersScreen(
     orderList: List<OrderShort?>,
     navController: NavController,
-    sorterParams: ProductSorter,
-    filterParams: ProductFilter,
-    viewModel: com.example.teashop.admin_screen.OrderViewModel,
+    sorterParams: OrderSorter,
+    filterParams: OrderFilter,
+    viewModel: OrderViewModel,
     context: Context,
     lazyListState: LazyListState
 ){
+    val tokenStorage = remember {
+        TokenStorage()
+    }
     var filterSheet by remember{ mutableStateOf(false) }
     var sortingSheet by remember{ mutableStateOf(false) }
-    val sortingText:Int = when(sorterParams.sortType){
-        ProductSortType.POPULAR->R.string.sortingTextCatalog1
-        ProductSortType.MORE_RATE->R.string.sortingTextCatalog2
-        ProductSortType.EXPENSIVE->R.string.sortingTextCatalog3
-        ProductSortType.CHEAP->R.string.sortingTextCatalog4
+    val sortingText = when(sorterParams.sortType){
+        OrderSortType.NEW->"Сначала новые"
+        OrderSortType.OLD->"Сначала старые"
+        OrderSortType.EXPENSIVE->"По убыванию стоимости"
+        OrderSortType.CHEAP->"По возрастанию стоимости"
     }
-    Column(
-
-    ) {
+    Column {
         Card(
             shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
             colors = CardDefaults.cardColors(containerColor = Green10),
@@ -158,7 +166,39 @@ fun MakeOrdersScreen(
                     Icon(
                         painter = painterResource(R.drawable.refresh_icon),
                         contentDescription = null,
-                        modifier = Modifier.size(25.dp),
+                        modifier = Modifier
+                            .size(25.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(
+                                onClick = {
+                                    if ((filterParams.minPrice ?: 0.0) > (filterParams.maxPrice
+                                            ?: 0.0)
+                                    ) {
+                                        filterParams.minPrice = null
+                                        filterParams.maxPrice = null
+                                    }
+                                    tokenStorage
+                                        .getToken(context)
+                                        ?.let {
+                                            viewModel.getAllOrders(
+                                                it,
+                                                OrderPagingRequest(
+                                                    filter = filterParams,
+                                                    sorter = sorterParams
+                                                ),
+                                                onError = {
+                                                    Toast
+                                                        .makeText(
+                                                            context,
+                                                            "Получение списка продуктов временно недоступно",
+                                                            Toast.LENGTH_SHORT
+                                                        )
+                                                        .show()
+                                                }
+                                            )
+                                        }
+                                }
+                            ),
                         tint = White10
                     )
                 }
@@ -179,7 +219,7 @@ fun MakeOrdersScreen(
                             iconSize = 20
                         )
                         Text(
-                            text = "TODO",
+                            text = sortingText,
                             fontFamily = montserratFamily,
                             fontWeight = FontWeight.W700,
                             fontSize = 10.sp,
@@ -232,8 +272,8 @@ fun MakeOrdersScreen(
 @Composable
 fun BottomFilterCatalog(
     expandedChange: (Boolean) -> Unit,
-    filterParams: ProductFilter,
-    sorterParams: ProductSorter,
+    filterParams: OrderFilter,
+    sorterParams: OrderSorter,
     viewModel: OrderViewModel,
     context: Context,
     lazyListState: LazyListState
@@ -241,11 +281,22 @@ fun BottomFilterCatalog(
     val tokenStorage = remember {
         TokenStorage()
     }
-    var switchOn by remember{mutableStateOf(false)}
-    switchOn = when(filterParams.inStock){
-        true -> true
-        false -> false
-        null -> false
+    var expanded by remember{
+        mutableStateOf(false)
+    }
+    var expandedDate by remember{
+        mutableStateOf(false)
+    }
+    val statusBarText = if(filterParams.status == null){
+        "Любой"
+    }else{
+        filterParams.status!!.value
+    }
+    var date = rememberDatePickerState(
+        initialDisplayMode = DisplayMode.Picker
+    )
+    var dateTemp by remember{
+        mutableStateOf("")
     }
 
     ModalBottomSheet(
@@ -296,42 +347,70 @@ fun BottomFilterCatalog(
                 )
             }
             Row(
-                modifier = Modifier.padding(start = 10.dp)
-            ) {
-                WeightButton(weight = VariantType.FIFTY_GRAMS, filterParams)
-                WeightButton(weight = VariantType.HUNDRED_GRAMS, filterParams)
-                WeightButton(weight = VariantType.TWO_HUNDRED_GRAMS, filterParams)
-                WeightButton(weight = VariantType.FIVE_HUNDRED_GRAMS, filterParams)
-            }
-            Row(
                 modifier = Modifier
-                    .padding(start = 10.dp, bottom = 10.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 5.dp, vertical = 10.dp)
+                    .fillMaxWidth()
             ) {
+                //TODO date pickers
+                DatePickerItem()
+                DatePickerItem()
+            }
+            Row (
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
                 Text(
-                    text = "В наличии",
+                    text = "Статус заказа:",
                     fontFamily = montserratFamily,
                     fontWeight = FontWeight.W400,
                     fontSize = 15.sp,
-                    color = Black10,
-                    modifier = Modifier.padding(end = 20.dp)
+                    color = Black10
                 )
-                Switch(
-                    checked = switchOn,
-                    onCheckedChange = {
-                        filterParams.inStock = it
-                        switchOn = !switchOn
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedBorderColor = White10,
-                        uncheckedBorderColor = White10,
-                        checkedThumbColor = Green10,
-                        uncheckedThumbColor = Grey10,
-                        checkedTrackColor = Grey20,
-                        uncheckedTrackColor = Grey20,
+                Button(
+                    onClick = {expanded = true},
+                    colors = ButtonDefaults.buttonColors(containerColor = Grey20),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(180.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    border = BorderStroke(1.dp, Green10)
+                ) {
+                    Text(
+                        text = statusBarText,
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.W400,
+                        fontSize = 15.sp,
+                        color = Black10,
                     )
-                )
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = {expanded = false},
+                        modifier = Modifier.background(Grey20)
+                    ) {
+                        DropDownItem(orderStatus = OrderStatus.NEW, filterParams = filterParams) {
+                            expanded = it
+                        }
+                        DropDownItem(orderStatus = OrderStatus.CONFIRMED, filterParams = filterParams) {
+                            expanded = it
+                        }
+                        DropDownItem(orderStatus = OrderStatus.ON_THE_WAY, filterParams = filterParams) {
+                            expanded = it
+                        }
+                        DropDownItem(orderStatus = OrderStatus.DELIVERED, filterParams = filterParams) {
+                            expanded = it
+                        }
+                        DropDownItem(orderStatus = OrderStatus.CANCELLED, filterParams = filterParams) {
+                            expanded = it
+                        }
+                        DropDownItem(orderStatus = null, filterParams = filterParams) {
+                            expanded = it
+                        }
+                    }
+                }
             }
             Button(
                 onClick = {
@@ -340,16 +419,18 @@ fun BottomFilterCatalog(
                         filterParams.minPrice = null
                         filterParams.maxPrice = null
                     }
-                    viewModel.getAllProducts(
-                        tokenStorage.getToken(context),
-                        ProductPagingRequest(
-                            filter = filterParams,
-                            sorter = sorterParams
-                        ),
-                        onError = {
-                            Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
-                        }
-                    )
+                    tokenStorage.getToken(context)?.let {
+                        viewModel.getAllOrders(
+                            it,
+                            OrderPagingRequest(
+                                filter = filterParams,
+                                sorter = sorterParams
+                            ),
+                            onError = {
+                                Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
                 modifier = Modifier
@@ -367,42 +448,6 @@ fun BottomFilterCatalog(
         }
     }
 }
-
-@Composable
-fun RowScope.WeightButton(weight: VariantType, filterParams: ProductFilter){
-    var colorChange by rememberSaveable{ mutableStateOf(false) }
-    filterParams.variantTypes?.let {
-        colorChange = filterParams.variantTypes!!.contains(weight)
-    }
-    val buttonColor: Color = when(colorChange){
-        true -> Green10
-        false -> Grey10
-    }
-    Button(
-        onClick = {
-            colorChange = !colorChange
-            if(colorChange){
-                filterParams.variantTypes?.add(weight)
-            }else{
-                filterParams.variantTypes?.remove(weight)
-            }
-        },
-        colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
-        contentPadding = PaddingValues(0.dp),
-        modifier = Modifier
-            .padding(end = 10.dp)
-            .weight(1f)
-    ){
-        Text(
-            text = weight.value,
-            fontFamily = montserratFamily,
-            fontWeight = FontWeight.W400,
-            fontSize = 13.sp,
-            color = White10,
-        )
-    }
-}
-
 @Composable
 fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goalString: String){
     var priceValueField by remember{
@@ -413,7 +458,6 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
             }
         )
     }
-
     TextField(
         value = priceValueField,
         shape = RoundedCornerShape(15.dp),
@@ -458,9 +502,9 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
 @Composable
 fun BottomSortingCatalog(
     expandedChange: (Boolean)->Unit,
-    filterParams: ProductFilter,
-    sorterParams: ProductSorter,
-    viewModel: CatalogScreenViewModel,
+    filterParams: OrderFilter,
+    sorterParams: OrderSorter,
+    viewModel: OrderViewModel,
     context: Context,
     lazyListState: LazyListState
 ){
@@ -477,10 +521,10 @@ fun BottomSortingCatalog(
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
             )
-            SheetTextCatalog(ProductSortType.POPULAR, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.MORE_RATE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.EXPENSIVE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.CHEAP, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(OrderSortType.NEW, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(OrderSortType.OLD, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(OrderSortType.EXPENSIVE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(OrderSortType.CHEAP, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
         }
     }
 }
@@ -491,18 +535,18 @@ fun SheetTextCatalog(
     expandedChange: (Boolean)->Unit,
     filterParams: OrderFilter,
     sorterParams: OrderSorter,
-    viewModel: com.example.teashop.admin_screen.OrderViewModel,
+    viewModel: OrderViewModel,
     context: Context,
     lazyListState: LazyListState
 ){
     val tokenStorage = remember {
         TokenStorage()
     }
-    val stringId: Int = when(textType){
-        OrderSortType.NEW -> R.string.sortingTextCatalog1
-        OrderSortType.OLD -> R.string.sortingTextCatalog2
-        OrderSortType.EXPENSIVE->R.string.sortingTextCatalog3
-        OrderSortType.CHEAP->R.string.sortingTextCatalog4
+    val sortingText = when(textType){
+        OrderSortType.NEW->"Сначала новые"
+        OrderSortType.OLD->"Сначала старые"
+        OrderSortType.EXPENSIVE->"По убыванию стоимости"
+        OrderSortType.CHEAP->"По возрастанию стоимости"
     }
 
     val cardColor: Color
@@ -528,7 +572,7 @@ fun SheetTextCatalog(
             modifier = Modifier.height(40.dp)
         ) {
             Text(
-                text = stringResource(id = stringId),
+                text = sortingText,
                 fontFamily = montserratFamily,
                 fontWeight = FontWeight.W700,
                 fontSize = 15.sp,
@@ -540,27 +584,137 @@ fun SheetTextCatalog(
                         onClick = {
                             sorterParams.sortType = textType
                             expandedChange(false)
-                            tokenStorage.getToken(context)?.let {
-                                viewModel.getAllOrders(
-                                    it,
-                                    OrderPagingRequest(
-                                        filter = filterParams,
-                                        sorter = sorterParams
-                                    ),
-                                    onError = {
-                                        Toast
-                                            .makeText(
-                                                context,
-                                                "Получение списка продуктов временно недоступно",
-                                                Toast.LENGTH_SHORT
-                                            )
-                                            .show()
-                                    }
-                                )
-                            }
+                            tokenStorage
+                                .getToken(context)
+                                ?.let {
+                                    viewModel.getAllOrders(
+                                        it,
+                                        OrderPagingRequest(
+                                            filter = filterParams,
+                                            sorter = sorterParams
+                                        ),
+                                        onError = {
+                                            Toast
+                                                .makeText(
+                                                    context,
+                                                    "Получение списка заказов временно недоступно",
+                                                    Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                        }
+                                    )
+                                }
                         }
                     )
             )
+        }
+    }
+}
+
+@Composable
+fun DropDownItem(
+    orderStatus: OrderStatus?,
+    filterParams: OrderFilter,
+    expandedChange: (Boolean) -> Unit
+){
+    DropdownMenuItem(
+        text = {
+           Text(
+               text = orderStatus?.value ?: "Любой",
+               fontFamily = montserratFamily,
+               fontWeight = FontWeight.W400,
+               fontSize = 15.sp,
+               color = Black10,
+           )
+        },
+        onClick = {
+            filterParams.status = orderStatus
+            expandedChange(false)
+        },
+        contentPadding = PaddingValues(5.dp),
+        modifier = Modifier
+            .height(30.dp)
+            .width(180.dp)
+            .background(Grey20)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RowScope.DatePickerItem(){
+    var expanded by remember{
+        mutableStateOf(false)
+    }
+    val date = rememberDatePickerState()
+    Button(
+        onClick = {expanded = true},
+        colors = ButtonDefaults.buttonColors(containerColor = Grey20),
+        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier
+            .padding(horizontal = 5.dp)
+            .height(40.dp)
+            .weight(1f),
+        contentPadding = PaddingValues(0.dp),
+        border = BorderStroke(1.dp, Green10)
+    ) {
+        Text(
+            text =
+            if(date.selectedDateMillis == null){
+                                               "От"
+            }else{
+                 date.selectedDateMillis!!.days.toString()
+            },
+            fontFamily = montserratFamily,
+            fontWeight = FontWeight.W400,
+            fontSize = 15.sp,
+            color = Black10
+        )
+        if(expanded) {
+            DatePickerDialog(
+                onDismissRequest = { expanded = false },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            expanded = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = White10),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .height(40.dp)
+                            .width(180.dp),
+                        contentPadding = PaddingValues(0.dp),
+                        border = BorderStroke(1.dp, Green10)
+                    ){
+                        Text(
+                            text = "Применить",
+                            fontFamily = montserratFamily,
+                            fontWeight = FontWeight.W400,
+                            fontSize = 15.sp,
+                            color = Black10
+                        )
+                    }
+                },
+                colors = DatePickerDefaults.colors(containerColor = White10)
+            ){
+                DatePicker(
+                    state = date,
+                    colors = DatePickerDefaults.colors(
+                        containerColor = White10,
+                        todayContentColor = Black10,
+                        todayDateBorderColor = Green10,
+                        dayContentColor = Black10,
+                        selectedDayContainerColor = Green10,
+                        selectedDayContentColor = White10,
+                        disabledDayContentColor = Black10,
+                        dayInSelectionRangeContainerColor = Grey10,
+                        dayInSelectionRangeContentColor = Black10,
+                        disabledSelectedDayContainerColor = Green10,
+                        disabledSelectedDayContentColor = White10,
+                        weekdayContentColor = Black10
+                    )
+                )
+            }
         }
     }
 }

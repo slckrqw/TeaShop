@@ -23,6 +23,7 @@ import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.data.model.user.User
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchNewFeedbackScreen
@@ -65,7 +66,7 @@ fun TeaShopApp(){
     val navController = rememberNavController()
     
     NavHost(navController = navController,
-        startDestination = Screen.Main.route,
+        startDestination = AdminScreen.Orders.route,
         enterTransition = { fadeIn() },
         exitTransition = { fadeOut() },
         popEnterTransition  = { fadeIn() },
