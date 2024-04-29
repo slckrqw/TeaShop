@@ -66,6 +66,7 @@ import com.example.teashop.data.model.pagination.product.productFilterSaver
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.pagination.product.ProductSortType
 import com.example.teashop.data.model.pagination.product.ProductSorter
+import com.example.teashop.data.model.pagination.product.productSorterSaver
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
@@ -87,11 +88,13 @@ fun LaunchCatalogScreen(
     config: CatalogConfig?,
     category: Category?,
     searchString: String?,
-    viewModel: CatalogScreenViewModel = viewModel(),
-    sorterParams: ProductSorter = ProductSorter()
+    viewModel: CatalogScreenViewModel = viewModel()
 ){
     val filterParams by rememberSaveable(stateSaver = productFilterSaver()) {
         mutableStateOf(ProductFilter())
+    }
+    val sorterParams by rememberSaveable(stateSaver = productSorterSaver()) {
+        mutableStateOf(ProductSorter())
     }
 
     val topName: String
@@ -187,29 +190,27 @@ fun MakeCatalogScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                productsList.let {
-                    items(it.size, key = { index -> it[index]?.id ?: index }) { index ->
-                        when (screenConfig) {
-                            ScreenConfig.SINGLE -> {
-                                MakeProductCard2(
-                                    navController = navController,
-                                    productsList[index]
+                items(productsList.size, key = { index -> productsList[index]?.id ?: index }) { index ->
+                    when (screenConfig) {
+                        ScreenConfig.SINGLE -> {
+                            MakeProductCard2(
+                                navController = navController,
+                                productsList[index]
+                            )
+                        }
+                        ScreenConfig.ROW -> Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (index % 2 == 0) {
+                                val product1 = productsList[index]
+                                val product2 = if (index + 1 < productsList.size) productsList[index + 1] else null
+                                RowOfCards(
+                                    navController,
+                                    product1 = product1,
+                                    product2 = product2
                                 )
-                            }
-                            ScreenConfig.ROW -> Row(
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                if (index % 2 == 0) {
-                                    val product1 = it[index]
-                                    val product2 = if (index + 1 < it.size) it[index + 1] else null
-                                    RowOfCards(
-                                        navController,
-                                        product1 = product1,
-                                        product2 = product2
-                                    )
-                                }
                             }
                         }
                     }
@@ -238,6 +239,7 @@ fun TopCardCatalog(
         ProductSortType.MORE_RATE->R.string.sortingTextCatalog2
         ProductSortType.EXPENSIVE->R.string.sortingTextCatalog3
         ProductSortType.CHEAP->R.string.sortingTextCatalog4
+        else ->R.string.sortingTextCatalog1
     }
     var searchSwitch by remember{mutableStateOf(SearchSwitch.FILTERS)}
     val tokenStorage = remember {
@@ -660,6 +662,7 @@ fun SheetTextCatalog(
         ProductSortType.MORE_RATE->R.string.sortingTextCatalog2
         ProductSortType.EXPENSIVE->R.string.sortingTextCatalog3
         ProductSortType.CHEAP->R.string.sortingTextCatalog4
+        else -> R.string.sortingTextCatalog1
     }
 
     val cardColor: Color

@@ -1,6 +1,10 @@
 package com.example.teashop.screen.screen.basket_screen.order
 
+import android.content.Context
+import android.widget.Toast.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,8 +21,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,16 +36,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import com.example.teashop.R
-import com.example.teashop.data.model.DataSource
 import com.example.teashop.data.model.address.Address
 import com.example.teashop.data.model.bucket.Bucket
+import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.MakeFullTextField
+import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
@@ -51,34 +60,82 @@ import com.example.teashop.ui.theme.montserratFamily
 @Composable
 fun LaunchOrderScreen(
     navController: NavController,
-    bucket: Bucket?
+    bucket: Bucket?,
+    viewModel: OrderViewModel = viewModel()
 ){
+    val addressView by viewModel.addresses.observeAsState()
+    val userView by viewModel.user.observeAsState()
     val context = LocalContext.current
     val tokenStorage = remember {
         TokenStorage()
     }
 
-    val addressList = remember{ mutableStateListOf(Address()) }
-    Navigation(navController = navController) {
-        MakeOrderScreen(
-            navController = navController,
-            addressList = addressList
-        )
+    LaunchedEffect(Unit) {
+        val token = tokenStorage.getToken(context)
+        token?.let {
+            viewModel.getUserAddresses(
+                token,
+                onError = {
+                    makeText(context, "Невозможно получить ваши адреса", LENGTH_SHORT).show()
+                }
+            )
+
+            viewModel.getLoggedUserInfo(
+                it,
+                onError = {
+                    makeText(context, "Упс, вы не еще не авторизировались", LENGTH_SHORT).show()
+                    tokenStorage.deleteToken(context)
+                    navController.navigate(
+                        Screen.Log.route,
+                        navOptions = navOptions {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                        }
+                    )
+                }
+            )
+        }
+    }
+    if (addressView != null && bucket != null && userView != null) {
+        Navigation(navController = navController) {
+            MakeOrderScreen(
+                navController,
+                addressView!!,
+                viewModel,
+                bucket,
+                userView!!,
+                tokenStorage,
+                context
+            )
+        }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
-    var productCnt = 1
-    var basketList = DataSource().loadFullProducts()
+fun MakeOrderScreen(
+    navController: NavController,
+    addressList: MutableList<Address>,
+    viewModel: OrderViewModel,
+    bucket: Bucket,
+    user: User,
+    tokenStorage: TokenStorage,
+    context: Context
+){
+    val totalCount = remember {
+        bucket.products?.sumOf {
+            it.quantityInBucket
+        }
+    }
     var receiverName by remember {
-        mutableStateOf("")
+        mutableStateOf(user.name)
     }
     var receiverSurName by remember {
-        mutableStateOf("")
+        mutableStateOf(user.surname)
     }
     var receiverEmail by remember {
-        mutableStateOf("")
+        mutableStateOf(user.email)
     }
     var receiverPhone by remember {
         mutableStateOf("")
@@ -87,7 +144,7 @@ fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
         mutableStateOf(false)
     }
     var selectedAddress by remember {
-        mutableStateOf(false)
+        mutableIntStateOf(0)
     }
 
     LazyColumn(
@@ -144,15 +201,33 @@ fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
                 }
             }
         }
-        items(addressList.size){address ->
+        items(addressList.size, { addressList[it].id }){address ->
             Card(
                 colors = CardDefaults.cardColors(containerColor = White10),
                 modifier = Modifier
                     .padding(bottom = 10.dp)
                     .fillMaxWidth()
-                    .clickable(
+                    .combinedClickable(
                         onClick = {
-                            selectedAddress = !selectedAddress
+                            selectedAddress = address
+                        },
+                        onLongClick = {
+                            tokenStorage.getToken(context)?.let {
+                                viewModel.deleteAddress(
+                                    it,
+                                    addressList[address].id,
+                                    onSuccess = {
+                                        makeText(context, "Адрес удален", LENGTH_SHORT).show()
+                                    },
+                                    onError = {
+                                        makeText(
+                                            context,
+                                            "Не удалось удалить адрес",
+                                            LENGTH_SHORT
+                                        ).show()
+                                    }
+                                )
+                            }
                         }
                     )
             ){
@@ -167,15 +242,15 @@ fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
                         modifier = Modifier
                             .padding(end = 20.dp)
                             .size(30.dp),
-                        tint = when(selectedAddress)
+                        tint = when(address == selectedAddress)
                         {
-                                true -> Green10
-                                false -> Grey10
+                            true -> Green10
+                            false -> Grey10
                         },
                         contentDescription = null
                     )
                     Text(
-                        text = "${addressList[address].address}, ${addressList[address].city}",
+                        text = addressList[address].address,
                         fontFamily = montserratFamily,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W500,
@@ -197,10 +272,26 @@ fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
                     color = Black10,
                     modifier = Modifier.padding(10.dp)
                 )
-                MakeFullTextField(header = "Имя", onValueChange = {receiverName = it})
-                MakeFullTextField(header = "Фамилия", onValueChange = {receiverSurName = it})
-                MakeFullTextField(header = "Email", onValueChange = {receiverEmail = it})
-                MakeFullTextField(header = "Номер телефона", onValueChange = {receiverPhone = it})
+                MakeFullTextField(
+                    header = "Имя",
+                    inputValue = receiverName,
+                    onValueChange = {receiverName = it}
+                )
+                MakeFullTextField(
+                    header = "Фамилия",
+                    inputValue = receiverSurName,
+                    onValueChange = {receiverSurName = it}
+                )
+                MakeFullTextField(
+                    header = "Email",
+                    inputValue = receiverEmail,
+                    onValueChange = {receiverEmail = it}
+                )
+                MakeFullTextField(
+                    header = "Номер телефона",
+                    inputValue = receiverPhone,
+                    onValueChange = {receiverPhone = it}
+                )
             }
         }
         item {
@@ -230,9 +321,14 @@ fun MakeOrderScreen(navController: NavController, addressList: List<Address>){
                 )
             }
         }
-//        item{ //TODO
-//            MakeSummaryCard(productCnt = productCnt, productList = basketList)
-//        }
+        item{
+            MakeSummaryCard(
+                productCnt = totalCount ?: 0,
+                bonusesSpent = if (writeOffBonus) user.teaBonuses else 0,
+                bonusesAccrued = bucket.plusTeaBonuses,
+                totalCost = if (writeOffBonus) bucket.totalSumWithDiscount - user.teaBonuses else bucket.totalSumWithDiscount
+            )
+        }
         item{
             MakeAgreeBottomButton(onClick = { /*TODO*/ }, text = "Оформить заказ")
         }

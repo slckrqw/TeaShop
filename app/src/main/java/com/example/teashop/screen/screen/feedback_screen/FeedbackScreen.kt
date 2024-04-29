@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,10 +40,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
-import com.example.teashop.data.enums.SortingType
 import com.example.teashop.data.model.pagination.review.ReviewFilter
 import com.example.teashop.data.model.pagination.review.ReviewPagingRequest
+import com.example.teashop.data.model.pagination.review.ReviewSortType
 import com.example.teashop.data.model.pagination.review.ReviewSorter
+import com.example.teashop.data.model.pagination.review.reviewSorterSaver
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.review.Review
 import com.example.teashop.data.storage.TokenStorage
@@ -58,16 +60,16 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
 
-var sorting = SortingType.NEW //TODO add review sort
-
 @Composable
 fun LaunchFeedbackScreen(
     navController: NavController,
     product: ProductFull?,
     viewModel: FeedbackViewModel = viewModel(),
-    reviewSorter: ReviewSorter = ReviewSorter(),
     reviewFilter: ReviewFilter = ReviewFilter(),
 ){
+    val reviewSorter by rememberSaveable(stateSaver = reviewSorterSaver()) {
+        mutableStateOf(ReviewSorter())
+    }
     val reviewView by viewModel.review.observeAsState()
     val context = LocalContext.current
     val tokenStorage = remember {
@@ -115,6 +117,9 @@ fun LaunchFeedbackScreen(
                 existsReview,
                 tokenStorage,
                 context,
+                reviewSorter,
+                viewModel,
+                reviewFilter
             )
         }
     }
@@ -127,12 +132,14 @@ fun MakeFeedbackScreen(
     product: ProductFull?,
     existsReview: Boolean,
     tokenStorage: TokenStorage,
-    context: Context
+    context: Context,
+    reviewSorter: ReviewSorter,
+    viewModel: FeedbackViewModel,
+    reviewFilter: ReviewFilter
 ){
-    var sortingText by remember {
-        mutableStateOf("Новые")
+    var sorter by remember {
+        mutableStateOf(reviewSorter)
     }
-    sortingText = sorting.value
     var expandedChange by remember{mutableStateOf(false)}
     var reviewListSum = 0.0
     var averageRate = 0.0
@@ -242,7 +249,7 @@ fun MakeFeedbackScreen(
                         contentDescription = null
                     )
                     Text(
-                        text = sortingText,
+                        text = sorter.sortType.value,
                         fontFamily = montserratFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.W400,
@@ -257,7 +264,14 @@ fun MakeFeedbackScreen(
                 }
             }
             if (expandedChange) {
-                BottomSheetCatalog(expandedChange = { expandedChange = it })
+                BottomSheetCatalog(
+                    expandedChange = { expandedChange = it },
+                    context = context,
+                    tokenStorage = tokenStorage,
+                    reviewSorter = reviewSorter,
+                    viewModel = viewModel,
+                    reviewFilter = reviewFilter
+                )
             }
         }
     }
@@ -265,7 +279,14 @@ fun MakeFeedbackScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheetCatalog(expandedChange: (Boolean)->Unit){
+fun BottomSheetCatalog(
+    expandedChange: (Boolean)->Unit,
+    tokenStorage: TokenStorage,
+    context: Context,
+    reviewSorter: ReviewSorter,
+    viewModel: FeedbackViewModel,
+    reviewFilter: ReviewFilter
+){
     ModalBottomSheet(
         onDismissRequest = {expandedChange(false)},
         containerColor = White10,
@@ -280,19 +301,27 @@ fun BottomSheetCatalog(expandedChange: (Boolean)->Unit){
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 20.dp)
             )
-            SheetTextCatalog(SortingType.NEW, expandedChange)
-            SheetTextCatalog(SortingType.OLD, expandedChange)
-            SheetTextCatalog(SortingType.NEGATIVE, expandedChange)
-            SheetTextCatalog(SortingType.POSITIVE, expandedChange)
+            SheetTextCatalog(ReviewSortType.NEW, expandedChange, tokenStorage, context, reviewSorter, viewModel, reviewFilter)
+            SheetTextCatalog(ReviewSortType.OLD, expandedChange, tokenStorage, context, reviewSorter, viewModel, reviewFilter)
+            SheetTextCatalog(ReviewSortType.NEGATIVE, expandedChange, tokenStorage, context, reviewSorter, viewModel, reviewFilter)
+            SheetTextCatalog(ReviewSortType.POSITIVE, expandedChange, tokenStorage, context, reviewSorter, viewModel, reviewFilter)
         }
     }
 }
 
 @Composable
-fun SheetTextCatalog(text: SortingType, expandedChange: (Boolean)->Unit){
+fun SheetTextCatalog(
+    type: ReviewSortType,
+    expandedChange: (Boolean)->Unit,
+    tokenStorage: TokenStorage,
+    context: Context,
+    reviewSorter: ReviewSorter,
+    viewModel: FeedbackViewModel,
+    reviewFilter: ReviewFilter
+){
     val cardColor: Color
     val textColor: Color
-    if(text == sorting){
+    if(type == reviewSorter.sortType){
         cardColor = Green10
         textColor = White10
     }
@@ -310,7 +339,7 @@ fun SheetTextCatalog(text: SortingType, expandedChange: (Boolean)->Unit){
     ){
         Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.height(40.dp)) {
             Text(
-                text = text.value,
+                text = type.value,
                 fontFamily = montserratFamily,
                 fontWeight = FontWeight.W700,
                 fontSize = 15.sp,
@@ -320,8 +349,24 @@ fun SheetTextCatalog(text: SortingType, expandedChange: (Boolean)->Unit){
                     .fillMaxWidth()
                     .clickable(
                         onClick = {
-                            sorting = text
+                            reviewSorter.sortType = type
                             expandedChange(false)
+                            viewModel.getAllReviewByProduct(
+                                tokenStorage.getToken(context),
+                                ReviewPagingRequest(
+                                    filter = reviewFilter,
+                                    sorter = reviewSorter
+                                ),
+                                onError = {
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "Получение списка отзывов временно недоступно",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                        .show()
+                                }
+                            )
                         }
                     )
             )

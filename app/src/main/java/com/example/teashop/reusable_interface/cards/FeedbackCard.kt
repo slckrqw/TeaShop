@@ -57,7 +57,7 @@ fun MakeFeedbackCard(review: Review){
                         fontWeight = FontWeight.W400,
                     )
                 }
-                review.createdTime?.let {
+                review.createdDate?.let {
                     Text(
                         text = it.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                         fontFamily = montserratFamily,

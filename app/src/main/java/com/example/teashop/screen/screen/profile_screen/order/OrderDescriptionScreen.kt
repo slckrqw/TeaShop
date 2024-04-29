@@ -42,7 +42,6 @@ import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun LaunchOrderDescriptionScreen(
@@ -161,8 +160,7 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
                         color = Black10
                     )
                     Text(
-                        text = "${order.address.city}, " +
-                                "${order.address.address}, " +
+                        text = "${order.address.address}, " +
                                 "${order.address.flat}",
                         fontSize = 14.sp,
                         fontFamily = montserratFamily,

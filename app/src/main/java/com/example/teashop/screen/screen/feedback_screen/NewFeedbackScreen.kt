@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.navOptions
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
@@ -61,7 +60,6 @@ import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.saves.ReviewSave
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
-import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -273,14 +271,7 @@ fun MakeNewFeedbackScreen(
                     onSuccess = {
                         Toast.makeText(context, "Ваш отзыв успешно добавлен!", Toast.LENGTH_SHORT)
                             .show()
-                        navController.navigate(
-                            Screen.UserFeedback.route,
-                            navOptions = navOptions {
-                                popUpTo(navController.graph.id) {
-                                    inclusive = true
-                                }
-                            }
-                        )
+                        navController.popBackStack()
                     },
                     onError = {
                         Toast.makeText(

@@ -5,7 +5,7 @@ import java.time.ZonedDateTime
 
 data class Review(
     var id: Long? = 1234,
-    var createdTime: ZonedDateTime? = ZonedDateTime.now(),
+    var createdDate: ZonedDateTime? = ZonedDateTime.now(),
     var userName: String? = "kirpich",
     var stars: Int? = 3,
     var reviewText: String? = "aboba",

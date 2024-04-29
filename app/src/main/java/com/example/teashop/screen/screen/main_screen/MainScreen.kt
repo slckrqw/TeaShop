@@ -139,7 +139,7 @@ fun MakeMainScreen(productsList: List<ProductShort?>?, navController: NavControl
             })
             NewProductsBanner(navController)
             BonusInfoCard(bonusCount)
-            PopularProductsText()//TODO place text into start position
+            PopularProductsText()
         }
         productsList?.let {
             items(it.size, key = { index -> it[index]?.id ?: index }) { index ->

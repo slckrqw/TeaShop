@@ -203,14 +203,7 @@ fun MakeUserFeedbackScreen(
                                                         it.id!!,
                                                         onSuccess = {
                                                             Toast.makeText(context, "Вы успешно удалили отзыв", Toast.LENGTH_SHORT).show()
-                                                            navController.navigate(
-                                                                Screen.UserFeedback.route,
-                                                                navOptions = navOptions {
-                                                                    popUpTo(navController.graph.id) {
-                                                                        inclusive = true
-                                                                    }
-                                                                }
-                                                            )
+                                                            navController.popBackStack()
                                                         },
                                                         onError = {
                                                             Toast.makeText(context, "Не удалось удалить отзыв", Toast.LENGTH_SHORT).show()
