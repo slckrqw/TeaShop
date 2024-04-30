@@ -26,10 +26,16 @@ class OrderViewModel: ViewModel() {
         onError: () -> Unit
     ) {
         viewModelScope.launch() {
+            if (orderPagingRequest.filter.maxPrice == 0.0) {
+                orderPagingRequest.filter.maxPrice = 1000000.0
+            }
             val response = OrderRepository().getOrdersByFilter("Bearer $token", orderPagingRequest)
             if (response.isSuccessful) {
                 response.body()?.let {
                     _orders.value = it.data
+                    if (orderPagingRequest.filter.maxPrice == 1000000.0) {
+                        orderPagingRequest.filter.maxPrice = 0.0
+                    }
                 }
             } else {
                 onError()

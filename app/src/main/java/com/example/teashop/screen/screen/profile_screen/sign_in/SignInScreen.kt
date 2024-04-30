@@ -246,7 +246,7 @@ fun MakeSignInScreen(
                         authViewModel.authenticate(
                             authRequest,
                             onSuccess = { authResponse ->
-                                tokenStorage.saveToken(context, authResponse.token)
+                                tokenStorage.saveTokenAndRole(context, authResponse.token, authResponse.role)
                                 if (authResponse.role == UserRole.USER.name) {
                                     navController.navigate(
                                         Screen.Profile.route,

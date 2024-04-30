@@ -9,7 +9,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -23,6 +25,7 @@ import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.data.model.user.User
+import com.example.teashop.data.model.user.UserRole
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
@@ -64,9 +67,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TeaShopApp(){
     val navController = rememberNavController()
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+    val context = LocalContext.current
+    val role = tokenStorage.getRole(context)
     
     NavHost(navController = navController,
-        startDestination = AdminScreen.Orders.route,
+        startDestination = if (role != UserRole.ADMIN.name) Screen.Main.route else AdminScreen.Orders.route,
         enterTransition = { fadeIn() },
         exitTransition = { fadeOut() },
         popEnterTransition  = { fadeIn() },

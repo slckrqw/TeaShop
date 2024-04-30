@@ -13,7 +13,7 @@ data class ProductFilter(
     var inStock: Boolean? = false,
     var isActive: Boolean? = null,
     var minPrice: Double? = 0.0,
-    var maxPrice: Double? = 0.0,
+    var maxPrice: Double? = null,
     var variantTypes: MutableList<VariantType>? = mutableListOf()
 )
 

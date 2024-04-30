@@ -123,12 +123,12 @@ fun OrderStatusText(orderStatus: OrderStatus, fontSize: Int){
                 style = fontStyle,
                 color = Green10
             )
-            OrderStatus.ON_THE_WAY -> Text(
+            OrderStatus.IN_THE_WAY -> Text(
                 text = "В пути",
                 style = fontStyle,
                 color = Green10
             )
-            OrderStatus.DELIVERED -> Text(
+            OrderStatus.COMPLETED -> Text(
                 text = "Доставлен",
                 style = fontStyle,
                 color = Green10

@@ -32,6 +32,9 @@ class CatalogScreenViewModel: ViewModel() {
             if (response.isSuccessful) {
                 response.body()?.let {
                     _products.value = it.data
+                    if (productPagingRequest.filter.maxPrice == 1000000.0) {
+                        productPagingRequest.filter.maxPrice = 0.0
+                    }
                 }
             } else {
                 onError()

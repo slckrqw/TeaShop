@@ -27,8 +27,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,6 +66,8 @@ import com.example.teashop.data.model.pagination.order.OrderFilter
 import com.example.teashop.data.model.pagination.order.OrderPagingRequest
 import com.example.teashop.data.model.pagination.order.OrderSortType
 import com.example.teashop.data.model.pagination.order.OrderSorter
+import com.example.teashop.data.model.pagination.order.orderFilterSaver
+import com.example.teashop.data.model.pagination.order.orderSorterSaver
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.reusable_interface.cards.MakeOrderCard
 import com.example.teashop.screen.screen.catalog_screen.IconsTopCatalog
@@ -76,29 +77,35 @@ import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
-import kotlin.time.Duration.Companion.days
-
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun LaunchAdminOrders(
     navController: NavController,
     viewModel: OrderViewModel = viewModel(),
-    orderSorter: OrderSorter = OrderSorter(),
-    orderFilter: OrderFilter = OrderFilter()
 ){
+    val filterParams by rememberSaveable(stateSaver = orderFilterSaver()) {
+        mutableStateOf(OrderFilter())
+    }
+    filterParams.byCurrentUser = false
+    val sorterParams by rememberSaveable(stateSaver = orderSorterSaver()) {
+        mutableStateOf(OrderSorter())
+    }
     val orderView by viewModel.orders.observeAsState()
     val context = LocalContext.current
     val tokenStorage = remember {
         TokenStorage()
     }
-    orderFilter.byCurrentUser = false
+
     LaunchedEffect(Unit) {
         tokenStorage.getToken(context)?.let {
             viewModel.getAllOrders(
                 it,
                 OrderPagingRequest(
-                    filter = orderFilter,
-                    sorter = orderSorter
+                    filter = filterParams,
+                    sorter = sorterParams
                 ),
                 onError = {
                     Toast.makeText(context, "Не удалось получить ваши заказы", Toast.LENGTH_SHORT).show()
@@ -106,19 +113,20 @@ fun LaunchAdminOrders(
             )
         }
     }
+
     orderView?.let {orders ->
         MakeOrdersScreen(
             orderList = orders,
             navController = navController,
-            sorterParams = orderSorter,
-            filterParams = orderFilter,
+            sorterParams = sorterParams,
+            filterParams = filterParams,
             context = context,
             lazyListState = LazyListState(),
             viewModel = viewModel
         )
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun MakeOrdersScreen(
     orderList: List<OrderShort?>,
@@ -253,7 +261,7 @@ fun MakeOrdersScreen(
             }
         }
         LazyColumn {
-            items(orderList.size){order ->
+            items(orderList.size, { orderList[it]?.id ?: it }){order ->
                 orderList[order]?.let {
                     MakeOrderCard(order = it, navController = navController)
                 }
@@ -284,19 +292,10 @@ fun BottomFilterCatalog(
     var expanded by remember{
         mutableStateOf(false)
     }
-    var expandedDate by remember{
-        mutableStateOf(false)
-    }
     val statusBarText = if(filterParams.status == null){
         "Любой"
     }else{
         filterParams.status!!.value
-    }
-    var date = rememberDatePickerState(
-        initialDisplayMode = DisplayMode.Picker
-    )
-    var dateTemp by remember{
-        mutableStateOf("")
     }
 
     ModalBottomSheet(
@@ -351,9 +350,16 @@ fun BottomFilterCatalog(
                     .padding(horizontal = 5.dp, vertical = 10.dp)
                     .fillMaxWidth()
             ) {
-                //TODO date pickers
-                DatePickerItem()
-                DatePickerItem()
+                DatePickerItem(
+                    placeHolder = "От",
+                    filterParams= filterParams,
+                    context = context
+                )
+                DatePickerItem(
+                    placeHolder = "До",
+                    filterParams= filterParams,
+                    context = context
+                )
             }
             Row (
                 modifier = Modifier
@@ -397,10 +403,10 @@ fun BottomFilterCatalog(
                         DropDownItem(orderStatus = OrderStatus.CONFIRMED, filterParams = filterParams) {
                             expanded = it
                         }
-                        DropDownItem(orderStatus = OrderStatus.ON_THE_WAY, filterParams = filterParams) {
+                        DropDownItem(orderStatus = OrderStatus.IN_THE_WAY, filterParams = filterParams) {
                             expanded = it
                         }
-                        DropDownItem(orderStatus = OrderStatus.DELIVERED, filterParams = filterParams) {
+                        DropDownItem(orderStatus = OrderStatus.COMPLETED, filterParams = filterParams) {
                             expanded = it
                         }
                         DropDownItem(orderStatus = OrderStatus.CANCELLED, filterParams = filterParams) {
@@ -641,11 +647,16 @@ fun DropDownItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RowScope.DatePickerItem(){
+fun RowScope.DatePickerItem(
+    placeHolder: String,
+    filterParams: OrderFilter,
+    context: Context
+){
     var expanded by remember{
         mutableStateOf(false)
     }
     val date = rememberDatePickerState()
+
     Button(
         onClick = {expanded = true},
         colors = ButtonDefaults.buttonColors(containerColor = Grey20),
@@ -657,24 +668,48 @@ fun RowScope.DatePickerItem(){
         contentPadding = PaddingValues(0.dp),
         border = BorderStroke(1.dp, Green10)
     ) {
-        Text(
-            text =
-            if(date.selectedDateMillis == null){
-                                               "От"
-            }else{
-                 date.selectedDateMillis!!.days.toString()
-            },
-            fontFamily = montserratFamily,
-            fontWeight = FontWeight.W400,
-            fontSize = 15.sp,
-            color = Black10
-        )
-        if(expanded) {
+        (if(placeHolder == "От"){
+            if (filterParams.dateFrom == null) placeHolder
+            else filterParams.dateFrom?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        } else {
+            if (filterParams.dateTo == null) placeHolder
+            else filterParams.dateTo?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        })?.let {
+            Text(
+                text =
+                it,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W400,
+                fontSize = 15.sp,
+                color = Black10
+            )
+        }
+        if (expanded) {
             DatePickerDialog(
                 onDismissRequest = { expanded = false },
                 confirmButton = {
                     Button(
                         onClick = {
+                            val selectedZonedDateTime = date.selectedDateMillis?.let {
+                                Instant.ofEpochMilli(it)
+                                    .atZone(ZoneId.systemDefault())
+                            }
+
+                            if (placeHolder == "От") {
+                                if (selectedZonedDateTime != null && (filterParams.dateTo == null || selectedZonedDateTime <= filterParams.dateTo)) {
+                                    filterParams.dateFrom = selectedZonedDateTime
+                                    expanded = false
+                                } else {
+                                    Toast.makeText(context, "Дата 'От' не может быть больше даты 'До'", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                if (selectedZonedDateTime != null && (filterParams.dateFrom == null || selectedZonedDateTime >= filterParams.dateFrom)) {
+                                    filterParams.dateTo = selectedZonedDateTime
+                                    expanded = false
+                                } else {
+                                    Toast.makeText(context, "Дата 'До' не может быть меньше даты 'От'", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                             expanded = false
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = White10),
