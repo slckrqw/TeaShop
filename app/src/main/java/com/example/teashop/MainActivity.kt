@@ -15,7 +15,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.teashop.admin_screen.LaunchAdminOrders
+import com.example.teashop.admin_screen.order_description.LaunchAdminDescription
+import com.example.teashop.admin_screen.orders.LaunchAdminOrders
+import com.example.teashop.admin_screen.products.LaunchAdminProducts
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.bucket.Bucket
 import com.example.teashop.data.model.category.Category
@@ -164,6 +166,14 @@ fun TeaShopApp(){
 
         composable(AdminScreen.Orders.route){
             LaunchAdminOrders(navController = navController)
+        }
+
+        composable(AdminScreen.Description.route){
+            LaunchAdminDescription(navController = navController/*, orderId = */) //TODO orderId parameter
+        }
+        
+        composable(AdminScreen.Products.route){
+            LaunchAdminProducts(navController = navController)
         }
     }
 }

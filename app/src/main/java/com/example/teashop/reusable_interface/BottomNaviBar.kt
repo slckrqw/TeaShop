@@ -3,6 +3,7 @@ package com.example.teashop.reusable_interface
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -17,7 +18,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.NaviBarItem
-import com.example.teashop.navigation.NaviConstants
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
@@ -50,7 +50,8 @@ fun MakeNaviBar(navController: NavController, barIconList: List<NaviBarItem>){
                     icon = {
                         Icon(
                             painterResource(naviItem.icon),
-                            contentDescription = null
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(

@@ -24,7 +24,12 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun MakeFullTextField(header: String, onValueChange: (String) -> Unit = {}, bottomPadding: Int = 10, inputValue: String? = ""){
+fun MakeFullTextField(
+    header: String,
+    onValueChange: (String) -> Unit = {},
+    bottomPadding: Int = 10,
+    inputValue: String? = ""
+){
     var value by remember{
         mutableStateOf(inputValue ?: "")
     }

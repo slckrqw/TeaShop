@@ -1,4 +1,4 @@
-package com.example.teashop.admin_screen
+package com.example.teashop.admin_screen.orders
 
 import android.content.Context
 import android.widget.Toast
@@ -69,6 +69,8 @@ import com.example.teashop.data.model.pagination.order.OrderSorter
 import com.example.teashop.data.model.pagination.order.orderFilterSaver
 import com.example.teashop.data.model.pagination.order.orderSorterSaver
 import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.navigation.admin.AdminNavigation
+import com.example.teashop.navigation.admin.AdminScreen
 import com.example.teashop.reusable_interface.cards.MakeOrderCard
 import com.example.teashop.screen.screen.catalog_screen.IconsTopCatalog
 import com.example.teashop.ui.theme.Black10
@@ -113,17 +115,18 @@ fun LaunchAdminOrders(
             )
         }
     }
-
-    orderView?.let {orders ->
-        MakeOrdersScreen(
-            orderList = orders,
-            navController = navController,
-            sorterParams = sorterParams,
-            filterParams = filterParams,
-            context = context,
-            lazyListState = LazyListState(),
-            viewModel = viewModel
-        )
+    AdminNavigation(navController = navController) {
+        orderView?.let {orders ->
+            MakeOrdersScreen(
+                orderList = orders,
+                navController = navController,
+                sorterParams = sorterParams,
+                filterParams = filterParams,
+                context = context,
+                lazyListState = LazyListState(),
+                viewModel = viewModel
+            )
+        }
     }
 }
 
@@ -263,7 +266,7 @@ fun MakeOrdersScreen(
         LazyColumn {
             items(orderList.size, { orderList[it]?.id ?: it }){order ->
                 orderList[order]?.let {
-                    MakeOrderCard(order = it, navController = navController)
+                    MakeOrderCard(order = it, navController = navController, AdminScreen.Description.route)
                 }
             }
         }
@@ -292,7 +295,10 @@ fun BottomFilterCatalog(
     var expanded by remember{
         mutableStateOf(false)
     }
-    val statusBarText = if(filterParams.status == null){
+    var statusBarText by remember {
+        mutableStateOf("")
+    }
+    statusBarText = if(filterParams.status == null){
         "Любой"
     }else{
         filterParams.status!!.value
@@ -345,9 +351,17 @@ fun BottomFilterCatalog(
                     goalString = "До"
                 )
             }
+            Text(
+                text = "Дата, дд-мм-гг:",
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W400,
+                fontSize = 15.sp,
+                color = Black10,
+                modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
+            )
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 5.dp, vertical = 10.dp)
+                    .padding(start = 5.dp, end = 5.dp, bottom = 10.dp)
                     .fillMaxWidth()
             ) {
                 DatePickerItem(
@@ -361,9 +375,9 @@ fun BottomFilterCatalog(
                     context = context
                 )
             }
-            Row (
+            Row(
                 modifier = Modifier
-                    .padding(10.dp)
+                    .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -386,7 +400,7 @@ fun BottomFilterCatalog(
                     border = BorderStroke(1.dp, Green10)
                 ) {
                     Text(
-                        text = statusBarText,
+                        text = filterParams.status?.value?: "Любой",
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.W400,
                         fontSize = 15.sp,
@@ -626,7 +640,7 @@ fun DropDownItem(
     DropdownMenuItem(
         text = {
            Text(
-               text = orderStatus?.value ?: "Любой",
+               text = orderStatus?.value?: "Любой",
                fontFamily = montserratFamily,
                fontWeight = FontWeight.W400,
                fontSize = 15.sp,

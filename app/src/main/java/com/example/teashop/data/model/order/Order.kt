@@ -9,14 +9,14 @@ import java.time.ZonedDateTime
 
 @Parcelize
 data class Order(
-    val id: Long,
-    val createdDate: ZonedDateTime,
+    val id: Long = 123,
+    val createdDate: ZonedDateTime = ZonedDateTime.now(),
     val recipient: Recipient = Recipient(),
-    val status: OrderStatus,
+    val status: OrderStatus = OrderStatus.NEW,
     val packageOrders: List<PackageOrder> = listOf(),
-    val trackNumber: String?,
+    var trackNumber: String? = "1234",
     val address: Address = Address(),
-    val bonusesSpent: Int,
-    val bonusesAccrued: Int,
-    val totalCost: Double,
+    val bonusesSpent: Int = 10,
+    val bonusesAccrued: Int = 15,
+    val totalCost: Double = 234.0,
 ): Parcelable

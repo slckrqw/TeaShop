@@ -1,4 +1,4 @@
-package com.example.teashop.admin_screen
+package com.example.teashop.admin_screen.orders
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

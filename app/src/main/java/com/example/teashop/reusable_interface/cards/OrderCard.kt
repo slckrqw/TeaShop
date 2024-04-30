@@ -15,6 +15,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,11 +27,13 @@ import com.example.teashop.data.model.packages.PackageOrder
 import com.example.teashop.data.model.packages.PackageShort
 import com.example.teashop.screen.screen.profile_screen.order.OrderStatusText
 import com.example.teashop.ui.theme.Black10
+import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun MakeOrderCard(order: OrderShort, navController: NavController){
+fun MakeOrderCard(order: OrderShort, navController: NavController, route: String){
     Card(
         modifier = Modifier
             .padding(bottom = 10.dp)
@@ -38,7 +41,7 @@ fun MakeOrderCard(order: OrderShort, navController: NavController){
             .height(170.dp)
             .clickable(onClick = {
                 navController.currentBackStackEntry?.savedStateHandle?.set("orderId", order.id)
-                navController.navigate("description_screen/${order.id}")
+                navController.navigate(route)
             }),
         colors = CardDefaults.cardColors(containerColor = White10),
         shape = RoundedCornerShape(10.dp)
@@ -49,13 +52,27 @@ fun MakeOrderCard(order: OrderShort, navController: NavController){
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(
-                text = "№${order.id}",
-                fontSize = 15.sp,
-                fontFamily = montserratFamily,
-                fontWeight = FontWeight.W700,
-                color = Black10
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "№${order.id}",
+                    fontSize = 15.sp,
+                    fontFamily = montserratFamily,
+                    fontWeight = FontWeight.W700,
+                    color = Black10
+                )
+                Text(
+                    text = order.createdDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                    fontFamily = montserratFamily,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.W400,
+                    color = Grey10
+                )
+            }
             Text(
                 text = "Цена: ${order.totalCost} рублей",
                 fontSize = 10.sp,

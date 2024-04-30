@@ -28,6 +28,7 @@ import com.example.teashop.data.model.pagination.order.OrderPagingRequest
 import com.example.teashop.data.model.pagination.order.OrderSorter
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
+import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeOrderCard
 import com.example.teashop.ui.theme.Green10
@@ -91,7 +92,7 @@ fun MakeOrdersScreen(
             LazyColumn {
                 items(orders.size, { orders[it]?.id ?: it}) { order ->
                     orders[order]?.let {
-                        MakeOrderCard(order = it, navController)
+                        MakeOrderCard(order = it, navController, Screen.OrderDescription.route)
                     }
                 }
             }
