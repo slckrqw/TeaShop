@@ -40,14 +40,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.example.teashop.R
+import com.example.teashop.data.api.PUBLISH_KEY
+import com.example.teashop.data.api.StripeApiService
 import com.example.teashop.data.model.address.Address
 import com.example.teashop.data.model.bucket.Bucket
+import com.example.teashop.data.model.packages.ShortOrderPackage
+import com.example.teashop.data.model.recipient.Recipient
+import com.example.teashop.data.model.saves.ClientOrderSave
+import com.example.teashop.data.model.stripe.PaymentIntent
 import com.example.teashop.data.model.user.User
+import com.example.teashop.data.storage.StripeStorage
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.MakeFullTextField
+import com.example.teashop.reusable_interface.MakeMaskedTextField
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -56,6 +64,15 @@ import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.rememberPaymentSheet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun LaunchOrderScreen(
@@ -146,6 +163,60 @@ fun MakeOrderScreen(
     var selectedAddress by remember {
         mutableIntStateOf(0)
     }
+
+    val paymentSheetCallback = PaymentSheetResultCallback { result ->
+        when (result) {
+            is PaymentSheetResult.Completed -> {
+                val address: Address?
+                if (selectedAddress in addressList.indices) {
+                    address = addressList[selectedAddress]
+                } else {
+                    makeText(context, "Укажите адрес доставки", LENGTH_SHORT).show()
+                    return@PaymentSheetResultCallback
+                }
+
+                val shortOrderPackageDtos: List<ShortOrderPackage> = bucket.products?.map {
+                    ShortOrderPackage(it.packId, it.quantityInBucket)
+                } ?: emptyList()
+
+                if (shortOrderPackageDtos.isEmpty()) {
+                    makeText(context, "Сначала добавьте товар в корзину", LENGTH_SHORT).show()
+                    return@PaymentSheetResultCallback
+                }
+
+                val orderSave = ClientOrderSave(
+                    recipientDto = Recipient(
+                        surname = receiverSurName!!.trim(),
+                        name = receiverName.trim(),
+                        email = receiverEmail.trim(),
+                        phoneNumber = receiverPhone.trim()
+                    ),
+                    addressId = address.id,
+                    isPayWithBonuses = writeOffBonus,
+                    shortOrderPackageDtos = shortOrderPackageDtos
+                )
+
+                viewModel.createOrder(
+                    tokenStorage.getToken(context)!!,
+                    orderSave,
+                    onSuccess = {
+                        makeText(context, "Платеж успешно завершен, заказ создан!", LENGTH_SHORT).show()
+                        navController.popBackStack()
+                    },
+                    onError = {
+                        makeText(context, "Не удалось создать заказ :(", LENGTH_SHORT).show()
+                    }
+                )
+            }
+            is PaymentSheetResult.Canceled -> {
+                makeText(context, "Платеж отменен", LENGTH_SHORT).show()
+            }
+            is PaymentSheetResult.Failed -> {
+                makeText(context, "Ошибка создании платежа", LENGTH_SHORT).show()
+            }
+        }
+    }
+    val paymentSheet = rememberPaymentSheet(paymentSheetCallback)
 
     LazyColumn(
         modifier = Modifier.fillMaxHeight()
@@ -287,10 +358,12 @@ fun MakeOrderScreen(
                     inputValue = receiverEmail,
                     onValueChange = {receiverEmail = it}
                 )
-                MakeFullTextField(
+                MakeMaskedTextField(
                     header = "Номер телефона",
                     inputValue = receiverPhone,
-                    onValueChange = {receiverPhone = it}
+                    onValueChange = {receiverPhone = it},
+                    mask = "+7(###)###-##-##",
+                    contextLength = 10
                 )
             }
         }
@@ -330,7 +403,78 @@ fun MakeOrderScreen(
             )
         }
         item{
-            MakeAgreeBottomButton(onClick = { /*TODO*/ }, text = "Оформить заказ")
+            MakeAgreeBottomButton(
+                onClick = {
+                    val customerId = StripeStorage().getCustomer(context)
+                    val ephemeralKey = StripeStorage().getCKey(context)
+                    val totalCost = if (writeOffBonus) bucket.totalSumWithDiscount - user.teaBonuses else bucket.totalSumWithDiscount
+
+                    if (totalCost  < 1) {
+                        makeText(context, "Добавьте товары в корзину", LENGTH_SHORT).show()
+                        return@MakeAgreeBottomButton
+                    }
+
+                    if (selectedAddress !in addressList.indices) {
+                        makeText(context, "Укажите адрес доставки", LENGTH_SHORT).show()
+                        return@MakeAgreeBottomButton
+                    }
+
+                    if (!receiverEmail.contains("@")) {
+                        makeText(context,"Укажите корректный адрес электронной почты", LENGTH_SHORT).show()
+                        return@MakeAgreeBottomButton
+                    }
+
+                    if (receiverName.trim().isEmpty() || receiverSurName.isNullOrEmpty() ||
+                        receiverEmail.trim().isEmpty() || receiverPhone.trim().isEmpty()) {
+                        makeText(context, "Заполните данные о получателе", LENGTH_SHORT).show()
+                        return@MakeAgreeBottomButton
+                    }
+
+                    if (customerId != null && ephemeralKey != null) {
+                        getPaymentIntent(context, customerId, totalCost) { paymentIntentResult ->
+                            paymentIntentResult?.let { paymentIntent ->
+                                PaymentConfiguration.init(context, PUBLISH_KEY)
+                                val paymentSheetConfig = PaymentSheet.Configuration(
+                                    merchantDisplayName = "Tea",
+                                    customer = PaymentSheet.CustomerConfiguration(
+                                        customerId, ephemeralKey
+                                    )
+                                )
+                                paymentSheet.presentWithPaymentIntent(paymentIntent.client_secret, paymentSheetConfig)
+                            } ?: run {
+                                makeText(context, "Не удалось получить информацию о платеже", LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        makeText(context, "Ошибка при получении данных", LENGTH_SHORT).show()
+                    }
+
+                },
+                text = "Оформить заказ")
+        }
+    }
+}
+
+private fun getPaymentIntent(
+    context: Context,
+    customerId: String,
+    totalCost: Double,
+    onSuccess: (PaymentIntent?) -> Unit
+) {
+    CoroutineScope(Dispatchers.IO).launch {
+        val response = StripeApiService.stripeApiService.getPaymentIntent(customerId, totalCost.toInt() * 100)
+        withContext(Dispatchers.Main) {
+            if (response.isSuccessful) {
+                response.body()?.let { paymentIntent ->
+                    onSuccess(paymentIntent)
+                } ?: run {
+                    makeText(context, "Не удалось получить данные платежа", LENGTH_SHORT).show()
+                    onSuccess(null)
+                }
+            } else {
+                makeText(context, "Ошибка при запросе платежа", LENGTH_SHORT).show()
+                onSuccess(null)
+            }
         }
     }
 }

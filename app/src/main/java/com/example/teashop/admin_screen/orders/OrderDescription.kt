@@ -1,5 +1,6 @@
-package com.example.teashop.admin_screen.order_description
+package com.example.teashop.admin_screen.orders
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,19 +15,25 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.order.Order
 import com.example.teashop.data.model.variant.VariantType
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
 import com.example.teashop.reusable_interface.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
@@ -38,11 +45,33 @@ import com.example.teashop.ui.theme.montserratFamily
 @Composable
 fun LaunchAdminDescription(
     navController: NavController,
-    /*orderId: Long?,
-    viewModel: OrderViewModel = viewModel()*/ //TODO add viewModel
+    orderId: Long?,
+    viewModel: OrderViewModel = viewModel()
 ){
-    AdminNavigation(navController = navController) {
-        MakeOrderDescriptionScreen(navController = navController, order = Order())
+    val orderView by viewModel.userOrder.observeAsState()
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+
+    LaunchedEffect(Unit) {
+        if (orderId != null) {
+            tokenStorage.getToken(context)?.let {
+                viewModel.getFullOrder(
+                    it,
+                    orderId,
+                    onError = {
+                        Toast.makeText(context, "Не удалось получить данный заказ", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
+
+    orderView?.let { order ->
+        AdminNavigation(navController = navController) {
+            MakeOrderDescriptionScreen(navController = navController, order = order)
+        }
     }
 }
 @Composable

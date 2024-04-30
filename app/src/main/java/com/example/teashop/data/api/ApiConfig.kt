@@ -8,6 +8,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.time.ZonedDateTime
@@ -37,3 +38,8 @@ var retrofitBuilder: Retrofit = Retrofit.Builder()
     .addConverterFactory(ScalarsConverterFactory.create())
     .addConverterFactory(MoshiConverterFactory.create(moshi))
     .build();
+
+var retrofitStripe: Retrofit = Retrofit.Builder()
+    .baseUrl(STRIPE_BASE_URL)
+    .addConverterFactory(GsonConverterFactory.create())
+    .build()

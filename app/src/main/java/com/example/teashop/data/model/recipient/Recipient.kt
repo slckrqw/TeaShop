@@ -5,9 +5,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Recipient(
-    var id: Long = 1,
-    var name: String = "Керил",
-    var surname: String = "Кирпичный",
-    var email: String = "amogus@gmail.com",
-    var phoneNumber: String = "+7 (800) 555-35-35"
+    var id: Long? = null,
+    var name: String,
+    var surname: String,
+    var email: String,
+    var phoneNumber: String
 ):Parcelable

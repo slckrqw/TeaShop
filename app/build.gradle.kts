@@ -86,4 +86,7 @@ dependencies {
 
     //Image Loading
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    //Stripe
+    implementation("com.stripe:stripe-android:20.41.0")
 }

@@ -52,7 +52,7 @@ fun MakeSummaryCard(
                 textColor = Black10
             )
             SumTextRow(
-                header = "Начислится бонусы",
+                header = "Начислится бонусов",
                 answer = "+$bonusesAccrued",
                 textColor = Green10
             )
@@ -74,7 +74,7 @@ fun MakeSummaryCard(
                     color = Black10
                 )
                 Text(
-                    text = "$totalCost руб.",
+                    text = "${totalCost - bonusesSpent} руб.",
                     fontFamily = montserratFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.W600,

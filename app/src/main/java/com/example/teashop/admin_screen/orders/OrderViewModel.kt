@@ -25,7 +25,7 @@ class OrderViewModel: ViewModel() {
         orderPagingRequest: OrderPagingRequest,
         onError: () -> Unit
     ) {
-        viewModelScope.launch() {
+        viewModelScope.launch(exceptionHandler) {
             if (orderPagingRequest.filter.maxPrice == 0.0) {
                 orderPagingRequest.filter.maxPrice = 1000000.0
             }
@@ -48,7 +48,7 @@ class OrderViewModel: ViewModel() {
         id: Long,
         onError: () -> Unit
     ) {
-        viewModelScope.launch() {
+        viewModelScope.launch(exceptionHandler) {
             val response = OrderRepository().getFullOrderInfo("Bearer $token", id)
             if (response.isSuccessful) {
                 response.body()?.let {

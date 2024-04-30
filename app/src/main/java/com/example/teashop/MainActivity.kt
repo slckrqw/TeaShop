@@ -12,12 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.teashop.admin_screen.order_description.LaunchAdminDescription
+import com.example.teashop.admin_screen.orders.LaunchAdminDescription
 import com.example.teashop.admin_screen.orders.LaunchAdminOrders
 import com.example.teashop.admin_screen.products.LaunchAdminProducts
+import com.example.teashop.data.api.StripeApiService.Companion.stripeApiService
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.bucket.Bucket
 import com.example.teashop.data.model.category.Category
@@ -28,6 +30,7 @@ import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.model.user.UserRole
+import com.example.teashop.data.storage.StripeStorage
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminScreen
 import com.example.teashop.screen.screen.feedback_screen.LaunchFeedbackScreen
@@ -47,10 +50,18 @@ import com.example.teashop.screen.screen.profile_screen.feedback.LaunchUserFeedb
 import com.example.teashop.screen.screen.search_screen.LaunchSearchScreen
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (StripeStorage().getCustomer(this) == null) {
+            getCustomerId()
+        }
+
         setContent {
             window.statusBarColor = Color.parseColor("#1FAF54")
             window.navigationBarColor=getColor(R.color.white)
@@ -60,6 +71,34 @@ class MainActivity : ComponentActivity() {
                     color = Grey20
                 ) {
                     TeaShopApp()
+                }
+            }
+        }
+    }
+
+    private fun getCustomerId() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = stripeApiService.getCustomer()
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        getEphemeralKey(it.id)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getEphemeralKey(customerId: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = stripeApiService.getEphemeralKey(customerId)
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        it.secret?.let { key ->
+                            StripeStorage().saveCustomerAndKey(this@MainActivity, customerId, key)
+                        }
+                    }
                 }
             }
         }
@@ -169,7 +208,8 @@ fun TeaShopApp(){
         }
 
         composable(AdminScreen.Description.route){
-            LaunchAdminDescription(navController = navController/*, orderId = */) //TODO orderId parameter
+            val orderId: Long? = navController.previousBackStackEntry?.savedStateHandle?.get("orderId")
+            LaunchAdminDescription(navController = navController, orderId = orderId)
         }
         
         composable(AdminScreen.Products.route){
