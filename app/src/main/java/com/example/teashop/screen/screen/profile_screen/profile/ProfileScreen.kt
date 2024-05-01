@@ -44,9 +44,11 @@ import com.example.teashop.R
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
-import com.example.teashop.logic.bonusDeclension
+import com.example.teashop.data.utils.bonusDeclension
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
+import com.example.teashop.reusable_interface.buttons.ConfirmButton
+import com.example.teashop.reusable_interface.cards.ProfileCard
 import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
@@ -85,7 +87,13 @@ fun LaunchProfileScreen(navController: NavController){
 
     userView?.let {
         Navigation(navController = navController){
-            MakeProfileScreen(userView, viewModel, tokenStorage, context, navController)
+            MakeProfileScreen(
+                userView,
+                viewModel,
+                tokenStorage,
+                context,
+                navController
+            )
         }
     }
 }
@@ -93,7 +101,13 @@ fun LaunchProfileScreen(navController: NavController){
 var orderCount = ""
 
 @Composable
-fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: TokenStorage, context: Context, navController: NavController){
+fun MakeProfileScreen(
+    user: User?,
+    viewModel: ProfileViewModel,
+    tokenStorage: TokenStorage,
+    context: Context,
+    navController: NavController
+){
     user?.ordersCount?.let {
         orderCount = it.toString()
     }
@@ -296,114 +310,6 @@ fun MakeProfileScreen(user: User?, viewModel: ProfileViewModel, tokenStorage: To
             }
         )
         deleteAccount = false
-    }
-}
-
-@Composable
-fun ProfileCard(icon: Int, title: String, counter: Boolean = false, onClick: () -> Unit = {}){
-    Card(
-        colors = CardDefaults.cardColors(containerColor = White10),
-        modifier = Modifier
-            .padding(bottom = 10.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = { onClick() })
-            .shadow(1.dp, shape = RoundedCornerShape(10.dp))
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp)
-    ){
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp, top = 15.dp, bottom = 15.dp)
-                .fillMaxWidth()
-        ) {
-            Row {
-                Icon(
-                    painter = painterResource(icon),
-                    modifier = Modifier
-                        .padding(end = 10.dp)
-                        .size(20.dp),
-                    tint = Green10,
-                    contentDescription = null
-                )
-                Text(
-                    text = title,
-                    fontFamily = montserratFamily,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.W500,
-                    color = Black10
-                )
-            }
-            if(counter) {
-                Text(
-                    text = orderCount,
-                    fontFamily = montserratFamily,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.W500,
-                    color = Grey10
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ConfirmButton(header: String, accountAction: (Boolean) -> Unit = {}, expandedChange: (Boolean) -> Unit = {}){
-    AlertDialog(onDismissRequest = { expandedChange(false) }) {
-        Card(
-            colors = CardDefaults.cardColors(containerColor = White10)
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 10.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = header,
-                    fontFamily = montserratFamily,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.W500,
-                    color = Black10
-                )
-                Row(
-                    modifier = Modifier.padding(10.dp)
-                ) {
-                    Button(
-                        onClick = {accountAction(true)},
-                        colors = ButtonDefaults.buttonColors(containerColor = Red10),
-                        modifier = Modifier
-                            .padding(end = 10.dp)
-                            .weight(1f)
-                    ) {
-                        Text(
-                            text = "Да",
-                            fontFamily = montserratFamily,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.W500,
-                            color = White10
-                        )
-                    }
-                    Button(
-                        onClick = { expandedChange(false) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Green10),
-                        modifier = Modifier
-                            .padding(start = 10.dp)
-                            .weight(1f)
-                    ) {
-                        Text(
-                            text = "Нет",
-                            fontFamily = montserratFamily,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.W500,
-                            color = White10
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 

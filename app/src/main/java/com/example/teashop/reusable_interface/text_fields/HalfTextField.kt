@@ -1,4 +1,4 @@
-package com.example.teashop.reusable_interface
+package com.example.teashop.reusable_interface.text_fields
 
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Column

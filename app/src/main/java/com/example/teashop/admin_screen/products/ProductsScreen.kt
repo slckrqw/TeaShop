@@ -2,37 +2,36 @@ package com.example.teashop.admin_screen.products
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,8 +47,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -63,7 +60,6 @@ import com.example.teashop.data.model.pagination.product.ProductSorter
 import com.example.teashop.data.model.pagination.product.productFilterSaver
 import com.example.teashop.data.model.pagination.product.productSorterSaver
 import com.example.teashop.data.model.product.ProductAccounting
-import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
 import com.example.teashop.navigation.admin.AdminScreen
@@ -72,7 +68,6 @@ import com.example.teashop.reusable_interface.cards.MakeSearchCard
 import com.example.teashop.screen.screen.catalog_screen.CatalogScreenViewModel
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
-import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.Red10
 import com.example.teashop.ui.theme.White10
@@ -85,7 +80,7 @@ fun LaunchAdminProducts(navController: NavController){
         mutableStateOf(ProductFilter())
     }
     val sorterParams by rememberSaveable(stateSaver = productSorterSaver()) {
-        mutableStateOf(ProductSorter())
+        mutableStateOf(ProductSorter(sortType = ProductSortType.MORE_SALES))
     }
     AdminNavigation(navController = navController) {
         MakeProductsScreen(
@@ -128,7 +123,7 @@ fun MakeProductsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                items(productsList.size, key = { index -> productsList[index]?.id ?: index }) { index ->
+                items(productsList.size, key = { index -> productsList[index].id }) { index ->
                     Card(
                         modifier = Modifier
                             .padding(bottom = 10.dp)
@@ -170,7 +165,8 @@ fun MakeProductsScreen(
                                 )
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ){
                                     Text(
                                         text = "На складе: ${productsList[index].quantity} шт.",
@@ -218,12 +214,12 @@ fun TopCardCatalog(
 ){
     var filterSheet by remember{ mutableStateOf(false) }
     var sortingSheet by remember{ mutableStateOf(false) }
-    val sortingText:Int = when(sorterParams.sortType){
-        ProductSortType.POPULAR-> R.string.sortingTextCatalog1
-        ProductSortType.MORE_RATE-> R.string.sortingTextCatalog2
-        ProductSortType.EXPENSIVE-> R.string.sortingTextCatalog3
-        ProductSortType.CHEAP-> R.string.sortingTextCatalog4
-        else -> R.string.sortingTextCatalog1
+    val sortingText = when(sorterParams.sortType){
+        ProductSortType.MORE_SALES-> "Продажи по убыванию"
+        ProductSortType.LESS_SALES-> "Продажи по возрастанию"
+        ProductSortType.MORE_QUANTITY-> "Остаток по убыванию"
+        ProductSortType.LESS_QUANTITY-> "Остаток по возрастанию"
+        else -> "Продажи по убыванию"
     }
     var searchSwitch by remember{ mutableStateOf(SearchSwitch.FILTERS) }
     val tokenStorage = remember {
@@ -323,7 +319,7 @@ fun TopCardCatalog(
                                 iconSize = 20
                             )
                             Text(
-                                text = stringResource(id = sortingText),
+                                text = sortingText,
                                 fontFamily = montserratFamily,
                                 fontWeight = FontWeight.W700,
                                 fontSize = 10.sp,
@@ -379,12 +375,13 @@ fun BottomFilterCatalog(
     val tokenStorage = remember {
         TokenStorage()
     }
-    var switchOn by remember{ mutableStateOf(false) }
-    switchOn = when(filterParams.inStock){
-        true -> true
-        false -> false
-        null -> false
+    var expanded by remember {
+        mutableStateOf(false)
     }
+    var sorterText by remember {
+        mutableStateOf("Любой")
+    }
+
 
     ModalBottomSheet(
         onDismissRequest = { expandedChange(false) },
@@ -394,82 +391,62 @@ fun BottomFilterCatalog(
         Column(
             modifier = Modifier.fillMaxWidth()
         ){
-            Text(
-                text = "Цена, руб.",
-                fontFamily = montserratFamily,
-                fontWeight = FontWeight.W400,
-                fontSize = 15.sp,
-                color = Black10,
-                modifier = Modifier.padding(start = 10.dp, bottom = 10.dp, top = 10.dp)
-            )
             Row(
                 modifier = Modifier
-                    .padding(bottom = 10.dp)
+                    .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                FilterCatalogField(
-                    priceValue = filterParams.minPrice ?: 0.0,
-                    price = {
-                        val inputPrice = it.toDoubleOrNull()
-                        if (inputPrice == null) {
-                            Toast.makeText(context, "Укажите верный формат цены", Toast.LENGTH_SHORT).show()
-                        } else {
-                            filterParams.minPrice = inputPrice
-                        }
-                    },
-                    goalString = "От"
-                )
-                FilterCatalogField(
-                    priceValue = filterParams.maxPrice ?: 0.0,
-                    price = {
-                        val inputPrice = it.toDoubleOrNull()
-                        if (inputPrice == null) {
-                            Toast.makeText(context, "Укажите верный формат цены", Toast.LENGTH_SHORT).show()
-                        } else {
-                            filterParams.maxPrice = inputPrice
-                        }
-                    },
-                    goalString = "До"
-                )
-            }
-            Row(
-                modifier = Modifier.padding(start = 10.dp)
-            ) {
-                WeightButton(weight = VariantType.FIFTY_GRAMS, filterParams)
-                WeightButton(weight = VariantType.HUNDRED_GRAMS, filterParams)
-                WeightButton(weight = VariantType.TWO_HUNDRED_GRAMS, filterParams)
-                WeightButton(weight = VariantType.FIVE_HUNDRED_GRAMS, filterParams)
-            }
-            Row(
-                modifier = Modifier
-                    .padding(start = 10.dp, bottom = 10.dp)
-                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "В наличии",
+                    text = "Статус товара:",
                     fontFamily = montserratFamily,
                     fontWeight = FontWeight.W400,
                     fontSize = 15.sp,
-                    color = Black10,
-                    modifier = Modifier.padding(end = 20.dp)
+                    color = Black10
                 )
-                Switch(
-                    checked = switchOn,
-                    onCheckedChange = {
-                        filterParams.inStock = it
-                        switchOn = !switchOn
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedBorderColor = White10,
-                        uncheckedBorderColor = White10,
-                        checkedThumbColor = Green10,
-                        uncheckedThumbColor = Grey10,
-                        checkedTrackColor = Grey20,
-                        uncheckedTrackColor = Grey20,
+                Button(
+                    onClick = { expanded = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = Grey20),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(180.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    border = BorderStroke(1.dp, Green10)
+                ) {
+                    Text(
+                        text = sorterText,
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.W400,
+                        fontSize = 15.sp,
+                        color = Black10,
                     )
-                )
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.background(Grey20)
+                    ) {
+                        DropDownItem(
+                            productCondition = null,
+                            filterParams = filterParams,
+                            expandedChange = {expanded = it},
+                            topBarChange = {sorterText = it}
+                        )
+                        DropDownItem(
+                            productCondition = true,
+                            filterParams = filterParams,
+                            expandedChange = {expanded = it},
+                            topBarChange = {sorterText = it}
+                        )
+                        DropDownItem(
+                            productCondition = false,
+                            filterParams = filterParams,
+                            expandedChange = {expanded = it},
+                            topBarChange = {sorterText = it}
+                        )
+                    }
+                }
             }
             Button(
                 onClick = {
@@ -506,91 +483,6 @@ fun BottomFilterCatalog(
     }
 }
 
-@Composable
-fun RowScope.WeightButton(weight: VariantType, filterParams: ProductFilter){
-    var colorChange by rememberSaveable{ mutableStateOf(false) }
-    filterParams.variantTypes?.let {
-        colorChange = filterParams.variantTypes!!.contains(weight)
-    }
-    val buttonColor: Color = when(colorChange){
-        true -> Green10
-        false -> Grey10
-    }
-    Button(
-        onClick = {
-            colorChange = !colorChange
-            if(colorChange){
-                filterParams.variantTypes?.add(weight)
-            }else{
-                filterParams.variantTypes?.remove(weight)
-            }
-        },
-        colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
-        contentPadding = PaddingValues(0.dp),
-        modifier = Modifier
-            .padding(end = 10.dp)
-            .weight(1f)
-    ){
-        Text(
-            text = weight.value,
-            fontFamily = montserratFamily,
-            fontWeight = FontWeight.W400,
-            fontSize = 13.sp,
-            color = White10,
-        )
-    }
-}
-
-@Composable
-fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goalString: String){
-    var priceValueField by remember{
-        mutableStateOf(
-            when(priceValue){
-                0.0 -> ""
-                else -> priceValue.toString()
-            }
-        )
-    }
-
-    TextField(
-        value = priceValueField,
-        shape = RoundedCornerShape(15.dp),
-        placeholder = {
-            Text(
-                text = goalString,
-                fontFamily = montserratFamily,
-                fontWeight = FontWeight.W400,
-                fontSize = 13.sp,
-                color = Black10
-            )
-        },
-        onValueChange = {
-            priceValueField = it.replace("-", "")
-        },
-        modifier = Modifier
-            .padding(start = 10.dp, end = 10.dp)
-            .weight(1f),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number).copy(imeAction = ImeAction.Done),
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Green10,
-            unfocusedIndicatorColor = Green10,
-            focusedContainerColor = Grey20,
-            unfocusedContainerColor = Grey20,
-            disabledContainerColor = Grey20,
-            disabledTextColor = Black10,
-            focusedTextColor = Black10,
-            focusedSupportingTextColor = Black10,
-            disabledSupportingTextColor = Black10
-        ),
-        singleLine = true
-    )
-    if(priceValueField == "" && priceValue == 0.0){
-        price("0")
-    } else if(priceValueField == "" && priceValue != 0.0){
-    } else{
-        price(priceValueField)
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -615,10 +507,10 @@ fun BottomSortingCatalog(
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
             )
-            SheetTextCatalog(ProductSortType.POPULAR, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.MORE_RATE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.EXPENSIVE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.CHEAP, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(ProductSortType.MORE_SALES, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(ProductSortType.LESS_SALES, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(ProductSortType.MORE_QUANTITY, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(ProductSortType.LESS_QUANTITY, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
         }
     }
 }
@@ -636,12 +528,12 @@ fun SheetTextCatalog(
     val tokenStorage = remember {
         TokenStorage()
     }
-    val stringId: Int = when(textType){
-        ProductSortType.POPULAR-> R.string.sortingTextCatalog1
-        ProductSortType.MORE_RATE-> R.string.sortingTextCatalog2
-        ProductSortType.EXPENSIVE-> R.string.sortingTextCatalog3
-        ProductSortType.CHEAP-> R.string.sortingTextCatalog4
-        else -> R.string.sortingTextCatalog1
+    val sorterText = when(textType){
+        ProductSortType.MORE_SALES-> "Продажи по убыванию"
+        ProductSortType.LESS_SALES-> "Продажи по возрастанию"
+        ProductSortType.MORE_QUANTITY-> "Остаток по убыванию"
+        ProductSortType.LESS_QUANTITY-> "Остаток по возрастанию"
+        else -> "Ошибка"
     }
 
     val cardColor: Color
@@ -667,7 +559,7 @@ fun SheetTextCatalog(
             modifier = Modifier.height(40.dp)
         ) {
             Text(
-                text = stringResource(id = stringId),
+                text = sorterText,
                 fontFamily = montserratFamily,
                 fontWeight = FontWeight.W700,
                 fontSize = 15.sp,
@@ -700,6 +592,41 @@ fun SheetTextCatalog(
             )
         }
     }
+}
+
+@Composable
+fun DropDownItem(
+    productCondition: Boolean?,
+    filterParams: ProductFilter,
+    expandedChange: (Boolean) -> Unit,
+    topBarChange: (String) -> Unit
+){
+    val itemText = when(productCondition){
+        true -> "Активный"
+        false -> "Неактивный"
+        null -> "Любой"
+    }
+    DropdownMenuItem(
+        text = {
+            Text(
+                text = itemText,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W400,
+                fontSize = 15.sp,
+                color = Black10,
+            )
+        },
+        onClick = {
+            filterParams.isActive = productCondition
+            expandedChange(false)
+            topBarChange(itemText)
+        },
+        contentPadding = PaddingValues(5.dp),
+        modifier = Modifier
+            .height(30.dp)
+            .width(180.dp)
+            .background(Grey20)
+    )
 }
 
 @Composable

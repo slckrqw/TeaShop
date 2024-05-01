@@ -53,9 +53,9 @@ import com.example.teashop.data.storage.StripeStorage
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
-import com.example.teashop.reusable_interface.MakeAgreeBottomButton
-import com.example.teashop.reusable_interface.MakeFullTextField
-import com.example.teashop.reusable_interface.MakeMaskedTextField
+import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
+import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
+import com.example.teashop.reusable_interface.text_fields.MakeMaskedTextField
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10

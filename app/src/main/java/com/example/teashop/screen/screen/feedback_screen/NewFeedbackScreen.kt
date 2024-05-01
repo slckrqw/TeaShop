@@ -60,7 +60,7 @@ import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.saves.ReviewSave
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
-import com.example.teashop.reusable_interface.MakeAgreeBottomButton
+import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10

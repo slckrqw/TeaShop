@@ -1,4 +1,4 @@
-package com.example.teashop.logic
+package com.example.teashop.data.utils
 
 fun reviewDeclension(count: Int): (String){
     var countClone = count

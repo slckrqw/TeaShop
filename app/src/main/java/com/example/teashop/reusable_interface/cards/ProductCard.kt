@@ -60,7 +60,7 @@ import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.saves.ProductToBucket
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
-import com.example.teashop.logic.reviewDeclension
+import com.example.teashop.data.utils.reviewDeclension
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.screen.screen.product_screen.ProductViewModel
 import com.example.teashop.ui.theme.Black10

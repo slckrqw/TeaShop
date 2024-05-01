@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -22,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,7 +37,7 @@ import com.example.teashop.data.model.order.Order
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
-import com.example.teashop.reusable_interface.MakeFullTextField
+import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -209,7 +211,9 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
                 ) {
                     Image(
                         painter = rememberAsyncImagePainter(model = currentProduct.imageUrl),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(80.dp),
+                        contentScale = ContentScale.FillBounds
                     )
                     Column(
                         modifier = Modifier
