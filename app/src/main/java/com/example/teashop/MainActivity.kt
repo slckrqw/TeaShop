@@ -60,9 +60,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (StripeStorage().getCustomer(this) == null) {
-            getCustomerId()
-        }
+
+        StripeStorage().deleteCustomerAndKey(this@MainActivity)
+        getCustomerId()
 
         setContent {
             window.statusBarColor = Color.parseColor("#1FAF54")

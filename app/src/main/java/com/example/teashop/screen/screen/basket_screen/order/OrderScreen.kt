@@ -163,6 +163,11 @@ fun MakeOrderScreen(
     var selectedAddress by remember {
         mutableIntStateOf(0)
     }
+    val bonusesSpent = if (writeOffBonus) {
+        minOf(user.teaBonuses, (bucket.totalSumWithDiscount * 0.5).toInt())
+    } else {
+        0
+    }
 
     val paymentSheetCallback = PaymentSheetResultCallback { result ->
         when (result) {
@@ -397,9 +402,9 @@ fun MakeOrderScreen(
         item{
             MakeSummaryCard(
                 productCnt = totalCount ?: 0,
-                bonusesSpent = if (writeOffBonus) user.teaBonuses else 0,
+                bonusesSpent = if (writeOffBonus) bonusesSpent else 0,
                 bonusesAccrued = bucket.plusTeaBonuses,
-                totalCost = if (writeOffBonus) bucket.totalSumWithDiscount - user.teaBonuses else bucket.totalSumWithDiscount
+                totalCost = if (writeOffBonus) bucket.totalSumWithDiscount - bonusesSpent else bucket.totalSumWithDiscount
             )
         }
         item{
@@ -409,7 +414,7 @@ fun MakeOrderScreen(
                     val ephemeralKey = StripeStorage().getCKey(context)
                     val totalCost = if (writeOffBonus) bucket.totalSumWithDiscount - user.teaBonuses else bucket.totalSumWithDiscount
 
-                    if (totalCost  < 1) {
+                    if (totalCost < 1) {
                         makeText(context, "Добавьте товары в корзину", LENGTH_SHORT).show()
                         return@MakeAgreeBottomButton
                     }

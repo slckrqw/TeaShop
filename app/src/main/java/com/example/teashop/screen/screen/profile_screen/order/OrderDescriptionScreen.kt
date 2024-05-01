@@ -248,7 +248,7 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
                 productCnt = totalCount,
                 bonusesAccrued = order.bonusesAccrued,
                 bonusesSpent = order.bonusesSpent,
-                totalCost = order.totalCost
+                totalCost = order.totalCost - order.bonusesSpent
             )
         }
     }

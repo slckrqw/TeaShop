@@ -74,7 +74,7 @@ fun MakeSummaryCard(
                     color = Black10
                 )
                 Text(
-                    text = "${totalCost - bonusesSpent} руб.",
+                    text = "$totalCost руб.",
                     fontFamily = montserratFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.W600,

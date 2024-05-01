@@ -29,6 +29,12 @@ class StripeStorage {
         sharedPreferences.edit().putString(EPH_KEY, key).apply()
     }
 
+    fun deleteCustomerAndKey(context: Context) {
+        val sharedPreferences = initSharedPreferences(context)
+        sharedPreferences.edit().remove(CUSTOMER_KEY).apply()
+        sharedPreferences.edit().remove(EPH_KEY).apply()
+    }
+
     fun getCustomer(context: Context): String? {
         val sharedPreferences = initSharedPreferences(context)
         return sharedPreferences.getString(CUSTOMER_KEY, null)
