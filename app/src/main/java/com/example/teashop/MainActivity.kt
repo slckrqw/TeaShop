@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.teashop.admin_screen.orders.LaunchAdminDescription
 import com.example.teashop.admin_screen.orders.LaunchAdminOrders
+import com.example.teashop.admin_screen.products.LaunchAdminProduct
 import com.example.teashop.admin_screen.products.LaunchAdminProducts
 import com.example.teashop.admin_screen.profile.LaunchAdminProfile
 import com.example.teashop.data.api.StripeApiService.Companion.stripeApiService
@@ -219,6 +220,10 @@ fun TeaShopApp(){
         
         composable(AdminScreen.Profile.route){
             LaunchAdminProfile(navController = navController)
+        }
+        
+        composable(AdminScreen.NewProduct.route){
+            LaunchAdminProduct(navController = navController)
         }
     }
 }

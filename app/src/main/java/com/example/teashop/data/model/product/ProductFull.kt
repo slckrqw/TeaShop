@@ -11,13 +11,13 @@ import java.time.ZonedDateTime
 data class ProductFull(
     val id: Long = 1,
     val packages: List<PackageProduct> = listOf(PackageProduct()),
-    val article:String = "1234",
-    val title: String = "Зелёный чай",
-    val description: String = "",
-    val discount: Int = 5,
+    var article:String = "1234",
+    var title: String = "Зелёный чай",
+    var description: String = "",
+    var discount: Int = 5,
     val countOfReviews: Int = 6,
     val averageRating: Double = 4.9,
     val createdTime: ZonedDateTime = ZonedDateTime.now(),
     val category: Category = Category(),
-    val images: List<Image> = listOf(Image()),
+    var images: List<Image> = listOf(Image()),
 ): Parcelable

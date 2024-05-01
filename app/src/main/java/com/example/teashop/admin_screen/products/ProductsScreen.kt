@@ -128,7 +128,12 @@ fun MakeProductsScreen(
                         modifier = Modifier
                             .padding(bottom = 10.dp)
                             .height(70.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .clickable(
+                                onClick = {
+                                    navController.navigate(AdminScreen.NewProduct.route)
+                                }
+                            ),
                         colors = CardDefaults.cardColors(containerColor = White10),
                         shape = RectangleShape
                     ){
@@ -297,7 +302,13 @@ fun TopCardCatalog(
                                     painter = painterResource(R.drawable.plus_icon),
                                     tint = White10,
                                     contentDescription = null,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable(
+                                            onClick = {
+                                            navController.navigate(AdminScreen.NewProduct.route)
+                                            }
+                                        )
                                 )
                             }
                         }

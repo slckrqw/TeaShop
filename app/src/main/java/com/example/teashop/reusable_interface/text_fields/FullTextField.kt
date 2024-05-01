@@ -34,7 +34,7 @@ fun MakeFullTextField(
         mutableStateOf(inputValue ?: "")
     }
     Column(
-        modifier = Modifier.padding(start = 10.dp)
+        modifier = Modifier.padding(start = 10.dp, end = 10.dp)
     ) {
         Text(
             text = header,
@@ -58,7 +58,7 @@ fun MakeFullTextField(
             ),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             modifier = Modifier
-                .padding(end = 10.dp, bottom = bottomPadding.dp)
+                .padding(bottom = bottomPadding.dp)
                 .fillMaxWidth(),
             singleLine = true
         )
