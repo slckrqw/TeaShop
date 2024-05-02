@@ -91,7 +91,7 @@ fun MakeUserDataScreen(navController: NavController, user: User){
                         color = Black10,
                         modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
                     )
-                    MakeFullTextField(header = "Имя", onValueChange = { userName = it }, inputValue = user.name)
+                    MakeFullTextField(header = "Имя", onValueChange = { userName = it }, inputValue = user.name, contextLength = 99)
                     MakeFullTextField(header = "Фамилия", onValueChange = { userSurname = it }, bottomPadding = 0, inputValue = user.surname)
                 }
             }

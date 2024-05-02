@@ -351,7 +351,8 @@ fun MakeOrderScreen(
                 MakeFullTextField(
                     header = "Имя",
                     inputValue = receiverName,
-                    onValueChange = {receiverName = it}
+                    onValueChange = {receiverName = it},
+                    contextLength = 99,
                 )
                 MakeFullTextField(
                     header = "Фамилия",

@@ -76,6 +76,7 @@ fun LaunchAdminDescription(
         }
     }
 }
+
 @Composable
 fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
     val totalCount = remember {
@@ -112,15 +113,16 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
                         color = Black10,
                         modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
                     )
-                    MakeFullTextField(
+                    MakeFullTextField( // TODO DropdownMenu
                         header = "Статус заказа",
                         onValueChange = {order.status.value = it},
                         bottomPadding = 5
                     )
-                    MakeFullTextField(
+                    MakeFullTextField( // TODO event by search
                         header = "Трек номер",
                         onValueChange = {order.trackNumber = it},
-                        bottomPadding = 0
+                        bottomPadding = 0,
+                        contextLength = 50,
                     )
                 }
             }

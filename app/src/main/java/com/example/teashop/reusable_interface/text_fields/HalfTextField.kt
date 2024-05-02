@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +35,8 @@ fun RowScope.MakeHalfTextField(
     header: String,
     onValueChange: (String?) -> Unit = {},
     startPadding: Int,
-    endPadding: Int
+    endPadding: Int,
+    maxInt: Int = 32760
 ){
     var value by remember{
         mutableStateOf("")
@@ -55,7 +57,17 @@ fun RowScope.MakeHalfTextField(
             )
             TextField(
                 value = value,
-                onValueChange = { value = it },
+                onValueChange = {
+                    val cleanedInput = it.filter { char -> char.isDigit() }
+                    if (cleanedInput.isNotEmpty()) {
+                        if (cleanedInput.toInt() < maxInt) {
+                            value = cleanedInput
+                        }
+                    } else {
+                        value = cleanedInput
+                    }
+                    onValueChange(value)
+                },
                 shape = RoundedCornerShape(15.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = White10,
@@ -66,12 +78,12 @@ fun RowScope.MakeHalfTextField(
                     disabledTextColor = Black10,
                     focusedTextColor = Black10,
                 ),
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    .copy(imeAction = ImeAction.Done),
                 singleLine = true
             )
         }
     }
-    onValueChange(value)
 }
 
 @Composable

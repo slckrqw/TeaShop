@@ -145,7 +145,8 @@ fun MakeSignInScreen(
                 UserField(
                     header = "Имя",
                     onValueChange = { userName = it },
-                    icon = R.drawable.name_icon
+                    icon = R.drawable.name_icon,
+                    contentLength = 99
                 )
                 "Зарегистрироваться"
             } else{
@@ -257,7 +258,14 @@ fun MakeSignInScreen(
                                         }
                                     )
                                 } else {
-                                    navController.navigate(AdminScreen.Orders.route)
+                                    navController.navigate(
+                                        AdminScreen.Orders.route,
+                                        navOptions = navOptions {
+                                            popUpTo(navController.graph.id) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    )
                                 }
                             },
                             onError = {
@@ -297,15 +305,19 @@ fun MakeSignInScreen(
 }
 
 @Composable
-fun UserField(header: String, onValueChange: (String) -> Unit, icon: Int){
+fun UserField(
+    header: String,
+    onValueChange: (String) -> Unit,
+    icon: Int,
+    contentLength: Int = 255
+){
     var value by remember {
         mutableStateOf("")
     }
     TextField(
         value = value,
         onValueChange = {
-            if (it.length < MAX_SIZE)
-                value = it
+            value = it.take(contentLength)
         },
         shape = RoundedCornerShape(15.dp),
         colors = TextFieldDefaults.colors(

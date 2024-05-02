@@ -41,8 +41,8 @@ fun productFilterSaver(): Saver<ProductFilter, Any> {
                 categoryId = map["categoryId"] as? Int?,
                 searchString = map["searchString"] as? String?,
                 inStock = map["inStock"] as Boolean,
-                minPrice = map["minPrice"] as Double,
-                maxPrice = map["maxPrice"] as Double,
+                minPrice = map["minPrice"] as Double?,
+                maxPrice = map["maxPrice"] as Double?,
                 variantTypes = map["variantTypes"] as MutableList<VariantType>,
                 isActive = map["isActive"] as? Boolean?
             )

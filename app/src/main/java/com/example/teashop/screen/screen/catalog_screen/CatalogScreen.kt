@@ -586,7 +586,7 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
             )
         },
         onValueChange = {
-            priceValueField = it.replace("-", "")
+            priceValueField = it.filter { char -> char.isDigit() }
         },
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp)

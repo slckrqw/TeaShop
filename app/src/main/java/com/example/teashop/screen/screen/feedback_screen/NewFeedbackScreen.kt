@@ -230,7 +230,9 @@ fun MakeNewFeedbackScreen(
                 )
                 TextField(
                     value = userFeedbackContent,
-                    onValueChange = { userFeedbackContent = it },
+                    onValueChange = {
+                        userFeedbackContent = it.take(299)
+                    },
                     shape = RoundedCornerShape(15.dp),
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = White10,

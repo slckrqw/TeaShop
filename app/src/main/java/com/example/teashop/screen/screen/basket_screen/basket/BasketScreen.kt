@@ -158,6 +158,12 @@ fun MakeBasketScreen(
                 bucket.products.let { packages ->
                     items(packages.size, { packages[it].packId }) { basketItem ->
                         val currentItem = packages[basketItem]
+                        val price = if (currentItem.product.discount == null) {
+                            currentItem.price
+                        } else {
+                            val discountAmount = currentItem.price * (currentItem.product.discount.toDouble() / 100.0)
+                            currentItem.price - discountAmount
+                        }
                         val variantTitle = when(currentItem.variant.title) {
                             VariantType.FIFTY_GRAMS -> "50 гр."
                             VariantType.HUNDRED_GRAMS -> "100 гр."
@@ -204,7 +210,7 @@ fun MakeBasketScreen(
                                             .padding(bottom = 10.dp)
                                     ) {
                                         Text(
-                                            text = "${currentItem.price} ₽ x $variantTitle",
+                                            text = "$price ₽ x $variantTitle",
                                             fontFamily = montserratFamily,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.W700,

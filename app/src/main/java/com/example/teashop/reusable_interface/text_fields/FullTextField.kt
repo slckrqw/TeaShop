@@ -28,7 +28,8 @@ fun MakeFullTextField(
     header: String,
     onValueChange: (String) -> Unit = {},
     bottomPadding: Int = 10,
-    inputValue: String? = ""
+    inputValue: String? = "",
+    contextLength: Int = 255
 ){
     var value by remember{
         mutableStateOf(inputValue ?: "")
@@ -45,7 +46,7 @@ fun MakeFullTextField(
         )
         TextField(
             value = value,
-            onValueChange = { value = it },
+            onValueChange = { value = it.take(contextLength) },
             shape = RoundedCornerShape(15.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = White10,

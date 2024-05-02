@@ -98,7 +98,8 @@ fun MakeAddressChangeScreen(navController: NavController, viewModel: OrderViewMo
                     MakeFullTextField(
                         header = "Адрес: город, улица, дом",
                         onValueChange = { address = it },
-                        bottomPadding = 0
+                        bottomPadding = 0,
+                        contextLength = 200
                     )
                     RowTextField(
                         header1 = "Квартира", onValueChange1 = { flat = it },
