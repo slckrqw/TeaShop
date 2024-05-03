@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.teashop.data.model.order.Order
 import com.example.teashop.data.model.order.OrderShort
 import com.example.teashop.data.model.pagination.order.OrderPagingRequest
+import com.example.teashop.data.repository.AccountingRepository
 import com.example.teashop.data.repository.OrderRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -53,6 +54,26 @@ class OrderViewModel: ViewModel() {
             if (response.isSuccessful) {
                 response.body()?.let {
                     _userOrder.value = it
+                }
+            } else {
+                onError()
+            }
+        }
+    }
+
+    fun updateStatusOrTrack(
+        token: String,
+        id: Long,
+        status: String,
+        track: String?,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        viewModelScope.launch() {
+            val response = AccountingRepository().updateStatusOrTrack(token, id, status, track)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    onSuccess()
                 }
             } else {
                 onError()

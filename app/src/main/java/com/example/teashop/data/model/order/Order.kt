@@ -12,7 +12,7 @@ data class Order(
     val id: Long = 123,
     val createdDate: ZonedDateTime = ZonedDateTime.now(),
     val recipient: Recipient,
-    val status: OrderStatus = OrderStatus.NEW,
+    var status: OrderStatus = OrderStatus.NEW,
     val packageOrders: List<PackageOrder> = listOf(),
     var trackNumber: String?,
     val address: Address = Address(),

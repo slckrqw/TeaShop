@@ -113,7 +113,7 @@ fun MakeAddressChangeScreen(navController: NavController, viewModel: OrderViewMo
         }
         MakeAgreeBottomButton(onClick = {
             if (address.trim().isEmpty() || flat.trim().isEmpty() || floor.trim().isEmpty() || flat.toShortOrNull() == null) {
-                Toast.makeText(context, "Коорректно заполните информацию об адресе", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Корректно заполните информацию об адресе", Toast.LENGTH_SHORT).show()
                 return@MakeAgreeBottomButton
             }
             tokenStorage.getToken(context)?.let {

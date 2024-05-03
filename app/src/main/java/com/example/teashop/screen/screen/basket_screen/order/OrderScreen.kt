@@ -197,7 +197,7 @@ fun MakeOrderScreen(
                         phoneNumber = receiverPhone.trim()
                     ),
                     addressId = address.id,
-                    isPayWithBonuses = writeOffBonus,
+                    bonusesSpent = bonusesSpent,
                     shortOrderPackageDtos = shortOrderPackageDtos
                 )
 
@@ -413,7 +413,7 @@ fun MakeOrderScreen(
                 onClick = {
                     val customerId = StripeStorage().getCustomer(context)
                     val ephemeralKey = StripeStorage().getCKey(context)
-                    val totalCost = if (writeOffBonus) bucket.totalSumWithDiscount - user.teaBonuses else bucket.totalSumWithDiscount
+                    val totalCost = if (writeOffBonus) bucket.totalSumWithDiscount - bonusesSpent else bucket.totalSumWithDiscount
 
                     if (totalCost < 1) {
                         makeText(context, "Добавьте товары в корзину", LENGTH_SHORT).show()

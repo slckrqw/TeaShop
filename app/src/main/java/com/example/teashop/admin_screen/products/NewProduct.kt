@@ -77,9 +77,8 @@ fun MakeAdminProduct(
     categories: List<Category>,
     navController: NavController
 ){
-
     var categoryText by remember{
-        mutableStateOf("Чёрный чай")
+        mutableStateOf(product.category.name)
     }
     var expandedCategory by remember{
         mutableStateOf(false)
@@ -111,7 +110,7 @@ fun MakeAdminProduct(
                 Icon(
                     painter = painterResource(R.drawable.delete_icon),
                     modifier = Modifier
-                        .padding(bottom = 10.dp, end = 10.dp)
+                        .padding(bottom = 10.dp, end = 15.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .clickable(
                             onClick = {

@@ -156,6 +156,7 @@ fun MakeOrdersScreen(
             shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
             colors = CardDefaults.cardColors(containerColor = Green10),
             modifier = Modifier
+                .padding(bottom = 10.dp)
                 .fillMaxWidth()
         ) {
             Column {

@@ -281,7 +281,7 @@ fun MakeProductScreen(
                                         .first { it.variant.title == productWeight ||
                                                 it.variant.title == VariantType.PACK }
                                         .price*(1-product.discount.toDouble()/100)
-                                ).setScale(2, RoundingMode.HALF_UP)} ₽",
+                                    ).setScale(2, RoundingMode.HALF_UP)} ₽",
                                 fontFamily = montserratFamily,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.W700,
@@ -405,7 +405,6 @@ fun MakeProductScreen(
                 }
             }
         }
-
         item {
             Card(
                 shape = RoundedCornerShape(10.dp),
@@ -431,11 +430,13 @@ fun MakeProductScreen(
                             contentDescription = null
                         )
                         Text(
-                            text = "+ ${BigDecimal(
-                                product.packages
-                                    .first{it.variant.title == productWeight}
-                                    .price*0.05
-                            ).setScale(0,RoundingMode.HALF_UP)} бонусных рублей",
+                            text = "+ ${
+                                BigDecimal(
+                                    product.packages
+                                        .first { it.variant.title == productWeight ||
+                                                it.variant.title == VariantType.PACK }
+                                        .price*(1-product.discount.toDouble()/100) * 0.05
+                                ).setScale(0, RoundingMode.DOWN)} бонусных рублей",
                             fontFamily = montserratFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.W500,
@@ -459,7 +460,6 @@ fun MakeProductScreen(
                 }
             }
         }
-
         item {
             Card(
                 shape = RoundedCornerShape(10.dp),
@@ -524,7 +524,6 @@ fun MakeProductScreen(
                 }
             }
         }
-
         item {
             Card(
                 modifier = Modifier
