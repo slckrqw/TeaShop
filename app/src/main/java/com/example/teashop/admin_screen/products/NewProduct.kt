@@ -24,6 +24,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,13 +48,13 @@ import com.example.teashop.data.model.packages.PackageProduct
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.navigation.admin.AdminNavigation
-import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.ImageDownloader
 import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
+import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
@@ -86,6 +88,15 @@ fun MakeAdminProduct(
         mutableStateOf(false)
     }
     var discountTemp = "0"
+    var editSwitch by remember {
+        mutableStateOf(false)
+    }
+    var pack by remember {
+        mutableStateOf(PackageProduct())
+    }
+    var switchOn by remember {
+        mutableStateOf(false)
+    }
 
     LazyColumn {
         item{
@@ -192,6 +203,7 @@ fun MakeAdminProduct(
                                         onClick = {
                                             expandedCategory = false
                                             categoryText = it.name
+                                            product.category = it
                                         },
                                         modifier = Modifier
                                             .background(Grey20)
@@ -207,6 +219,21 @@ fun MakeAdminProduct(
                         onValueChange = {discountTemp = it},
                         bottomPadding = 0,
                         inputValue = product.discount.toString()
+                    )
+                    Switch(
+                        checked = switchOn,
+                        onCheckedChange = {
+                            product
+                            switchOn = !switchOn
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedBorderColor = White10,
+                            uncheckedBorderColor = White10,
+                            checkedThumbColor = Green10,
+                            uncheckedThumbColor = Grey10,
+                            checkedTrackColor = Grey20,
+                            uncheckedTrackColor = Grey20,
+                        )
                     )
                 }
             }
@@ -244,7 +271,11 @@ fun MakeAdminProduct(
                             color = Black10
                         )
                         Button(
-                            onClick = {expandedPackage = true},
+                            onClick = {
+                                editSwitch = true
+                                pack = PackageProduct() //TODO adding empty package
+                                expandedPackage = true
+                            },
                             modifier = Modifier
                                 .width(120.dp)
                                 .height(25.dp),
@@ -295,7 +326,14 @@ fun MakeAdminProduct(
         items(product.packages.size){index ->
             Card(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable(
+                        onClick = {
+                            editSwitch = false
+                            pack = product.packages[index]
+                            expandedPackage = true
+                        }
+                    ),
                 colors = CardDefaults.cardColors(containerColor = White10),
                 shape = RectangleShape,
                 border = BorderStroke(1.dp, Grey20)
@@ -333,13 +371,13 @@ fun MakeAdminProduct(
         }
         item{
             MakeAgreeBottomButton(
-                onClick = { /*TODO*/ },
+                onClick = { /*TODO request*/ },
                 text = "Сохранить"
             )
         }
     }
     if(expandedPackage){
-        PackageEditSheet(editSwitch = true, pack = PackageProduct()) {
+        PackageEditSheet(editSwitch = editSwitch, pack = pack, packageList = product.packages) {
             expandedPackage = it
         }
     }
@@ -351,14 +389,29 @@ fun MakeAdminProduct(
 fun PackageEditSheet(
     editSwitch: Boolean,
     pack: PackageProduct,
+    packageList: MutableList<PackageProduct>,
     expandedChange: (Boolean) -> Unit
 ){
 
     var expanded by remember{
         mutableStateOf(false)
     }
-    var priceTemp = "0"
-    var quantityTemp = "0"
+    var priceTemp by remember{
+        mutableStateOf(
+            when(pack.price){
+                0.0 -> ""
+                else -> pack.price.toString()
+            }
+        )
+    }
+    var quantityTemp by remember{
+        mutableStateOf(
+            when(pack.quantity){
+                0 -> ""
+                else -> pack.quantity.toString()
+            }
+        )
+    }
 
     ModalBottomSheet(
         onDismissRequest = {expandedChange(false)},
@@ -391,7 +444,7 @@ fun PackageEditSheet(
                     border = BorderStroke(1.dp, Green10)
                 ) {
                     Text(
-                        text = pack.variant.title.value,
+                        text = "Тип упаковки",
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.W400,
                         fontSize = 15.sp,
@@ -406,35 +459,61 @@ fun PackageEditSheet(
                             .fillMaxWidth()
                     ){
                         VariantType.entries.toTypedArray().forEach {
-                            DropdownMenuItem(
-                                text = {
-                                   Text(
-                                       text = it.value,
-                                       fontFamily = montserratFamily,
-                                       fontWeight = FontWeight.W400,
-                                       fontSize = 15.sp,
-                                       color = Black10,
-                                   )
-                                },
-                                onClick = {
-                                    expanded = false
-                                },
-                                modifier = Modifier
-                                    .background(Grey20)
-                                    .fillMaxWidth()
-                            )
+                            if(packageList
+                                .none { it1 ->
+                                    it1.variant.title == it
+                                }
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = it.value,
+                                            fontFamily = montserratFamily,
+                                            fontWeight = FontWeight.W400,
+                                            fontSize = 15.sp,
+                                            color = Black10,
+                                        )
+                                    },
+                                    onClick = {
+                                        expanded = false
+                                        pack.variant.title = it
+                                    },
+                                    modifier = Modifier
+                                        .background(Grey20)
+                                        .fillMaxWidth()
+                                )
+                            }
                         }
                     }
                 }
             }
             MakeAgreeBottomButton(
-                onClick = {expandedChange(false)},
+                onClick = {
+                    expandedChange(false)
+                    if(priceTemp == "" && pack.price == 0.0){
+                        pack.price = 0.0
+                    }else if(priceTemp == ""){
+
+                    }
+                    else {
+                        pack.price = priceTemp.toDouble()
+                    }
+                    if(quantityTemp == "" && pack.quantity == 0){
+                        pack.quantity = 0
+                    }else if(quantityTemp == ""){
+
+                    }
+                    else{
+                        pack.quantity = quantityTemp.toInt()
+                    }
+                    if(editSwitch){
+                        packageList.add(pack)
+                    }
+                },
                 text = "Сохранить"
             )
         }
     }
-    pack.price = priceTemp.toDouble()
-    pack.quantity = quantityTemp.toInt()
 }
 
 @Preview(showBackground = true)
