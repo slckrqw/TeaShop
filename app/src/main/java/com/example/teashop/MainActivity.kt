@@ -30,6 +30,7 @@ import com.example.teashop.screen.screen.basket_screen.order.LaunchOrderScreen
 import com.example.teashop.screen.screen.category_screen.LaunchCategoryScreen
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.category.ParentCategory
+import com.example.teashop.data.model.product.ProductAccounting
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.model.user.UserRole
 import com.example.teashop.data.storage.StripeStorage
@@ -223,7 +224,13 @@ fun TeaShopApp(){
         }
         
         composable(AdminScreen.NewProduct.route){
-            LaunchAdminProduct(navController = navController)
+            val id: Long? = navController.previousBackStackEntry?.savedStateHandle?.get("id")
+            val accounting: ProductAccounting? = navController.previousBackStackEntry?.savedStateHandle?.get("accounting")
+            LaunchAdminProduct(
+                navController = navController,
+                id = id,
+                accounting = accounting
+            )
         }
     }
 }

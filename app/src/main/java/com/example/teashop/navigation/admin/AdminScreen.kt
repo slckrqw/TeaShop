@@ -7,7 +7,7 @@ open class AdminScreen(val route: String) {
 
     object  Products: AdminScreen("products_admin")
 
-    object NewProduct: AdminScreen("new_product_admin")
+    object NewProduct: AdminScreen("new_product_admin/{id}/{accounting")
 
     object Statistics: AdminScreen("statistics_admin")
 

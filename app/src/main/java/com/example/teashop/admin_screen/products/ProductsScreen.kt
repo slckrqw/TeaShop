@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
+import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.data.model.pagination.product.ProductFilter
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
@@ -131,6 +132,12 @@ fun MakeProductsScreen(
                             .fillMaxWidth()
                             .clickable(
                                 onClick = {
+                                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                                        "id", productsList[index].id
+                                    )
+                                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                                        "accounting", productsList[index]
+                                    )
                                     navController.navigate(AdminScreen.NewProduct.route)
                                 }
                             ),
@@ -264,18 +271,6 @@ fun TopCardCatalog(
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(
-                                onClick = {navController.popBackStack()},
-                                modifier = Modifier
-                                    .size(25.dp)
-                            ) {
-                                Icon(
-                                    painterResource(R.drawable.back_arrow),
-                                    tint = White10,
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
                             Text(
                                 text = topName.toString(),
                                 fontFamily = montserratFamily,
@@ -292,7 +287,13 @@ fun TopCardCatalog(
                                 screenChange = { searchSwitch = it })
                             IconButton(
                                 onClick = {
-                                   navController.navigate(AdminScreen.NewProduct.route)
+                                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                                        "id", null
+                                    )
+                                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                                        "accounting", null
+                                    )
+                                    navController.navigate(AdminScreen.NewProduct.route)
                                 },
                                 modifier = Modifier
                                     .padding(start = 10.dp)
@@ -304,11 +305,6 @@ fun TopCardCatalog(
                                     contentDescription = null,
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clickable(
-                                            onClick = {
-                                            navController.navigate(AdminScreen.NewProduct.route)
-                                            }
-                                        )
                                 )
                             }
                         }

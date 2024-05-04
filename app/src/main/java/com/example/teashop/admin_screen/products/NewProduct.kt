@@ -45,6 +45,7 @@ import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.model.category.Category
 import com.example.teashop.data.model.packages.PackageProduct
+import com.example.teashop.data.model.product.ProductAccounting
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.navigation.admin.AdminNavigation
@@ -61,10 +62,11 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun LaunchAdminProduct(navController: NavController){
+fun LaunchAdminProduct(navController: NavController, id: Long?, accounting: ProductAccounting?){
     AdminNavigation(navController = navController) {
         MakeAdminProduct(
             product = ProductFull(),
+            accounting = accounting,
             categories = listOf(Category()),
             navController = navController
         )
@@ -74,6 +76,7 @@ fun LaunchAdminProduct(navController: NavController){
 @Composable
 fun MakeAdminProduct(
     product: ProductFull,
+    accounting: ProductAccounting?,
     categories: List<Category>,
     navController: NavController
 ){
@@ -99,29 +102,11 @@ fun MakeAdminProduct(
 
     LazyColumn {
         item{
-            Box(
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                MakeTopCard(
-                    drawableId = R.drawable.back_arrow,
-                    text = "Товар",
-                    navController = navController
-                )
-                Icon(
-                    painter = painterResource(R.drawable.delete_icon),
-                    modifier = Modifier
-                        .padding(bottom = 10.dp, end = 15.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable(
-                            onClick = {
-                                //TODO
-                            }
-                        )
-                        .size(20.dp),
-                    tint = White10,
-                    contentDescription = null
-                )
-            }
+            MakeTopCard(
+                drawableId = R.drawable.back_arrow,
+                text = "Товар",
+                navController = navController
+            )
         }
         item{
             Card(
@@ -219,21 +204,38 @@ fun MakeAdminProduct(
                         bottomPadding = 0,
                         inputValue = product.discount.toString()
                     )
-                    Switch(
-                        checked = switchOn,
-                        onCheckedChange = {
-                            product
-                            switchOn = !switchOn
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedBorderColor = White10,
-                            uncheckedBorderColor = White10,
-                            checkedThumbColor = Green10,
-                            uncheckedThumbColor = Grey10,
-                            checkedTrackColor = Grey20,
-                            uncheckedTrackColor = Grey20,
+                    Row(
+                       verticalAlignment = Alignment.CenterVertically,
+                       modifier = Modifier
+                           .padding(start = 10.dp)
+                           .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Активность",
+                            fontFamily = montserratFamily,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.W400,
+                            color = Black10,
+                            modifier = Modifier.padding(end = 20.dp)
                         )
-                    )
+                        Switch(
+                            checked = switchOn,
+                            onCheckedChange = {
+                                switchOn = !switchOn
+                                accounting?.let {
+                                    it.active = switchOn
+                                }
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedBorderColor = White10,
+                                uncheckedBorderColor = White10,
+                                checkedThumbColor = Green10,
+                                uncheckedThumbColor = Grey10,
+                                checkedTrackColor = Grey20,
+                                uncheckedTrackColor = Grey20,
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -491,18 +493,14 @@ fun PackageEditSheet(
                     expandedChange(false)
                     if(priceTemp == "" && pack.price == 0.0){
                         pack.price = 0.0
-                    }else if(priceTemp == ""){
-
                     }
-                    else {
+                    else if(priceTemp != ""){
                         pack.price = priceTemp.toDouble()
                     }
-                    if(quantityTemp == "" && pack.quantity == 0){
+                    if(quantityTemp == "" && pack.quantity == 0) {
                         pack.quantity = 0
-                    }else if(quantityTemp == ""){
-
                     }
-                    else{
+                    else if(quantityTemp != ""){
                         pack.quantity = quantityTemp.toInt()
                     }
                     if(editSwitch){
