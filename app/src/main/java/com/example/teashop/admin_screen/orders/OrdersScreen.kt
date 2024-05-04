@@ -424,7 +424,7 @@ fun BottomFilterCatalog(
                         DropDownItem(orderStatus = OrderStatus.COMPLETED, filterParams = filterParams) {
                             expanded = it
                         }
-                        DropDownItem(orderStatus = OrderStatus.CANCELLED, filterParams = filterParams) {
+                        DropDownItem(orderStatus = OrderStatus.CANCELED, filterParams = filterParams) {
                             expanded = it
                         }
                         DropDownItem(orderStatus = null, filterParams = filterParams) {

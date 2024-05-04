@@ -5,5 +5,5 @@ enum class OrderStatus(var value: String){
     CONFIRMED("Подтверждён"),
     IN_THE_WAY("В пути"),
     COMPLETED("Доставлен"),
-    CANCELLED("Отменён")
+    CANCELED("Отменён")
 }

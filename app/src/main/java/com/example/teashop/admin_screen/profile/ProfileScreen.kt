@@ -18,13 +18,11 @@ import com.example.teashop.R
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
-import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.buttons.ConfirmButton
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.reusable_interface.cards.ProfileCard
 import com.example.teashop.screen.screen.profile_screen.profile.ProfileViewModel
-
 
 @Composable
 fun LaunchAdminProfile(navController: NavController){
@@ -74,7 +72,6 @@ fun MakeProfileAdmin(
     context: Context,
     navController: NavController
 ){
-
     var expandedDelete by remember{
         mutableStateOf(false)
     }
@@ -98,7 +95,10 @@ fun MakeProfileAdmin(
         ProfileCard(
             icon = R.drawable.user_data_icon,
             title = "Мои данные",
-            onClick = {/*navController.navigate()*/}//TODO 
+            onClick = {
+                navController.currentBackStackEntry?.savedStateHandle?.set("user", user)
+                navController.navigate(Screen.UserData.route)
+            }
         )
         ProfileCard(
             icon = R.drawable.exit_icon,

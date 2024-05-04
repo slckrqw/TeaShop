@@ -33,7 +33,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,12 +49,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
-import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.data.model.pagination.product.ProductFilter
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
@@ -66,7 +69,6 @@ import com.example.teashop.navigation.admin.AdminNavigation
 import com.example.teashop.navigation.admin.AdminScreen
 import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeSearchCard
-import com.example.teashop.screen.screen.catalog_screen.CatalogScreenViewModel
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -75,33 +77,63 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun LaunchAdminProducts(navController: NavController){
-    val context = LocalContext.current
+fun LaunchAdminProducts(
+    navController: NavController,
+    viewModel: ProductViewModel = viewModel(),
+){
     val filterParams by rememberSaveable(stateSaver = productFilterSaver()) {
         mutableStateOf(ProductFilter())
     }
     val sorterParams by rememberSaveable(stateSaver = productSorterSaver()) {
         mutableStateOf(ProductSorter(sortType = ProductSortType.MORE_SALES))
     }
-    AdminNavigation(navController = navController) {
-        MakeProductsScreen(
-            productsList = listOf(ProductAccounting()),
-            navController = navController,
-            topName = "Все товары",
-            filterParams = filterParams,
-            sorterParams = sorterParams,
-            context = context
-        )
+    val productView by viewModel.product.observeAsState()
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+
+    LaunchedEffect(Unit) {
+        tokenStorage.getToken(context)?.let {
+            viewModel.getProductsByFilter(
+                it,
+                ProductPagingRequest(
+                    filter = filterParams,
+                    sorter = sorterParams
+                ),
+                onError = {
+                    Toast.makeText(
+                        context,
+                        "Получение списка продуктов временно недоступно",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+        }
+    }
+
+    productView?.let { products ->
+        AdminNavigation(navController = navController) {
+            MakeProductsScreen(
+                productsList = products,
+                navController = navController,
+                topName = "Все товары",
+                filterParams = filterParams,
+                sorterParams = sorterParams,
+                context = context,
+                viewModel = viewModel
+            )
+        }
     }
 }
 @Composable
 fun MakeProductsScreen(
-    productsList: List<ProductAccounting>,
+    productsList: List<ProductAccounting?>,
     navController: NavController,
     topName: String?,
     filterParams: ProductFilter,
     sorterParams: ProductSorter,
-    viewModel: CatalogScreenViewModel = CatalogScreenViewModel(),
+    viewModel: ProductViewModel,
     context: Context
 ) {
     val lazyListState = remember { LazyListState() }
@@ -124,85 +156,88 @@ fun MakeProductsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                items(productsList.size, key = { index -> productsList[index].id }) { index ->
-                    Card(
-                        modifier = Modifier
-                            .padding(bottom = 10.dp)
-                            .height(70.dp)
-                            .fillMaxWidth()
-                            .clickable(
-                                onClick = {
-                                    navController.currentBackStackEntry?.savedStateHandle?.set(
-                                        "id", productsList[index].id
-                                    )
-                                    navController.currentBackStackEntry?.savedStateHandle?.set(
-                                        "accounting", productsList[index]
-                                    )
-                                    navController.navigate(AdminScreen.NewProduct.route)
-                                }
-                            ),
-                        colors = CardDefaults.cardColors(containerColor = White10),
-                        shape = RectangleShape
-                    ){
-                        Row(
+                items(productsList.size, key = { index -> productsList[index]?.id ?: index}) { index ->
+                    productsList[index]?.let { product ->
+                        Card(
                             modifier = Modifier
+                                .padding(bottom = 10.dp)
+                                .height(70.dp)
                                 .fillMaxWidth()
-                                .padding(vertical = 5.dp, horizontal = 10.dp)
+                                .clickable(
+                                    onClick = {
+                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                            "id", product.id
+                                        )
+                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                            "accounting", product
+                                        )
+                                        navController.navigate(AdminScreen.NewProduct.route)
+                                    }
+                                ),
+                            colors = CardDefaults.cardColors(containerColor = White10),
+                            shape = RectangleShape
                         ){
-                            Image(
-                                painter = rememberAsyncImagePainter(productsList[index].image.imageUrl),
-                                contentDescription = null,
+                            Row(
                                 modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(70.dp)
-                            )
-                            Column(
-                                modifier = Modifier.fillMaxHeight(),
-                                verticalArrangement = Arrangement.SpaceBetween
+                                    .fillMaxWidth()
+                                    .padding(vertical = 5.dp, horizontal = 10.dp)
                             ){
-                                Text(
-                                    text = productsList[index].title,
-                                    fontFamily = montserratFamily,
-                                    fontWeight = FontWeight.W700,
-                                    fontSize = 14.sp,
-                                    color = Black10,
-                                    modifier = Modifier.padding(bottom = 5.dp)
+                                Image(
+                                    painter = rememberAsyncImagePainter(product.imageUrl),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .padding(end = 10.dp)
+                                        .size(70.dp)
                                 )
-                                Text(
-                                    text = "Всего продаж: ${productsList[index].orderCount} шт.",
-                                    fontFamily = montserratFamily,
-                                    fontWeight = FontWeight.W400,
-                                    fontSize = 13.sp,
-                                    color = Black10,
-                                )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                Column(
+                                    modifier = Modifier.fillMaxHeight(),
+                                    verticalArrangement = Arrangement.SpaceBetween
                                 ){
                                     Text(
-                                        text = "На складе: ${productsList[index].quantity} шт.",
+                                        text = product.title,
+                                        fontFamily = montserratFamily,
+                                        fontWeight = FontWeight.W700,
+                                        fontSize = 14.sp,
+                                        color = Black10,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "Всего продаж: ${product.orderCount} шт.",
                                         fontFamily = montserratFamily,
                                         fontWeight = FontWeight.W400,
                                         fontSize = 13.sp,
-                                        color = Black10
+                                        color = Black10,
                                     )
-                                    if(productsList[index].active) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ){
                                         Text(
-                                            text = "Активный товар",
+                                            text = "На складе: ${product.quantity} шт.",
                                             fontFamily = montserratFamily,
                                             fontWeight = FontWeight.W400,
-                                            fontSize = 10.sp,
-                                            color = Green10
+                                            fontSize = 13.sp,
+                                            color = Black10
                                         )
-                                    }else{
-                                        Text(
-                                            text = "Неактивный товар",
-                                            fontFamily = montserratFamily,
-                                            fontWeight = FontWeight.W400,
-                                            fontSize = 10.sp,
-                                            color = Red10
-                                        )
+                                        if(productsList[index]?.active == true) {
+                                            Text(
+                                                text = "Активный товар",
+                                                fontFamily = montserratFamily,
+                                                fontWeight = FontWeight.W400,
+                                                fontSize = 10.sp,
+                                                color = Green10
+                                            )
+                                        }else{
+                                            Text(
+                                                text = "Неактивный товар",
+                                                fontFamily = montserratFamily,
+                                                fontWeight = FontWeight.W400,
+                                                fontSize = 10.sp,
+                                                color = Red10
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -220,7 +255,7 @@ fun TopCardCatalog(
     navController: NavController,
     sorterParams: ProductSorter,
     filterParams: ProductFilter,
-    viewModel: CatalogScreenViewModel,
+    viewModel: ProductViewModel,
     context: Context,
     lazyListState: LazyListState
 ){
@@ -241,8 +276,8 @@ fun TopCardCatalog(
         SearchSwitch.SEARCH -> MakeSearchCard(searchCardHide = { newSearchSwitch, searchString ->
             searchSwitch = newSearchSwitch
             filterParams.searchString = searchString
-            viewModel.getAllProducts(
-                tokenStorage.getToken(context),
+            viewModel.getProductsByFilter(
+                tokenStorage.getToken(context)!!,
                 ProductPagingRequest(
                     filter = filterParams,
                     sorter = sorterParams
@@ -375,7 +410,7 @@ fun BottomFilterCatalog(
     expandedChange: (Boolean) -> Unit,
     filterParams: ProductFilter,
     sorterParams: ProductSorter,
-    viewModel: CatalogScreenViewModel,
+    viewModel: ProductViewModel,
     context: Context,
     lazyListState: LazyListState
 ){
@@ -386,9 +421,12 @@ fun BottomFilterCatalog(
         mutableStateOf(false)
     }
     var sorterText by remember {
-        mutableStateOf("Любой")
+        mutableStateOf(when(filterParams.isActive){
+            true -> "Активный"
+            false -> "Неактивный"
+            null -> "Любой"
+        })
     }
-
 
     ModalBottomSheet(
         onDismissRequest = { expandedChange(false) },
@@ -458,12 +496,8 @@ fun BottomFilterCatalog(
             Button(
                 onClick = {
                     expandedChange(false)
-                    if((filterParams.minPrice  ?: 0.0) > (filterParams.maxPrice ?: 0.0)){
-                        filterParams.minPrice = null
-                        filterParams.maxPrice = null
-                    }
-                    viewModel.getAllProducts(
-                        tokenStorage.getToken(context),
+                    viewModel.getProductsByFilter(
+                        tokenStorage.getToken(context)!!,
                         ProductPagingRequest(
                             filter = filterParams,
                             sorter = sorterParams
@@ -490,14 +524,13 @@ fun BottomFilterCatalog(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSortingCatalog(
     expandedChange: (Boolean)->Unit,
     filterParams: ProductFilter,
     sorterParams: ProductSorter,
-    viewModel: CatalogScreenViewModel,
+    viewModel: ProductViewModel,
     context: Context,
     lazyListState: LazyListState
 ){
@@ -528,7 +561,7 @@ fun SheetTextCatalog(
     expandedChange: (Boolean)->Unit,
     filterParams: ProductFilter,
     sorterParams: ProductSorter,
-    viewModel: CatalogScreenViewModel,
+    viewModel: ProductViewModel,
     context: Context,
     lazyListState: LazyListState
 ){
@@ -578,8 +611,8 @@ fun SheetTextCatalog(
                         onClick = {
                             sorterParams.sortType = textType
                             expandedChange(false)
-                            viewModel.getAllProducts(
-                                tokenStorage.getToken(context),
+                            viewModel.getProductsByFilter(
+                                tokenStorage.getToken(context)!!,
                                 ProductPagingRequest(
                                     filter = filterParams,
                                     sorter = sorterParams

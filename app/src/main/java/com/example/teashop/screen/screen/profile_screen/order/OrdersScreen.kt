@@ -134,7 +134,7 @@ fun OrderStatusText(orderStatus: OrderStatus, fontSize: Int){
                 style = fontStyle,
                 color = Green10
             )
-            OrderStatus.CANCELLED -> Text(
+            OrderStatus.CANCELED -> Text(
                 text = "Отменён",
                 style = fontStyle,
                 color = Red10

@@ -325,7 +325,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                                     makeToast(context, "Товар добавлен в корзину!")
                                 },
                                 onError = {
-                                    makeToast(context, "Упс, что-то пошло не так")
+                                    makeToast(context, "Товара нет в наличии")
                                 }
                             )
 
@@ -612,7 +612,7 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                                     makeToast(context, "Товар добавлен в корзину!")
                                 },
                                 onError = {
-                                    makeToast(context, "Упс, что-то пошло не так")
+                                    makeToast(context, "Товара нет в наличии")
                                 }
                             )
                         },

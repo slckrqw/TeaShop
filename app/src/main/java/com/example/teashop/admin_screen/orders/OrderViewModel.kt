@@ -69,7 +69,7 @@ class OrderViewModel: ViewModel() {
         onSuccess: () -> Unit,
         onError: () -> Unit
     ) {
-        viewModelScope.launch() {
+        viewModelScope.launch(exceptionHandler) {
             val response = AccountingRepository().updateStatusOrTrack(token, id, status, track)
             if (response.isSuccessful) {
                 response.body()?.let {

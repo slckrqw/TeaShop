@@ -8,5 +8,6 @@ data class ProductSave(
     val article: String,
     val title: String,
     val description: String,
-    val discount: Short
+    val discount: Short,
+    val active: Boolean
 )
