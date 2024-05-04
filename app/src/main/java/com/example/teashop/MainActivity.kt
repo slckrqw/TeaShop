@@ -21,6 +21,7 @@ import com.example.teashop.admin_screen.orders.LaunchAdminOrders
 import com.example.teashop.admin_screen.products.LaunchAdminProduct
 import com.example.teashop.admin_screen.products.LaunchAdminProducts
 import com.example.teashop.admin_screen.profile.LaunchAdminProfile
+import com.example.teashop.admin_screen.statistics.LaunchAdminStatistics
 import com.example.teashop.data.api.StripeApiService.Companion.stripeApiService
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.bucket.Bucket
@@ -231,6 +232,10 @@ fun TeaShopApp(){
                 id = id,
                 accounting = accounting
             )
+        }
+
+        composable(AdminScreen.Statistics.route){
+            LaunchAdminStatistics(navController = navController)
         }
     }
 }

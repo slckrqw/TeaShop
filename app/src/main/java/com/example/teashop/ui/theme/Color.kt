@@ -18,3 +18,8 @@ val White10= Color(android.graphics.Color.rgb(255,255,255))
 val Black10 = Color(android.graphics.Color.rgb(0,0,0))
 val Red10 = Color(android.graphics.Color.rgb(235,50,35))
 val Yellow10 = Color(android.graphics.Color.rgb(249,217,120))
+
+val greenColor = Color(0xFF0F9D58)
+val blueColor = Color(0xFF2196F3)
+val yellowColor = Color(0xFFFFC107)
+val redColor = Color(0xFFF44336)
