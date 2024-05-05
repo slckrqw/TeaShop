@@ -57,7 +57,6 @@ fun LaunchAdminStatistics(navController: NavController){
 
 @Composable
 fun MakeAdminStatistics(navController: NavController){
-
     var sorterText by remember{
         mutableStateOf("Весь период")
     }

@@ -9,15 +9,15 @@ import java.time.ZonedDateTime
 
 @Parcelize
 data class ProductFull(
-    val id: Long = 1,
-    val packages: MutableList<PackageProduct> = mutableListOf(PackageProduct()),
-    var article:String = "1234",
-    var title: String = "Зелёный чай",
+    val id: Long = 0,
+    val packages: MutableList<PackageProduct> = mutableListOf(),
+    var article:String = "",
+    var title: String = "",
     var description: String = "",
-    var discount: Int = 5,
-    val countOfReviews: Int = 6,
-    val averageRating: Double = 4.9,
+    var discount: Int = 0,
+    val countOfReviews: Int = 0,
+    val averageRating: Double = 0.0,
     val createdTime: ZonedDateTime = ZonedDateTime.now(),
     var category: Category = Category(),
-    var images: List<Image> = listOf(Image()),
+    var images: List<Image> = listOf(),
 ): Parcelable

@@ -5,8 +5,6 @@ data class PieChartData(
     var value: Float?
 )
 
-// on below line we are creating a method
-// in which we are passing all the data.
 val getPieChartData = listOf(
     PieChartData("Чёрный чай", 34.68F),
     PieChartData("Зелёный чай", 16.60F),

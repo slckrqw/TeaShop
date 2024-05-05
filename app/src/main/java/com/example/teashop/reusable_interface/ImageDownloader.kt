@@ -17,8 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -34,9 +33,7 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 @Composable
-fun ImageDownloader(response: (List<Uri>) -> Unit = {}){
-
-    val imageList = remember { mutableStateListOf<Uri>() }
+fun ImageDownloader(imageList: SnapshotStateList<Uri>){
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -102,5 +99,4 @@ fun ImageDownloader(response: (List<Uri>) -> Unit = {}){
             }
         }
     }
-    response(imageList)
 }

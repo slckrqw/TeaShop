@@ -5,11 +5,11 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Address(
-    val id: Long = 123456,
-    val city: String = "г. Воронеж",
-    val address: String = "ул. Ашанская, д.24",
-    val flat: Short? = 5,
-    val floor: Short = 150,
-    val entrance: Short? = 2,
-    val intercomCode: String? = "не работает"
+    val id: Long = 0,
+    val city: String = "",
+    val address: String = "",
+    val flat: Short? = 0,
+    val floor: Short = 0,
+    val entrance: Short? = 0,
+    val intercomCode: String? = ""
 ):Parcelable

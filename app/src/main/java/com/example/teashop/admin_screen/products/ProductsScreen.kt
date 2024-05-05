@@ -87,7 +87,7 @@ fun LaunchAdminProducts(
     val sorterParams by rememberSaveable(stateSaver = productSorterSaver()) {
         mutableStateOf(ProductSorter(sortType = ProductSortType.MORE_SALES))
     }
-    val productView by viewModel.product.observeAsState()
+    val productView by viewModel.products.observeAsState()
     val context = LocalContext.current
     val tokenStorage = remember {
         TokenStorage()

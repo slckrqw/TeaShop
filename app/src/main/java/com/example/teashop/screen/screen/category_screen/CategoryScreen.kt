@@ -57,6 +57,7 @@ fun LaunchCategoryScreen(navController: NavController, type: ParentCategory?){
             when(type) {
                 ParentCategory.TEA -> return@let "Чайная продукция:"
                 ParentCategory.TEA_DISHES -> return@let "Посуда для чая:"
+                ParentCategory.ALL -> return@let "Все категории:"
             }
         }
     }

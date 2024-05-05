@@ -1,15 +1,15 @@
 package com.example.teashop.data.model.order
 
 import android.os.Parcelable
-import com.example.teashop.data.model.recipient.Recipient
 import com.example.teashop.data.model.address.Address
 import com.example.teashop.data.model.packages.PackageOrder
+import com.example.teashop.data.model.recipient.Recipient
 import kotlinx.parcelize.Parcelize
 import java.time.ZonedDateTime
 
 @Parcelize
 data class Order(
-    val id: Long = 123,
+    val id: Long = 0,
     val createdDate: ZonedDateTime = ZonedDateTime.now(),
     val recipient: Recipient,
     var status: OrderStatus = OrderStatus.NEW,

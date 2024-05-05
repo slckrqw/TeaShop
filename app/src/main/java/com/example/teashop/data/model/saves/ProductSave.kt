@@ -1,13 +1,13 @@
 package com.example.teashop.data.model.saves
 
 data class ProductSave(
-    val id: Long,
-    val images: List<Long>,
-    val packages: List<PackageSave>,
-    val categoryId: Int,
-    val article: String,
-    val title: String,
-    val description: String,
-    val discount: Short,
-    val active: Boolean
+    var id: Long? = null,
+    var images: List<Long?>? = null,
+    var packages: List<PackageSave>? = null,
+    var categoryId: Int? = null,
+    var article: String? = null,
+    var title: String? = null,
+    var description: String? = null,
+    var discount: Int? = null,
+    var active: Boolean? = true
 )

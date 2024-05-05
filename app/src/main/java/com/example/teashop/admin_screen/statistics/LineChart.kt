@@ -17,10 +17,7 @@ import co.yml.charts.ui.linechart.model.LineStyle
 import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
-import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
-import com.example.teashop.ui.theme.Green20
-import com.example.teashop.ui.theme.Red10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.greenColor
 

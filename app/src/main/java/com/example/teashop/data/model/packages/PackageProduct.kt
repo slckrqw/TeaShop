@@ -7,8 +7,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class PackageProduct(
-    val id: Long = 1234,
+    val id: Long = 0,
     var variant: Variant = Variant(1, VariantType.PACK),
-    var quantity: Int = 1,
-    var price: Double = 250.0
+    var quantity: Int = 0,
+    var price: Double = 0.0
 ): Parcelable

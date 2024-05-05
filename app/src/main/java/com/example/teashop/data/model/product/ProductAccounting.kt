@@ -5,10 +5,10 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ProductAccounting(
-    val id: Long = 1234,
-    val title: String = "Chai",
-    val orderCount: Int = 52,
-    val quantity: Int = 52,
+    val id: Long = 0,
+    val title: String = "",
+    val orderCount: Int = 0,
+    val quantity: Int = 0,
     var active: Boolean = true,
     val imageUrl: String
 ): Parcelable

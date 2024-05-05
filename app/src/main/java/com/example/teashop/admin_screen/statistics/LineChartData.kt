@@ -1,7 +1,6 @@
 package com.example.teashop.admin_screen.statistics
 
 import co.yml.charts.common.model.Point
-import java.lang.Math.random
 import kotlin.random.Random
 
 fun loadPoints(): List<Point>{
@@ -27,6 +26,7 @@ fun maxOf(pointsList: List<Point>): Int{
     }
     return max
 }
+
 fun minOf(pointsList: List<Point>): Int{
     var min = maxOf(pointsList)
     pointsList.forEach {
