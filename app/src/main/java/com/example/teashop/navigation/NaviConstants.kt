@@ -7,7 +7,7 @@ import com.example.teashop.navigation.common.Screen
 object NaviConstants {
     val BottomNaviItems = listOf(
         NaviBarItem(
-            icon = R.drawable.home_bottombar_icon,
+            icon = R.drawable.home_bottombar_icon_3,
             route = Screen.Main.route
         ),
         NaviBarItem(
