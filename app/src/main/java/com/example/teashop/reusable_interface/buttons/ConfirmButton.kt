@@ -1,5 +1,6 @@
 package com.example.teashop.reusable_interface.buttons
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +26,11 @@ import com.example.teashop.ui.theme.montserratFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmButton(header: String, accountAction: (Boolean) -> Unit = {}, expandedChange: (Boolean) -> Unit = {}){
+fun ConfirmButton(
+    header: String,
+    accountAction: (Boolean) -> Unit = {},
+    expandedChange: (Boolean) -> Unit = {}
+){
     AlertDialog(onDismissRequest = { expandedChange(false) }) {
         Card(
             colors = CardDefaults.cardColors(containerColor = White10)
@@ -36,13 +41,18 @@ fun ConfirmButton(header: String, accountAction: (Boolean) -> Unit = {}, expande
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = header,
-                    fontFamily = montserratFamily,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.W500,
-                    color = Black10
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Text(
+                        text = header,
+                        fontFamily = montserratFamily,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.W500,
+                        color = Black10
+                    )
+                }
                 Row(
                     modifier = Modifier.padding(10.dp)
                 ) {

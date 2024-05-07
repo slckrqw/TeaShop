@@ -36,15 +36,15 @@ fun MakeNaviBar(navController: NavController, barIconList: List<NaviBarItem>){
             val currentRoute = navBackStackEntry?.destination?.route
            barIconList.forEach { naviItem ->
                 NavigationBarItem(
-                    selected = currentRoute == naviItem.route,
+                    selected = naviItem.route.contains(currentRoute),
                     onClick = {
-                        if((naviItem.route == Screen.Basket.route ||
-                            naviItem.route == Screen.Profile.route)&&
+                        if((naviItem.route[0] == Screen.Basket.route ||
+                            naviItem.route[0] == Screen.Profile.route)&&
                             tokenStorage.getToken(context).isNullOrEmpty())
                         {
                             navController.navigate(Screen.Log.route)
                         }else {
-                            navController.navigate(naviItem.route)
+                            navController.navigate(naviItem.route[0])
                         }
                     },
                     icon = {

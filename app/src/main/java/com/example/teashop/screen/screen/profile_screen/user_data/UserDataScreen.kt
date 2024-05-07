@@ -30,6 +30,7 @@ import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
+import com.example.teashop.reusable_interface.buttons.ConfirmButton
 import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeTopCard
@@ -66,6 +67,12 @@ fun MakeUserDataScreen(navController: NavController, user: User){
     }
     var userPassword by remember{
         mutableStateOf("")
+    }
+    var confirmEdit by remember {
+        mutableStateOf(false)
+    }
+    var editConfirmed by remember{
+        mutableStateOf(false)
     }
 
     Column(
@@ -117,50 +124,61 @@ fun MakeUserDataScreen(navController: NavController, user: User){
         }
         MakeAgreeBottomButton(
             onClick = {
-                if (userName.isEmpty() || userSurname.isNullOrEmpty() || userEmail.isEmpty()) {
-                    makeToast(context,"Заполните все данные корректно")
-                    return@MakeAgreeBottomButton
-                }
-                if (!userEmail.contains("@")) {
-                    makeToast(context,"Укажите корректный адрес электронной почты")
-                    return@MakeAgreeBottomButton
-                }
-                if ((userPassword.isNotEmpty() && userFirstPassword.isNotEmpty() && userFirstPassword != userPassword) ||
-                    (userPassword.isNotEmpty() && userFirstPassword.isEmpty()) ||
-                    (userPassword.isEmpty() && userFirstPassword.isNotEmpty())) {
-                    makeToast(context,"Пароли должны совпадать")
-                    return@MakeAgreeBottomButton
-                }
+                confirmEdit = true
+            },
+            text = "Сохранить изменения"
+        )
+    }
+    if(confirmEdit){
+        ConfirmButton(
+            header = "Сохранить изменения?\nДля этого потребуется перезайти.",
+            accountAction = {editConfirmed = it},
+            expandedChange = {confirmEdit = it}
+        )
+    }
+    if(editConfirmed){
+        if (userName.isEmpty() || userSurname.isNullOrEmpty() || userEmail.isEmpty()) {
+            makeToast(context,"Заполните все данные корректно")
+            return
+        }
+        if (!userEmail.contains("@")) {
+            makeToast(context,"Укажите корректный адрес электронной почты")
+            return
+        }
+        if ((userPassword.isNotEmpty() && userFirstPassword.isNotEmpty() && userFirstPassword != userPassword) ||
+            (userPassword.isNotEmpty() && userFirstPassword.isEmpty()) ||
+            (userPassword.isEmpty() && userFirstPassword.isNotEmpty())) {
+            makeToast(context,"Пароли должны совпадать")
+            return
+        }
 
-                val userSave = UserSave(
-                    userName.trim(),
-                    userSurname!!.trim(),
-                    userEmail.trim(),
-                    if (userPassword.trim().isEmpty()) userPassword.replace(" ", "")
-                    else null,
-                )
+        val userSave = UserSave(
+            userName.trim(),
+            userSurname!!.trim(),
+            userEmail.trim(),
+            if (userPassword.trim().isEmpty()) userPassword.replace(" ", "")
+            else null,
+        )
 
-                userDataViewModel.saveUserInfo(
-                    tokenStorage.getToken(context),
-                    userSave,
-                    onSuccess = {
-                        tokenStorage.deleteToken(context)
-                        makeToast(context, "Данные успешно обновлены!")
-                        navController.navigate(
-                            Screen.Log.route,
-                            navOptions = navOptions {
-                                popUpTo(navController.graph.id) {
-                                    inclusive = true
-                                }
-                            }
-                        )
-                    },
-                    onError = {
-                        makeToast(context, "Укажите корректные данные")
+        userDataViewModel.saveUserInfo(
+            tokenStorage.getToken(context),
+            userSave,
+            onSuccess = {
+                tokenStorage.deleteToken(context)
+                makeToast(context, "Данные успешно обновлены!")
+                navController.navigate(
+                    Screen.Log.route,
+                    navOptions = navOptions {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
                     }
                 )
             },
-            text = "Сохранить изменения")
+            onError = {
+                makeToast(context, "Укажите корректные данные")
+            }
+        )
     }
 }
 
