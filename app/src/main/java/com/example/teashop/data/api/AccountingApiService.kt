@@ -1,13 +1,16 @@
 package com.example.teashop.data.api
 
+import com.example.teashop.data.enums.StatisticsSortType
 import com.example.teashop.data.model.order.Order
 import com.example.teashop.data.model.pagination.product.ProductAccountingResponse
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.product.ProductFull
 import com.example.teashop.data.model.saves.ProductSave
+import com.example.teashop.data.model.statistics.Statistics
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -43,6 +46,12 @@ interface AccountingApiService {
         @Query("status") status: String,
         @Query("track") track: String?
     ): Response<Order>
+
+    @GET("accounting/statistics")
+    suspend fun getStatisticsByPeriod(
+        @Header("Authorization") token: String,
+        @Query("period") sortType: StatisticsSortType,
+    ): Response<Statistics>
 
     companion object {
         val accountingApiService: AccountingApiService by lazy {

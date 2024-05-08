@@ -130,17 +130,7 @@ fun MakeProductScreen(
     val heartColor: Color
     val heartIcon: Int
     var productWeight by remember {
-        mutableStateOf(if ((product.packages[0].variant.title) == VariantType.PACK
-        ) {
-            VariantType.PACK
-        } else {
-            VariantType.FIFTY_GRAMS
-        })
-    }
-    if (productWeight == VariantType.FIFTY_GRAMS) {
-        if ((product.packages[0].variant.title) == VariantType.PACK) {
-            productWeight = VariantType.PACK
-        }
+        mutableStateOf(product.packages[0].variant.title )
     }
     var expanded by remember{ mutableStateOf(false) }
     var favorite by remember {
@@ -278,8 +268,7 @@ fun MakeProductScreen(
                                 text = "${
                                     BigDecimal(
                                     product.packages
-                                        .first { it.variant.title == productWeight ||
-                                                it.variant.title == VariantType.PACK }
+                                        .first { it.variant.title == productWeight }
                                         .price*(1-product.discount.toDouble()/100)
                                     ).setScale(2, RoundingMode.HALF_UP)} ₽",
                                 fontFamily = montserratFamily,
@@ -291,8 +280,7 @@ fun MakeProductScreen(
                             Text(
                                 text = "${product
                                     .packages
-                                    .first { it.variant.title == productWeight ||
-                                            it.variant.title == VariantType.PACK}
+                                    .first { it.variant.title == productWeight }
                                     .price} ₽",
                                 fontFamily = montserratFamily,
                                 fontSize = 13.sp,
@@ -375,7 +363,7 @@ fun MakeProductScreen(
                                         onError = {
                                             makeToast(
                                                 context,
-                                                "Упс, что-то пошло не так"
+                                                "Товара нет в наличии"
                                             )
                                         }
                                     )
@@ -433,8 +421,7 @@ fun MakeProductScreen(
                             text = "+ ${
                                 BigDecimal(
                                     product.packages
-                                        .first { it.variant.title == productWeight ||
-                                                it.variant.title == VariantType.PACK }
+                                        .first { it.variant.title == productWeight }
                                         .price*(1-product.discount.toDouble()/100) * 0.05
                                 ).setScale(0, RoundingMode.DOWN)} бонусных рублей",
                             fontFamily = montserratFamily,
@@ -484,7 +471,8 @@ fun MakeProductScreen(
                             contentDescription = null
                         )
                         Text(
-                            text = "${product.averageRating}",
+                            text = BigDecimal(product.averageRating)
+                                .setScale(1, RoundingMode.HALF_UP).toString(),
                             fontFamily = montserratFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.W500,

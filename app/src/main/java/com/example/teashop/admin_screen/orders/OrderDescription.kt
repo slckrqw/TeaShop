@@ -52,9 +52,9 @@ import com.example.teashop.data.model.order.OrderStatus
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
-import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
+import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey20
@@ -312,7 +312,7 @@ fun MakeOrderDescriptionScreen(
                 )
             }
         }
-        items(order.packageOrders.size, { order.packageOrders[it].productTitle }){product ->
+        items(order.packageOrders.size, { it }){product ->
             val currentProduct = order.packageOrders[product]
             val variantTitle = when(currentProduct.type) {
                 VariantType.FIFTY_GRAMS -> "50 гр."

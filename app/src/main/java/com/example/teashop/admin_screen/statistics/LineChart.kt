@@ -17,33 +17,33 @@ import co.yml.charts.ui.linechart.model.LineStyle
 import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
+import com.example.teashop.data.model.statistics.OrdersStatistics
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.White10
-import com.example.teashop.ui.theme.greenColor
 
 @Composable
 fun LineChartBase(
-    currentMonth: Int = 1,
+    orderStat: List<OrdersStatistics>,
     stepSizeX: Int = 100,
-    stepSizeY: Int = 10
 ){
-    val pointsList = loadPoints()
+    val pointsList = loadPoints(orderStat.sortedBy {
+        it.date
+    })
 
     val xAxisData = AxisData.Builder()
         .axisStepSize(stepSizeX.dp)
         .backgroundColor(White10)
         .steps(pointsList.size - 1)
-        .labelData { i -> "$i.$currentMonth" }
+        .labelData { i -> orderStat[i].date.toString() }
         .labelAndAxisLinePadding(15.dp)
         .build()
 
     val yAxisData = AxisData.Builder()
-        .steps(stepSizeY)
+        .steps(maxOf(pointsList) - 1)
         .backgroundColor(White10)
         .labelAndAxisLinePadding(20.dp)
         .labelData { i ->
-            val yScale = (maxOf(pointsList) - minOf(pointsList))/stepSizeY
-            (i * yScale).toString()
+            (i + 1).toString()
         }.build()
 
     val lineChartData = LineChartData(
@@ -52,7 +52,7 @@ fun LineChartBase(
                 Line(
                     dataPoints = pointsList,
                     LineStyle(
-                        color = greenColor
+                        color = Green10
                     ),
                     IntersectionPoint(radius = 4.dp),
                     SelectionHighlightPoint(),

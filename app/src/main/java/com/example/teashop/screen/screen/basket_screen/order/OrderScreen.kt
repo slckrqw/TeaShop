@@ -1,7 +1,9 @@
 package com.example.teashop.screen.screen.basket_screen.order
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.Toast.*
+import android.widget.Toast.LENGTH_SHORT
+import android.widget.Toast.makeText
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -28,6 +30,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,10 +57,10 @@ import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
-import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
-import com.example.teashop.reusable_interface.text_fields.MakeMaskedTextField
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
 import com.example.teashop.reusable_interface.cards.MakeTopCard
+import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
+import com.example.teashop.reusable_interface.text_fields.MakeMaskedTextField
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
@@ -129,6 +132,7 @@ fun LaunchOrderScreen(
     }
 }
 
+@SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MakeOrderScreen(
@@ -167,6 +171,9 @@ fun MakeOrderScreen(
         minOf(user.teaBonuses, (bucket.totalSumWithDiscount * 0.5).toInt())
     } else {
         0
+    }
+    val addresses by remember {
+        mutableStateOf(addressList.toMutableStateList())
     }
 
     val paymentSheetCallback = PaymentSheetResultCallback { result ->
@@ -293,6 +300,8 @@ fun MakeOrderScreen(
                                     it,
                                     addressList[address].id,
                                     onSuccess = {
+                                        addresses.removeAt(address)
+                                        addressList.removeAt(address)
                                         makeText(context, "Адрес удален", LENGTH_SHORT).show()
                                     },
                                     onError = {

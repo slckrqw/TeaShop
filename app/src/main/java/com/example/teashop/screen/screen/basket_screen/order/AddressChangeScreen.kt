@@ -1,7 +1,6 @@
 package com.example.teashop.screen.screen.basket_screen.order
 
 import android.widget.Toast
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,9 +29,9 @@ import com.example.teashop.data.model.saves.AddressSave
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
+import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.reusable_interface.text_fields.MakeHalfTextField
-import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
@@ -112,7 +112,7 @@ fun MakeAddressChangeScreen(navController: NavController, viewModel: OrderViewMo
             }
         }
         MakeAgreeBottomButton(onClick = {
-            if (address.trim().isEmpty() || flat.trim().isEmpty() || floor.trim().isEmpty() || flat.toShortOrNull() == null) {
+            if (address.trim().isEmpty()) {
                 Toast.makeText(context, "Корректно заполните информацию об адресе", Toast.LENGTH_SHORT).show()
                 return@MakeAgreeBottomButton
             }
@@ -122,7 +122,7 @@ fun MakeAddressChangeScreen(navController: NavController, viewModel: OrderViewMo
                     AddressSave(
                         address,
                         address,
-                        flat.toShort(),
+                        flat.toShortOrNull(),
                         floor.toShortOrNull(),
                         entrance.toShortOrNull(),
                         intercomCode

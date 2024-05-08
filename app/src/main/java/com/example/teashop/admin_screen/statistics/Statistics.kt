@@ -1,5 +1,6 @@
 package com.example.teashop.admin_screen.statistics
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,14 +34,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teashop.R
 import com.example.teashop.data.enums.StatisticsSortType
+import com.example.teashop.data.model.statistics.Statistics
+import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
@@ -48,15 +55,43 @@ import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
 
 var sorter = StatisticsSortType.ALL_TIME
+
 @Composable
-fun LaunchAdminStatistics(navController: NavController){
-    AdminNavigation(navController = navController) {
-        MakeAdminStatistics(navController)
+fun LaunchAdminStatistics(
+    navController: NavController,
+    viewModel: StatisticsViewModel = viewModel()
+){
+    val statsView by viewModel.stats.observeAsState()
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
+    }
+
+    LaunchedEffect(Unit) {
+        tokenStorage.getToken(context)?.let {
+            viewModel.getStatisticsByPeriod(
+                it,
+                StatisticsSortType.ALL_TIME,
+                onError = {
+                    Toast.makeText(context, "Не удалось получить статистику", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+    }
+
+    statsView?.let { stats ->
+        AdminNavigation(navController = navController) {
+            MakeAdminStatistics(navController, viewModel, stats)
+        }
     }
 }
 
 @Composable
-fun MakeAdminStatistics(navController: NavController){
+fun MakeAdminStatistics(
+    navController: NavController,
+    viewModel: StatisticsViewModel,
+    stats: Statistics
+){
     var sorterText by remember{
         mutableStateOf("Весь период")
     }
@@ -67,7 +102,6 @@ fun MakeAdminStatistics(navController: NavController){
         StatisticsSortType.WEEK -> StatisticsSortType.WEEK.value
         StatisticsSortType.DAY -> StatisticsSortType.DAY.value
     }
-
     var expanded by remember{
         mutableStateOf(false)
     }
@@ -132,7 +166,7 @@ fun MakeAdminStatistics(navController: NavController){
                         fontSize = 13.sp,
                         color = Black10
                     )
-                    PieChart()
+                    PieChart(stats.categoryStatistics)
                 }
             }
         }
@@ -148,13 +182,13 @@ fun MakeAdminStatistics(navController: NavController){
                     modifier = Modifier.padding(10.dp)
                 ){
                     Text(
-                        text = "Количество продаж по дням",
+                        text = "Количество заказов по дням",
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.W600,
                         fontSize = 13.sp,
                         color = Black10
                     )
-                    LineChartBase()
+                    LineChartBase(stats.ordersStatistics)
                 }
             }
         }
@@ -176,15 +210,17 @@ fun MakeAdminStatistics(navController: NavController){
                         color = Black10,
                         modifier = Modifier.padding(bottom = 5.dp)
                     )
-                    TextRow(header = "Всего заказов: ", data = "5")
-                    TextRow(header = "Продано товаров: ", data = "10")
-                    TextRow(header = "Сумма: ", data = "1000")
+                    TextRow(header = "Всего заказов: ", data = stats.countOfOrders.toString())
+                    TextRow(header = "Продано товаров: ", data = stats.countOfSales.toString())
+                    TextRow(header = "Сумма: ", data = stats.totalPrice.toString())
                 }
             }
         }
     }
     if(expanded){
-        BottomSortingCatalog {
+        BottomSortingCatalog(
+            viewModel
+        ) {
             expanded = it
         }
     }
@@ -192,7 +228,10 @@ fun MakeAdminStatistics(navController: NavController){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSortingCatalog(expandedChange: (Boolean) -> Unit){
+fun BottomSortingCatalog(
+    viewModel: StatisticsViewModel,
+    expandedChange: (Boolean) -> Unit
+){
     ModalBottomSheet(
         onDismissRequest = {expandedChange(false)},
         containerColor = White10,
@@ -206,27 +245,31 @@ fun BottomSortingCatalog(expandedChange: (Boolean) -> Unit){
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
             )
-            BottomSheetText(textType = StatisticsSortType.ALL_TIME, expandedChange = expandedChange)
-            BottomSheetText(textType = StatisticsSortType.YEAR, expandedChange = expandedChange)
-            BottomSheetText(textType = StatisticsSortType.MONTH, expandedChange = expandedChange)
-            BottomSheetText(textType = StatisticsSortType.WEEK, expandedChange = expandedChange)
-            BottomSheetText(textType = StatisticsSortType.DAY, expandedChange = expandedChange)
+            BottomSheetText(textType = StatisticsSortType.ALL_TIME, expandedChange = expandedChange, viewModel = viewModel)
+            BottomSheetText(textType = StatisticsSortType.YEAR, expandedChange = expandedChange, viewModel = viewModel)
+            BottomSheetText(textType = StatisticsSortType.MONTH, expandedChange = expandedChange, viewModel = viewModel)
+            BottomSheetText(textType = StatisticsSortType.WEEK, expandedChange = expandedChange, viewModel = viewModel)
+            BottomSheetText(textType = StatisticsSortType.DAY, expandedChange = expandedChange, viewModel = viewModel)
         }
     }
 }
 
 @Composable
 fun BottomSheetText(
+    viewModel: StatisticsViewModel,
     textType: StatisticsSortType,
     expandedChange: (Boolean) -> Unit
 ){
-
     val sorterText = when(textType){
         StatisticsSortType.ALL_TIME -> StatisticsSortType.ALL_TIME.value
         StatisticsSortType.YEAR -> StatisticsSortType.YEAR.value
         StatisticsSortType.MONTH -> StatisticsSortType.MONTH.value
         StatisticsSortType.WEEK -> StatisticsSortType.WEEK.value
         StatisticsSortType.DAY -> StatisticsSortType.DAY.value
+    }
+    val context = LocalContext.current
+    val tokenStorage = remember {
+        TokenStorage()
     }
 
     val cardColor: Color
@@ -262,8 +305,18 @@ fun BottomSheetText(
                     .fillMaxWidth()
                     .clickable(
                         onClick = {
-                            //TODO request(check adminProducts)
                             sorter = textType
+
+                            tokenStorage.getToken(context)?.let {
+                                viewModel.getStatisticsByPeriod(
+                                    it,
+                                    sorter,
+                                    onError = {
+                                        Toast.makeText(context, "Не удалось получить статистику", Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            }
+
                             expandedChange(false)
                         }
                     )

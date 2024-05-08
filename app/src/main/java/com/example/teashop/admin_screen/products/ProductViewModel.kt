@@ -81,7 +81,7 @@ class ProductViewModel: ViewModel() {
         onSuccess: () -> Unit,
         onError: () -> Unit
     ) {
-        viewModelScope.launch() {
+        viewModelScope.launch(exceptionHandler) {
             if (files.isNotEmpty()) {
                 val imageResponse = AccountingRepository().uploadImages(files)
                 if (imageResponse.isSuccessful) {

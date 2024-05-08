@@ -116,13 +116,7 @@ fun RowOfCards(
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun RowScope.MakeProductCard(navController: NavController, product: ProductShort?) {
-    var productWeight by remember { mutableStateOf(if ((product?.packages?.get(0)?.variantType
-            ?: VariantType.FIFTY_GRAMS) == VariantType.PACK
-    ) {
-        VariantType.PACK
-    } else {
-        VariantType.FIFTY_GRAMS
-    })}
+    var productWeight by remember { mutableStateOf(product?.packages?.get(0)?.variantType) }
     var expanded by remember{ mutableStateOf(false) }
     var heartIconId by remember {
         mutableIntStateOf(R.drawable.heart_icon_disabled)
@@ -136,7 +130,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
     }
     val productViewModel: ProductViewModel = viewModel()
 
-    if(product != null) {
+    if (product != null) {
         Box(
             modifier = Modifier
                 .padding(5.dp)
@@ -236,9 +230,14 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                         text = "${
                             BigDecimal(
                                 product.packages
-                                    .first { it.variantType == productWeight || 
-                                            it.variantType == VariantType.PACK }
-                                    .price*(1-product.discount.toDouble()/100)
+                                    .firstOrNull { it.variantType == productWeight }
+                                    ?.price?.let { price ->
+                                        price * (1 - product.discount.toDouble() / 100)
+                                    } ?: run {
+                                        productWeight = product.packages.first().variantType
+                                        val defaultPackage = product.packages.first { it.variantType == productWeight }
+                                        defaultPackage.price * (1 - product.discount.toDouble() / 100) 
+                                    }
                             ).setScale(2, RoundingMode.HALF_UP)
                         } ₽",
                         fontFamily = montserratFamily,
@@ -249,8 +248,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                     Text(
                         text = "${product
                             .packages
-                            .first { it.variantType == productWeight ||
-                                    it.variantType == VariantType.PACK}
+                            .first { it.variantType == productWeight }
                             .price} ₽",
                         fontFamily = montserratFamily,
                         fontSize = 10.sp,
@@ -279,7 +277,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                             modifier = Modifier.fillMaxSize()
                         ) {
                             Text(
-                                text = productWeight.value,
+                                text = productWeight?.value ?: VariantType.FIFTY_GRAMS.value,
                                 fontFamily = montserratFamily,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.W200,
@@ -407,13 +405,7 @@ private fun makeToast(context: Context, text: String) {
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun MakeProductCard2(navController: NavController, product: ProductShort?) {
-    var productWeight by remember { mutableStateOf(if ((product?.packages?.get(0)?.variantType
-            ?: VariantType.FIFTY_GRAMS) == VariantType.PACK
-    ) {
-        VariantType.PACK
-    } else {
-        VariantType.FIFTY_GRAMS
-    })}
+    var productWeight by remember { mutableStateOf(product?.packages?.get(0)?.variantType)}
     var expanded by remember{ mutableStateOf(false) }
     var heartIconId by remember {
         mutableIntStateOf(R.drawable.heart_icon_disabled)
@@ -529,8 +521,7 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         Text(
                             text = "${BigDecimal(
                                 product.packages
-                                    .first { it.variantType == productWeight ||
-                                            it.variantType == VariantType.PACK }
+                                    .first { it.variantType == productWeight  }
                                     .price*(1-product.discount.toDouble()/100)
                             ).setScale(2, RoundingMode.HALF_UP)} ₽",
                             fontFamily = montserratFamily,
@@ -541,8 +532,7 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         Text(
                             text = "${product
                                 .packages
-                                .first { it.variantType == productWeight ||
-                                        it.variantType == VariantType.PACK}
+                                .first { it.variantType == productWeight }
                                 .price} ₽",
                             fontFamily = montserratFamily,
                             fontSize = 10.sp,
@@ -566,7 +556,7 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                             modifier = Modifier.fillMaxSize()
                         ) {
                             Text(
-                                text = productWeight.value,
+                                text = productWeight?.value ?: VariantType.FIFTY_GRAMS.value,
                                 fontFamily = montserratFamily,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.W200,

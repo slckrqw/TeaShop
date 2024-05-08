@@ -59,6 +59,8 @@ import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun LaunchFeedbackScreen(
@@ -212,7 +214,8 @@ fun MakeFeedbackScreen(
                             contentDescription = null
                         )
                         Text(
-                            text = averageRate.toString(),
+                            text = BigDecimal(averageRate)
+                                .setScale(1, RoundingMode.HALF_UP).toString(),
                             fontFamily = montserratFamily,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.W500

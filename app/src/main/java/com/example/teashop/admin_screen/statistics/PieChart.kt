@@ -17,6 +17,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.teashop.R
+import com.example.teashop.data.model.statistics.CategoryStatistics
+import com.example.teashop.ui.theme.Green10
+import com.example.teashop.ui.theme.Pink40
+import com.example.teashop.ui.theme.Purple40
+import com.example.teashop.ui.theme.PurpleGrey80
 import com.example.teashop.ui.theme.blueColor
 import com.example.teashop.ui.theme.greenColor
 import com.example.teashop.ui.theme.redColor
@@ -28,7 +33,7 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
 @Composable
-fun PieChart() {
+fun PieChart(stats: List<CategoryStatistics>) {
     Column(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -37,7 +42,7 @@ fun PieChart() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Crossfade(targetState = getPieChartData, label = "") { pieChartData ->
+            Crossfade(targetState = stats, label = "") { pieChartData ->
                 AndroidView(factory = { context ->
                     PieChart(context).apply {
                         layoutParams = LinearLayout.LayoutParams(
@@ -65,13 +70,13 @@ fun PieChart() {
 
 fun updatePieChartWithData(
     chart: PieChart,
-    data: List<PieChartData>
+    data: List<CategoryStatistics>
 ) {
     val entries = ArrayList<PieEntry>()
 
     for (i in data.indices) {
         val item = data[i]
-        entries.add(PieEntry(item.value ?: 0.toFloat(), item.browserName ?: ""))
+        entries.add(PieEntry(item.percent, item.categoryTitle))
     }
     val ds = PieDataSet(entries, "")
     ds.colors = arrayListOf(
@@ -79,6 +84,10 @@ fun updatePieChartWithData(
         blueColor.toArgb(),
         redColor.toArgb(),
         yellowColor.toArgb(),
+        Purple40.toArgb(),
+        Pink40.toArgb(),
+        Green10.toArgb(),
+        PurpleGrey80.toArgb()
     )
     ds.yValuePosition = PieDataSet.ValuePosition.INSIDE_SLICE
     ds.xValuePosition = PieDataSet.ValuePosition.INSIDE_SLICE

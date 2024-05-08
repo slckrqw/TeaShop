@@ -1,16 +1,16 @@
 package com.example.teashop.admin_screen.statistics
 
 import co.yml.charts.common.model.Point
-import kotlin.random.Random
+import com.example.teashop.data.model.statistics.OrdersStatistics
 
-fun loadPoints(): List<Point>{
+fun loadPoints(orderStat: List<OrdersStatistics>): List<Point>{
     val pointsList = mutableListOf<Point>()
-    for(i in 1..31){
+    for(i in orderStat.indices){
         pointsList
             .add(
                 Point(
                     i.toFloat(),
-                    Random.nextInt(from = 0, until = 30).toFloat()
+                    orderStat[i].countOfOrders.toFloat()
                 )
             )
     }
@@ -18,21 +18,5 @@ fun loadPoints(): List<Point>{
 }
 
 fun maxOf(pointsList: List<Point>): Int{
-    var max = 0
-    pointsList.forEach {
-        if(max<it.y){
-            max = it.y.toInt()
-        }
-    }
-    return max
-}
-
-fun minOf(pointsList: List<Point>): Int{
-    var min = maxOf(pointsList)
-    pointsList.forEach {
-        if(min>it.y){
-            min = it.y.toInt()
-        }
-    }
-    return min
+    return pointsList.maxOf { it.y }.toInt()
 }

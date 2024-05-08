@@ -1,10 +1,6 @@
 package com.example.teashop.screen.screen.profile_screen.order
 
 import android.widget.Toast
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
-import com.example.teashop.reusable_interface.cards.MakeTopCard
-import androidx.navigation.NavController
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -33,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.R
 import com.example.teashop.data.model.order.Order
@@ -40,6 +39,7 @@ import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.reusable_interface.cards.MakeSummaryCard
+import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
@@ -188,7 +188,7 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
                 )
             }
         }
-        items(order.packageOrders.size, { order.packageOrders[it].productTitle }){product ->
+        items(order.packageOrders.size, { it }){product ->
             val currentProduct = order.packageOrders[product]
             val variantTitle = when(currentProduct.type) {
                 VariantType.FIFTY_GRAMS -> "50 гр."

@@ -81,7 +81,7 @@ fun LaunchAdminProduct(
     val context = LocalContext.current
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
     LaunchedEffect(Unit) {
-        viewModel.loadCategories(ParentCategory.TEA_DISHES) // TODO set ParentCategory.ALL
+        viewModel.loadCategories(ParentCategory.ALL)
     }
 
     if (id != null) {
@@ -188,19 +188,22 @@ fun MakeAdminProduct(
                         header = "Название товара",
                         onValueChange = {product.title = it},
                         bottomPadding = 5,
-                        inputValue = product.title
+                        inputValue = product.title,
+                        contextLength = 50
                     )
                     MakeFullTextField(
                         header = "Артикул",
                         onValueChange = {product.article = it},
                         bottomPadding = 5,
-                        inputValue = product.article
+                        inputValue = product.article,
+                        contextLength = 50
                     )
                     MakeFullTextField(
                         header = "Описание",
                         onValueChange = {product.description = it},
                         bottomPadding = 5,
-                        inputValue = product.description
+                        inputValue = product.description,
+                        contextLength = 500
                     )
                     Column(
                         modifier = Modifier

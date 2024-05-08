@@ -11,6 +11,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -28,9 +29,24 @@ class ZonedDateTimeAdapter: JsonAdapter<ZonedDateTime>() {
     }
 }
 
+class LocalDateAdapter: JsonAdapter<LocalDate>() {
+    private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
+
+    @FromJson
+    override fun fromJson(reader: JsonReader): LocalDate? {
+        return reader.nextString()?.let { LocalDate.parse(it, formatter) }
+    }
+
+    @ToJson
+    override fun toJson(writer: JsonWriter, value: LocalDate?) {
+        writer.value(value?.format(formatter))
+    }
+}
+
 val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
     .add(ZonedDateTimeAdapter())
+    .add(LocalDateAdapter())
     .build()
 
 var retrofitBuilder: Retrofit = Retrofit.Builder()
