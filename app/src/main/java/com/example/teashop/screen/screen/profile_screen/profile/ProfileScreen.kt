@@ -2,6 +2,7 @@ package com.example.teashop.screen.screen.profile_screen.profile
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,8 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -124,6 +129,9 @@ fun MakeProfileScreen(
         mutableStateOf(false)
     }
     var deleteAccount by remember{
+        mutableStateOf(false)
+    }
+    var appInfo by remember{
         mutableStateOf(false)
     }
 
@@ -243,7 +251,13 @@ fun MakeProfileScreen(
                 navController.navigate(Screen.UserFeedback.route)
             }
         )
-        ProfileCard(icon = R.drawable.info_profile_icon, title = "О приложении")
+        ProfileCard(
+            icon = R.drawable.info_profile_icon,
+            title = "О приложении",
+            onClick = {
+                appInfo = true
+            }
+        )
         ProfileCard(
             icon = R.drawable.exit_icon,
             title = "Выйти из аккаунта",
@@ -258,6 +272,11 @@ fun MakeProfileScreen(
                 expandedDelete = true
             }
         )
+    }
+    if(appInfo){
+        AppInfoSheet {
+            appInfo = it
+        }
     }
     if(bonusInfo){
         BottomSheetBonuses(header = "Что такое бонусы?", textId = R.string.BonusInfo) {
@@ -313,10 +332,49 @@ fun MakeProfileScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppInfoSheet(expanded: (Boolean) -> Unit = {}){
+    var exp = true
+    if(exp) {
+        ModalBottomSheet(
+            onDismissRequest = { expanded(false) },
+            containerColor = White10
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(start = 10.dp, end = 10.dp, bottom = 60.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.mipmap1),
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clip(RoundedCornerShape(10.dp)),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth
+                )
+                Text(
+                    text = "Приложение для любителей чая! Мы предлагаем широкий ассортимент чая из лучших плантаций мира, включая черный, зеленый, белый, улун и эксклюзивные сорта. В нашем приложении вы найдете чай на любой вкус и настроение!",
+                    fontSize = 20.sp,
+                    fontFamily = montserratFamily,
+                    fontWeight = FontWeight.W400,
+                    color = Black10
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     TeaShopTheme {
-        ConfirmButton(header = "Выйти из аккаунта?")
+        AppInfoSheet {
+
+        }
     }
 }

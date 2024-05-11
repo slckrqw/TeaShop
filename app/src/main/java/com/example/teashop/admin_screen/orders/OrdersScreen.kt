@@ -492,7 +492,7 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
             )
         },
         onValueChange = {
-            priceValueField = it.replace("-", "")
+            priceValueField = it
         },
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp)
@@ -513,8 +513,7 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
     )
     if(priceValueField == "" && priceValue == 0.0){
         price("0")
-    } else if(priceValueField == "" && priceValue != 0.0){
-    } else{
+    } else if(priceValueField != ""){
         price(priceValueField)
     }
 }

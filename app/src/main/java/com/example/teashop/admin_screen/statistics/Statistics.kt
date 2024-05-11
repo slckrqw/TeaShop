@@ -120,7 +120,8 @@ fun MakeAdminStatistics(
                 onClick = {
                     expanded = true
                 },
-                modifier = Modifier.padding(start = 10.dp, bottom = 10.dp),
+                modifier = Modifier
+                    .padding(start = 10.dp, bottom = 10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = White10),
                 contentPadding = PaddingValues(0.dp),
                 border = BorderStroke(1.dp, Green10)
@@ -196,8 +197,9 @@ fun MakeAdminStatistics(
             Card(
                 colors = CardDefaults.cardColors(containerColor = White10),
                 modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
+                    .padding(bottom = 10.dp)
+                    .fillMaxWidth()
+                    .shadow(2.dp, RoundedCornerShape(10.dp))
             ){
                 Column(
                     modifier = Modifier.padding(vertical = 10.dp, horizontal = 5.dp)

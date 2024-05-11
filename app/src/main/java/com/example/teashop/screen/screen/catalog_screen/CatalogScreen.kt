@@ -607,8 +607,7 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
     )
     if(priceValueField == "" && priceValue == 0.0){
         price("0")
-    } else if(priceValueField == "" && priceValue != 0.0){
-    } else{
+    } else if(priceValueField != "") {
         price(priceValueField)
     }
 }
