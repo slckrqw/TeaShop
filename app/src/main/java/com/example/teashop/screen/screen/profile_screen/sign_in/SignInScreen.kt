@@ -107,6 +107,7 @@ fun MakeSignInScreen(
         true -> R.drawable.eye
         false -> R.drawable.hide
     }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier

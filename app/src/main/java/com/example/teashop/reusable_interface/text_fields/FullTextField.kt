@@ -16,6 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.teashop.ui.theme.Black10
@@ -29,7 +31,8 @@ fun MakeFullTextField(
     onValueChange: (String) -> Unit = {},
     bottomPadding: Int = 10,
     inputValue: String? = "",
-    contextLength: Int = 255
+    contextLength: Int = 255,
+    encrypted: Boolean = false
 ){
     var value by remember{
         mutableStateOf(inputValue ?: "")
@@ -61,7 +64,11 @@ fun MakeFullTextField(
             modifier = Modifier
                 .padding(bottom = bottomPadding.dp)
                 .fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            visualTransformation = when(encrypted){
+                false -> VisualTransformation.None
+                true -> PasswordVisualTransformation()
+            }
         )
     }
     onValueChange(value)

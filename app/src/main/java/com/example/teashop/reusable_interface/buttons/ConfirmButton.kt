@@ -57,7 +57,10 @@ fun ConfirmButton(
                     modifier = Modifier.padding(10.dp)
                 ) {
                     Button(
-                        onClick = {accountAction(true)},
+                        onClick = {
+                            accountAction(true)
+                            expandedChange(false)
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Red10),
                         modifier = Modifier
                             .padding(end = 10.dp)

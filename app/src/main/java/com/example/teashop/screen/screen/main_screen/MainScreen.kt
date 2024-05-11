@@ -214,6 +214,7 @@ fun NewProductsBanner(navController: NavController) {
 
 @Composable
 fun BonusInfoCard(bonusCount: Int){
+
     var bonusInfo by remember{ mutableStateOf(false)}
     var bonusToSpend by remember {
         mutableStateOf(false)
@@ -221,6 +222,8 @@ fun BonusInfoCard(bonusCount: Int){
     var bonusToCollect by remember {
         mutableStateOf(false)
     }
+    val buttonHeight = 45.dp
+
     Card(modifier = Modifier
         .background(Grey20)
         .padding(top = 15.dp, start = 15.dp, end = 15.dp)
@@ -255,7 +258,6 @@ fun BonusInfoCard(bonusCount: Int){
                         .padding(top = 5.dp, bottom = 10.dp)
                         .height(35.dp)
                 )
-                val buttonHeight = 45.dp
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
@@ -268,7 +270,8 @@ fun BonusInfoCard(bonusCount: Int){
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 10.dp, end = 3.dp),
-                        contentPadding = PaddingValues(0.dp)
+                        contentPadding = PaddingValues(0.dp),
+                        shape = RoundedCornerShape(15.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.bonusCardToSpend),
@@ -284,7 +287,8 @@ fun BonusInfoCard(bonusCount: Int){
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 3.dp, end = 10.dp),
-                        contentPadding = PaddingValues(0.dp)
+                        contentPadding = PaddingValues(0.dp),
+                        shape = RoundedCornerShape(15.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.bonusCardToTake),
@@ -295,15 +299,16 @@ fun BonusInfoCard(bonusCount: Int){
                         )
                     }
                 }
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(containerColor = White10),
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = White10),
                     modifier = Modifier
+                        .padding(horizontal = 10.dp)
                         .fillMaxWidth()
-                        .height(buttonHeight)
-                        .padding(start = 10.dp, end = 10.dp)
-                ) {
+                        .height(buttonHeight),
+                    shape = RoundedCornerShape(15.dp)
+                ){
                     Row(
+                        modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

@@ -139,7 +139,7 @@ fun MakeFeedbackScreen(
     viewModel: FeedbackViewModel,
     reviewFilter: ReviewFilter
 ){
-    var sorter by remember {
+    val sorter by remember {
         mutableStateOf(reviewSorter)
     }
     var expandedChange by remember{mutableStateOf(false)}

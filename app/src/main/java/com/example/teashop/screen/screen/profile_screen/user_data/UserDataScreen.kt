@@ -27,7 +27,9 @@ import androidx.navigation.navOptions
 import com.example.teashop.R
 import com.example.teashop.data.model.saves.UserSave
 import com.example.teashop.data.model.user.User
+import com.example.teashop.data.model.user.UserRole
 import com.example.teashop.data.storage.TokenStorage
+import com.example.teashop.navigation.admin.AdminNavigation
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.buttons.ConfirmButton
@@ -42,8 +44,13 @@ import com.example.teashop.ui.theme.montserratFamily
 @Composable
 fun LaunchUserDataScreen(navController: NavController, user: User?){
     user?.let { item ->
-        Navigation(navController = navController){
-            MakeUserDataScreen(navController = navController, user = item)
+        when(user.role) {
+            UserRole.USER -> Navigation(navController = navController) {
+                MakeUserDataScreen(navController = navController, user = item)
+            }
+            UserRole.ADMIN -> AdminNavigation(navController = navController) {
+                MakeUserDataScreen(navController = navController, user = item)
+            }
         }
     }
 }
@@ -116,9 +123,22 @@ fun MakeUserDataScreen(navController: NavController, user: User){
                         color = Black10,
                         modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
                     )
-                    MakeFullTextField(header = "Email", onValueChange = { userEmail = it }, inputValue = user.email)
-                    MakeFullTextField(header = "Пароль", onValueChange = { userFirstPassword = it })
-                    MakeFullTextField(header = "Новый пароль", onValueChange = { userPassword = it }, bottomPadding = 0)
+                    MakeFullTextField(
+                        header = "Email",
+                        onValueChange = { userEmail = it },
+                        inputValue = user.email
+                    )
+                    MakeFullTextField(
+                        header = "Пароль",
+                        onValueChange = { userFirstPassword = it },
+                        encrypted = true
+                    )
+                    MakeFullTextField(
+                        header = "Новый пароль",
+                        onValueChange = { userPassword = it },
+                        bottomPadding = 0,
+                        encrypted = true
+                    )
                 }
             }
         }

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -75,6 +77,9 @@ import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.Red10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun LaunchAdminProducts(
@@ -92,6 +97,8 @@ fun LaunchAdminProducts(
     val tokenStorage = remember {
         TokenStorage()
     }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         tokenStorage.getToken(context)?.let {
@@ -121,7 +128,9 @@ fun LaunchAdminProducts(
                 filterParams = filterParams,
                 sorterParams = sorterParams,
                 context = context,
-                viewModel = viewModel
+                viewModel = viewModel,
+                lazyListState = listState,
+                coroutineScope = coroutineScope
             )
         }
     }
@@ -134,10 +143,10 @@ fun MakeProductsScreen(
     filterParams: ProductFilter,
     sorterParams: ProductSorter,
     viewModel: ProductViewModel,
-    context: Context
+    context: Context,
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ) {
-    val lazyListState = remember { LazyListState() }
-
     Column {
         TopCardCatalog(
             topName,
@@ -146,7 +155,8 @@ fun MakeProductsScreen(
             filterParams,
             viewModel,
             context,
-            lazyListState
+            lazyListState,
+            coroutineScope = coroutineScope
         )
         if(productsList.isEmpty()){
             MakeEmptyListScreen(type = "Товаров")
@@ -257,7 +267,8 @@ fun TopCardCatalog(
     filterParams: ProductFilter,
     viewModel: ProductViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     var filterSheet by remember{ mutableStateOf(false) }
     var sortingSheet by remember{ mutableStateOf(false) }
@@ -300,7 +311,7 @@ fun TopCardCatalog(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
-                            .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 20.dp)
+                            .padding(start = 10.dp, end = 10.dp, top = 15.dp, bottom = 20.dp)
                             .fillMaxWidth()
                     ) {
                         Row(
@@ -309,10 +320,9 @@ fun TopCardCatalog(
                             Text(
                                 text = topName.toString(),
                                 fontFamily = montserratFamily,
-                                fontWeight = FontWeight.W700,
+                                fontWeight = FontWeight.W500,
                                 fontSize = 20.sp,
-                                color = White10,
-                                modifier = Modifier.padding(start = 10.dp)
+                                color = White10
                             )
                         }
                         Row {
@@ -348,7 +358,7 @@ fun TopCardCatalog(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
-                            .padding(start = 20.dp, end = 15.dp, bottom = 10.dp)
+                            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                             .fillMaxWidth()
                     ) {
                         Row(
@@ -387,7 +397,7 @@ fun TopCardCatalog(
                                 fontSize = 10.sp,
                                 color = White10,
                                 modifier = Modifier
-                                    .padding(start = 5.dp, end = 5.dp)
+                                    .padding(start = 5.dp)
                                     .align(Alignment.CenterVertically)
                             )
                         }
@@ -395,10 +405,26 @@ fun TopCardCatalog(
                 }
             }
             if (sortingSheet) {
-                BottomSortingCatalog(expandedChange = { sortingSheet = it }, filterParams, sorterParams, viewModel, context, lazyListState)
+                BottomSortingCatalog(
+                    expandedChange = { sortingSheet = it },
+                    filterParams,
+                    sorterParams,
+                    viewModel,
+                    context,
+                    lazyListState,
+                    coroutineScope
+                )
             }
             if (filterSheet) {
-                BottomFilterCatalog(expandedChange = {filterSheet = it}, filterParams, sorterParams, viewModel, context, lazyListState)
+                BottomFilterCatalog(
+                    expandedChange = {filterSheet = it},
+                    filterParams,
+                    sorterParams,
+                    viewModel,
+                    context,
+                    lazyListState,
+                    coroutineScope
+                )
             }
         }
     }
@@ -412,7 +438,8 @@ fun BottomFilterCatalog(
     sorterParams: ProductSorter,
     viewModel: ProductViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     val tokenStorage = remember {
         TokenStorage()
@@ -506,6 +533,10 @@ fun BottomFilterCatalog(
                             Toast.makeText(context, "Получение списка продуктов временно недоступно", Toast.LENGTH_SHORT).show()
                         }
                     )
+                    coroutineScope.launch {
+                        delay(500)
+                        lazyListState.animateScrollToItem(index = 0)
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
                 modifier = Modifier
@@ -532,7 +563,8 @@ fun BottomSortingCatalog(
     sorterParams: ProductSorter,
     viewModel: ProductViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     ModalBottomSheet(
         onDismissRequest = {expandedChange(false)},
@@ -547,10 +579,46 @@ fun BottomSortingCatalog(
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
             )
-            SheetTextCatalog(ProductSortType.MORE_SALES, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.LESS_SALES, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.MORE_QUANTITY, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(ProductSortType.LESS_QUANTITY, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(
+                ProductSortType.MORE_SALES,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
+            SheetTextCatalog(
+                ProductSortType.LESS_SALES,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
+            SheetTextCatalog(
+                ProductSortType.MORE_QUANTITY,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
+            SheetTextCatalog(
+                ProductSortType.LESS_QUANTITY,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
         }
     }
 }
@@ -563,7 +631,8 @@ fun SheetTextCatalog(
     sorterParams: ProductSorter,
     viewModel: ProductViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     val tokenStorage = remember {
         TokenStorage()
@@ -627,6 +696,10 @@ fun SheetTextCatalog(
                                         .show()
                                 }
                             )
+                            coroutineScope.launch {
+                                delay(500)
+                                lazyListState.animateScrollToItem(index = 0)
+                            }
                         }
                     )
             )

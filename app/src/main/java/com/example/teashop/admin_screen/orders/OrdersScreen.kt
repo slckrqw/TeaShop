@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -42,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,6 +73,7 @@ import com.example.teashop.data.model.pagination.order.orderSorterSaver
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
 import com.example.teashop.navigation.admin.AdminScreen
+import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeOrderCard
 import com.example.teashop.screen.screen.catalog_screen.IconsTopCatalog
 import com.example.teashop.ui.theme.Black10
@@ -79,6 +82,9 @@ import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -100,6 +106,8 @@ fun LaunchAdminOrders(
     val tokenStorage = remember {
         TokenStorage()
     }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         tokenStorage.getToken(context)?.let {
@@ -122,9 +130,10 @@ fun LaunchAdminOrders(
                 navController = navController,
                 sorterParams = sorterParams,
                 filterParams = filterParams,
+                viewModel = viewModel,
                 context = context,
-                lazyListState = LazyListState(),
-                viewModel = viewModel
+                lazyListState = listState,
+                coroutineScope = coroutineScope
             )
         }
     }
@@ -138,7 +147,8 @@ fun MakeOrdersScreen(
     filterParams: OrderFilter,
     viewModel: OrderViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     val tokenStorage = remember {
         TokenStorage()
@@ -164,16 +174,15 @@ fun MakeOrdersScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 20.dp)
+                        .padding(start = 10.dp, end = 10.dp, top = 15.dp, bottom = 20.dp)
                         .fillMaxWidth()
                 ) {
                     Text(
                         text = "Все заказы",
                         fontFamily = montserratFamily,
-                        fontWeight = FontWeight.W700,
+                        fontWeight = FontWeight.W500,
                         fontSize = 20.sp,
-                        color = White10,
-                        modifier = Modifier.padding(start = 10.dp)
+                        color = White10
                     )
                     Icon(
                         painter = painterResource(R.drawable.refresh_icon),
@@ -209,6 +218,10 @@ fun MakeOrdersScreen(
                                                 }
                                             )
                                         }
+                                    coroutineScope.launch {
+                                        delay(500)
+                                        lazyListState.animateScrollToItem(index = 0)
+                                    }
                                 }
                             ),
                         tint = White10
@@ -218,7 +231,7 @@ fun MakeOrdersScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .padding(start = 20.dp, end = 15.dp, bottom = 10.dp)
+                        .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                         .fillMaxWidth()
                 ) {
                     Row(
@@ -257,26 +270,52 @@ fun MakeOrdersScreen(
                             fontSize = 10.sp,
                             color = White10,
                             modifier = Modifier
-                                .padding(start = 5.dp, end = 5.dp)
+                                .padding(start = 5.dp)
                                 .align(Alignment.CenterVertically)
                         )
                     }
                 }
             }
         }
-        LazyColumn {
-            items(orderList.size, { orderList[it]?.id ?: it }){order ->
-                orderList[order]?.let {
-                    MakeOrderCard(order = it, navController = navController, AdminScreen.Description.route)
+        if(orderList.isEmpty()){
+            MakeEmptyListScreen(type = "Заказов")
+        }else {
+            LazyColumn(
+                state = lazyListState
+            ) {
+                items(orderList.size, { orderList[it]?.id ?: it }) { order ->
+                    orderList[order]?.let {
+                        MakeOrderCard(
+                            order = it,
+                            navController = navController,
+                            AdminScreen.Description.route
+                        )
+                    }
                 }
             }
         }
     }
     if (sortingSheet) {
-        BottomSortingCatalog(expandedChange = { sortingSheet = it }, filterParams, sorterParams, viewModel, context, lazyListState)
+        BottomSortingCatalog(
+            expandedChange = { sortingSheet = it },
+            filterParams,
+            sorterParams,
+            viewModel,
+            context,
+            lazyListState,
+            coroutineScope
+        )
     }
     if (filterSheet) {
-        BottomFilterCatalog(expandedChange = {filterSheet = it}, filterParams, sorterParams, viewModel, context, lazyListState)
+        BottomFilterCatalog(
+            expandedChange = {filterSheet = it},
+            filterParams,
+            sorterParams,
+            viewModel,
+            context,
+            lazyListState,
+            coroutineScope
+        )
     }
 }
 
@@ -288,7 +327,8 @@ fun BottomFilterCatalog(
     sorterParams: OrderSorter,
     viewModel: OrderViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     val tokenStorage = remember {
         TokenStorage()
@@ -452,6 +492,10 @@ fun BottomFilterCatalog(
                             }
                         )
                     }
+                    coroutineScope.launch {
+                        delay(500)
+                        lazyListState.animateScrollToItem(index = 0)
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
                 modifier = Modifier
@@ -526,7 +570,8 @@ fun BottomSortingCatalog(
     sorterParams: OrderSorter,
     viewModel: OrderViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     ModalBottomSheet(
         onDismissRequest = {expandedChange(false)},
@@ -541,10 +586,46 @@ fun BottomSortingCatalog(
                 color = Black10,
                 modifier = Modifier.padding(start = 5.dp, bottom = 10.dp)
             )
-            SheetTextCatalog(OrderSortType.NEW, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(OrderSortType.OLD, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(OrderSortType.EXPENSIVE, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
-            SheetTextCatalog(OrderSortType.CHEAP, expandedChange, filterParams, sorterParams, viewModel, context, lazyListState)
+            SheetTextCatalog(
+                OrderSortType.NEW,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
+            SheetTextCatalog(
+                OrderSortType.OLD,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
+            SheetTextCatalog(
+                OrderSortType.EXPENSIVE,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
+            SheetTextCatalog(
+                OrderSortType.CHEAP,
+                expandedChange,
+                filterParams,
+                sorterParams,
+                viewModel,
+                context,
+                lazyListState,
+                coroutineScope
+            )
         }
     }
 }
@@ -557,7 +638,8 @@ fun SheetTextCatalog(
     sorterParams: OrderSorter,
     viewModel: OrderViewModel,
     context: Context,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     val tokenStorage = remember {
         TokenStorage()
@@ -624,6 +706,10 @@ fun SheetTextCatalog(
                                         }
                                     )
                                 }
+                            coroutineScope.launch {
+                                delay(500)
+                                lazyListState.animateScrollToItem(index = 0)
+                            }
                         }
                     )
             )

@@ -67,7 +67,8 @@ object NaviConstants {
         NaviBarItem(
             icon = R.drawable.profile_bottombar_icon,
             route = listOf(
-                AdminScreen.Profile.route
+                AdminScreen.Profile.route,
+                Screen.UserData.route
             )
         )
     )
