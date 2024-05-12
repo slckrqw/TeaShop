@@ -47,6 +47,7 @@ import com.example.teashop.data.enums.StatisticsSortType
 import com.example.teashop.data.model.statistics.Statistics
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminNavigation
+import com.example.teashop.reusable_interface.MakeEmptyListScreen
 import com.example.teashop.reusable_interface.cards.MakeTopCard
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
@@ -71,7 +72,7 @@ fun LaunchAdminStatistics(
         tokenStorage.getToken(context)?.let {
             viewModel.getStatisticsByPeriod(
                 it,
-                StatisticsSortType.ALL_TIME,
+                sorter,
                 onError = {
                     Toast.makeText(context, "Не удалось получить статистику", Toast.LENGTH_SHORT).show()
                 }
@@ -149,72 +150,80 @@ fun MakeAdminStatistics(
                 }
             }
         }
-        item{
-            Card(
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .shadow(2.dp, RoundedCornerShape(10.dp))
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = White10)
-            ){
-                Column(
-                    modifier = Modifier.padding(10.dp)
+        if (stats.countOfSales == 0) {
+            item {
+                MakeEmptyListScreen(type = "Заказов")
+            }
+        } else {
+            item{
+                Card(
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                        .shadow(2.dp, RoundedCornerShape(10.dp))
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = White10)
                 ){
-                    Text(
-                        text = "Продажи по категориям",
-                        fontFamily = montserratFamily,
-                        fontWeight = FontWeight.W600,
-                        fontSize = 13.sp,
-                        color = Black10
-                    )
-                    PieChart(stats.categoryStatistics)
+                    Column(
+                        modifier = Modifier.padding(10.dp)
+                    ){
+                        Text(
+                            text = "Продажи по категориям",
+                            fontFamily = montserratFamily,
+                            fontWeight = FontWeight.W600,
+                            fontSize = 13.sp,
+                            color = Black10
+                        )
+                        PieChart(stats.categoryStatistics)
+                    }
                 }
             }
-        }
-        item{
-            Card(
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .shadow(2.dp, RoundedCornerShape(10.dp))
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = White10)
-            ) {
-                Column(
-                    modifier = Modifier.padding(10.dp)
-                ){
-                    Text(
-                        text = "Количество заказов по дням",
-                        fontFamily = montserratFamily,
-                        fontWeight = FontWeight.W600,
-                        fontSize = 13.sp,
-                        color = Black10
-                    )
-                    LineChartBase(stats.ordersStatistics)
+            if (sorter != StatisticsSortType.DAY) {
+                item{
+                    Card(
+                        modifier = Modifier
+                            .padding(bottom = 10.dp)
+                            .shadow(2.dp, RoundedCornerShape(10.dp))
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = White10)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(10.dp)
+                        ){
+                            Text(
+                                text = "Количество заказов по дням",
+                                fontFamily = montserratFamily,
+                                fontWeight = FontWeight.W600,
+                                fontSize = 13.sp,
+                                color = Black10
+                            )
+                            LineChartBase(stats.ordersStatistics)
+                        }
+                    }
                 }
             }
-        }
-        item{
-            Card(
-                colors = CardDefaults.cardColors(containerColor = White10),
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .fillMaxWidth()
-                    .shadow(2.dp, RoundedCornerShape(10.dp))
-            ){
-                Column(
-                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 5.dp)
+            item{
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = White10),
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(10.dp))
                 ){
-                    Text(
-                        text = "Итог",
-                        fontFamily = montserratFamily,
-                        fontWeight = FontWeight.W700,
-                        fontSize = 13.sp,
-                        color = Black10,
-                        modifier = Modifier.padding(bottom = 5.dp)
-                    )
-                    TextRow(header = "Всего заказов: ", data = stats.countOfOrders.toString())
-                    TextRow(header = "Продано товаров: ", data = stats.countOfSales.toString())
-                    TextRow(header = "Сумма: ", data = stats.totalPrice.toString())
+                    Column(
+                        modifier = Modifier.padding(vertical = 10.dp, horizontal = 5.dp)
+                    ){
+                        Text(
+                            text = "Итог",
+                            fontFamily = montserratFamily,
+                            fontWeight = FontWeight.W700,
+                            fontSize = 13.sp,
+                            color = Black10,
+                            modifier = Modifier.padding(bottom = 5.dp)
+                        )
+                        TextRow(header = "Всего заказов: ", data = stats.countOfOrders.toString())
+                        TextRow(header = "Продано товаров: ", data = stats.countOfSales.toString())
+                        TextRow(header = "Сумма: ", data = stats.totalPrice.toString())
+                    }
                 }
             }
         }
@@ -309,15 +318,23 @@ fun BottomSheetText(
                         onClick = {
                             sorter = textType
 
-                            tokenStorage.getToken(context)?.let {
-                                viewModel.getStatisticsByPeriod(
-                                    it,
-                                    sorter,
-                                    onError = {
-                                        Toast.makeText(context, "Не удалось получить статистику", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            }
+                            tokenStorage
+                                .getToken(context)
+                                ?.let {
+                                    viewModel.getStatisticsByPeriod(
+                                        it,
+                                        sorter,
+                                        onError = {
+                                            Toast
+                                                .makeText(
+                                                    context,
+                                                    "Не удалось получить статистику",
+                                                    Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                        }
+                                    )
+                                }
 
                             expandedChange(false)
                         }

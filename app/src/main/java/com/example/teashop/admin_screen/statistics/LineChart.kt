@@ -34,7 +34,7 @@ fun LineChartBase(
         .axisStepSize(stepSizeX.dp)
         .backgroundColor(White10)
         .steps(pointsList.size - 1)
-        .labelData { i -> orderStat[i].date.toString() }
+        .labelData { i -> if (i != 0) orderStat[i].date.toString() else "" }
         .labelAndAxisLinePadding(15.dp)
         .build()
 

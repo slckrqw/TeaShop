@@ -286,8 +286,11 @@ fun MakeOrderDescriptionScreen(
                         color = Black10
                     )
                     Text(
-                        text = "${order.address.address}, " +
-                                "${order.address.flat}",
+                        text = if (order.address.flat == null) {
+                            order.address.address
+                        } else {
+                            "${order.address.address}, ${order.address.flat}"
+                        },
                         fontSize = 14.sp,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.W400,

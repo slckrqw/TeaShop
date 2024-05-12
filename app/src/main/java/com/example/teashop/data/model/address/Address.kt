@@ -9,7 +9,7 @@ data class Address(
     val city: String = "",
     val address: String = "",
     val flat: Short? = 0,
-    val floor: Short = 0,
+    val floor: Short? = 0,
     val entrance: Short? = 0,
     val intercomCode: String? = ""
 ):Parcelable
