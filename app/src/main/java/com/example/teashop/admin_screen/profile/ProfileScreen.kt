@@ -26,6 +26,7 @@ import com.example.teashop.screen.screen.profile_screen.profile.ProfileViewModel
 
 @Composable
 fun LaunchAdminProfile(navController: NavController){
+
     val viewModel: ProfileViewModel = viewModel()
     val userView by viewModel.user.observeAsState()
     val context = LocalContext.current
@@ -55,7 +56,6 @@ fun LaunchAdminProfile(navController: NavController){
         AdminNavigation(navController = navController){
             MakeProfileAdmin(
                 userView,
-                viewModel,
                 tokenStorage,
                 context,
                 navController
@@ -67,18 +67,12 @@ fun LaunchAdminProfile(navController: NavController){
 @Composable
 fun MakeProfileAdmin(
     user: User?,
-    viewModel: ProfileViewModel,
     tokenStorage: TokenStorage,
     context: Context,
     navController: NavController
 ){
-    var expandedDelete by remember{
-        mutableStateOf(false)
-    }
+
     var expandedExit by remember{
-        mutableStateOf(false)
-    }
-    var deleteAccount by remember {
         mutableStateOf(false)
     }
     var exitAccount by remember{
@@ -107,26 +101,12 @@ fun MakeProfileAdmin(
                 expandedExit = true
             }
         )
-        ProfileCard(
-            icon = R.drawable.delete_icon,
-            title = "Удалить аккаунт",
-            onClick = {
-                expandedDelete = true
-            }
-        )
     }
     if(expandedExit){
         ConfirmButton(
             header = "Выйти из аккаунта?",
             accountAction = { exitAccount = it },
             expandedChange = { expandedExit = it }
-        )
-    }
-    if(expandedDelete){
-        ConfirmButton(
-            header = "Удалить аккаунт?",
-            accountAction = { deleteAccount = it },
-            expandedChange = { expandedDelete = it }
         )
     }
     if(exitAccount){
@@ -140,26 +120,5 @@ fun MakeProfileAdmin(
             }
         )
         exitAccount = false
-    }
-    if (deleteAccount) {
-        viewModel.deleteAccount(
-            tokenStorage.getToken(context) ?: "",
-            onSuccess = {
-                Toast.makeText(context, "Вы успешно удалили аккаунт", Toast.LENGTH_SHORT).show()
-            },
-            onError = {
-                Toast.makeText(context, "Упс, ошибка", Toast.LENGTH_SHORT).show()
-            })
-        tokenStorage.deleteToken(context)
-
-        navController.navigate(
-            Screen.Log.route,
-            navOptions = navOptions {
-                popUpTo(navController.graph.id) {
-                    inclusive = true
-                }
-            }
-        )
-        deleteAccount = false
     }
 }

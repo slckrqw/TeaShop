@@ -196,7 +196,8 @@ fun MakeAdminProduct(
                         onValueChange = {product.article = it},
                         bottomPadding = 5,
                         inputValue = product.article,
-                        contextLength = 50
+                        contextLength = 50,
+                        lettersOn = false
                     )
                     MakeFullTextField(
                         header = "Описание",
@@ -275,7 +276,8 @@ fun MakeAdminProduct(
                             product.discount = it.toInt()
                         },
                         bottomPadding = 0,
-                        inputValue = product.discount.toString()
+                        inputValue = product.discount.toString(),
+                        lettersOn = false
                     )
                     Row(
                        verticalAlignment = Alignment.CenterVertically,

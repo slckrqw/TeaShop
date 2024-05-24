@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,8 @@ fun MakeFullTextField(
     bottomPadding: Int = 10,
     inputValue: String? = "",
     contextLength: Int = 255,
-    encrypted: Boolean = false
+    encrypted: Boolean = false,
+    lettersOn: Boolean = true
 ){
     var value by remember{
         mutableStateOf(inputValue ?: "")
@@ -60,7 +62,12 @@ fun MakeFullTextField(
                 disabledTextColor = Black10,
                 focusedTextColor = Black10,
             ),
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+            keyboardOptions = if(lettersOn){
+                KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+            }else{
+                KeyboardOptions(keyboardType = KeyboardType.Number)
+                    .copy(imeAction = ImeAction.Done)
+            },
             modifier = Modifier
                 .padding(bottom = bottomPadding.dp)
                 .fillMaxWidth(),

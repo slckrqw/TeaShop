@@ -166,6 +166,7 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                     Image(
                         rememberAsyncImagePainter(model = product.images[0].imageUrl),
                         modifier = Modifier
+                            .fillMaxSize()
                             .clip(RoundedCornerShape(10.dp)),
                         contentDescription = null,
                         contentScale = ContentScale.FillBounds
@@ -460,7 +461,9 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                         painter = rememberAsyncImagePainter(product.images[0].imageUrl),
                         contentDescription = null,
                         contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.clip(RoundedCornerShape(10.dp))
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(10.dp))
                     )
                 }
                 Column(

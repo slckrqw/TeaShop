@@ -106,7 +106,8 @@ fun MakeAddressChangeScreen(navController: NavController, viewModel: OrderViewMo
                         header2 = "Подъезд", onValueChange2 = { entrance = it })
                     RowTextField(
                         header1 = "Этаж", onValueChange1 = { floor = it },
-                        header2 = "Код домофона", onValueChange2 = { intercomCode = it }
+                        header2 = "Код домофона", onValueChange2 = { intercomCode = it },
+                        intercomOn = true
                     )
                 }
             }
@@ -145,7 +146,8 @@ fun RowTextField(
     header1: String,
     onValueChange1: (String) -> Unit = {},
     header2: String,
-    onValueChange2: (String) -> Unit = {}
+    onValueChange2: (String) -> Unit = {},
+    intercomOn: Boolean = false
 ){
     Row(
         modifier = Modifier
@@ -170,6 +172,10 @@ fun RowTextField(
                 it?.let {
                     onValueChange2(it)
                 }
+            },
+            lettersOn = when(intercomOn){
+                true -> true
+                false -> false
             }
         )
     }

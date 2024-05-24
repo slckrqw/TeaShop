@@ -3,7 +3,6 @@ package com.example.teashop.screen.screen.profile_screen.profile
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,20 +13,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +34,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,15 +50,18 @@ import com.example.teashop.data.utils.bonusDeclension
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.buttons.ConfirmButton
+import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
 import com.example.teashop.reusable_interface.cards.ProfileCard
+import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.screen.screen.main_screen.BottomSheetBonuses
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
-import com.example.teashop.ui.theme.Red10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+
+const val CURRENT_VERSION = "1.0.0"
 
 @Composable
 fun LaunchProfileScreen(navController: NavController){
@@ -134,6 +134,12 @@ fun MakeProfileScreen(
     var appInfo by remember{
         mutableStateOf(false)
     }
+    var expandedSupport by remember {
+        mutableStateOf(false)
+    }
+    var messageText by remember {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -145,8 +151,7 @@ fun MakeProfileScreen(
                 .fillMaxWidth(),
             shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
         ) {
-            Column(
-            ) {
+            Column {
                 Row(
                     modifier = Modifier
                         .padding(start = 10.dp, top = 10.dp, bottom = 20.dp)
@@ -259,6 +264,11 @@ fun MakeProfileScreen(
             }
         )
         ProfileCard(
+            icon = R.drawable.support_icon,
+            title = "Поддержка",
+            onClick = {expandedSupport = true}
+        )
+        ProfileCard(
             icon = R.drawable.exit_icon,
             title = "Выйти из аккаунта",
             onClick = {
@@ -271,6 +281,16 @@ fun MakeProfileScreen(
             onClick = {
                 expandedDelete = true
             }
+        )
+        Text(
+            text = "version $CURRENT_VERSION",
+            fontFamily = montserratFamily,
+            fontSize = 10.sp,
+            color = Grey10,
+            fontWeight = FontWeight.W400,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(vertical = 10.dp)
         )
     }
     if(appInfo){
@@ -295,6 +315,13 @@ fun MakeProfileScreen(
             header = "Удалить аккаунт?",
             accountAction = { deleteAccount = it },
             expandedChange = { expandedDelete = it }
+        )
+    }
+    if(expandedSupport){
+        SupportMessage(
+            expanded = {expandedSupport = it},
+            onValueChange = {messageText = it},
+            messageText = messageText
         )
     }
     if(exitAccount){
@@ -335,36 +362,67 @@ fun MakeProfileScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppInfoSheet(expanded: (Boolean) -> Unit = {}){
-    var exp = true
-    if(exp) {
-        ModalBottomSheet(
-            onDismissRequest = { expanded(false) },
-            containerColor = White10
+    ModalBottomSheet(
+        onDismissRequest = { expanded(false) },
+        containerColor = White10
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp, bottom = 60.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            Image(
+                painter = painterResource(id = R.drawable.mipmap1),
                 modifier = Modifier
-                    .padding(start = 10.dp, end = 10.dp, bottom = 60.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.mipmap1),
-                    modifier = Modifier
-                        .padding(bottom = 10.dp)
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .clip(RoundedCornerShape(10.dp)),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth
-                )
-                Text(
-                    text = "Приложение для любителей чая! Мы предлагаем широкий ассортимент чая из лучших плантаций мира, включая черный, зеленый, белый, улун и эксклюзивные сорта. В нашем приложении вы найдете чай на любой вкус и настроение!",
-                    fontSize = 20.sp,
-                    fontFamily = montserratFamily,
-                    fontWeight = FontWeight.W400,
-                    color = Black10
-                )
-            }
+                    .padding(bottom = 10.dp)
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(10.dp)),
+                contentDescription = null,
+                contentScale = ContentScale.FillWidth
+            )
+            Text(
+                text = "Приложение для любителей чая! Мы предлагаем широкий ассортимент чая из лучших плантаций мира, включая черный, зеленый, белый, улун и эксклюзивные сорта. В нашем приложении вы найдете чай на любой вкус и настроение!",
+                fontSize = 20.sp,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.W400,
+                color = Black10
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SupportMessage(
+    expanded: (Boolean) -> Unit,
+    onValueChange: (String) -> Unit = {},
+    messageText: String = ""
+){
+    ModalBottomSheet(
+        onDismissRequest = { expanded(false) },
+        containerColor = White10
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(bottom = 30.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            MakeFullTextField(
+                header = "Опишите проблему",
+                bottomPadding = 0,
+                inputValue = messageText,
+                onValueChange = onValueChange
+            )
+            MakeAgreeBottomButton(
+                onClick = {
+                    expanded(false)
+                    //TODO do request here
+                },
+                text = "Отправить"
+            )
         }
     }
 }

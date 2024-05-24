@@ -36,7 +36,8 @@ fun RowScope.MakeHalfTextField(
     onValueChange: (String?) -> Unit = {},
     startPadding: Int,
     endPadding: Int,
-    maxInt: Int = 32760
+    maxInt: Int = 32760,
+    lettersOn: Boolean = false
 ){
     var value by remember{
         mutableStateOf("")
@@ -78,8 +79,14 @@ fun RowScope.MakeHalfTextField(
                     disabledTextColor = Black10,
                     focusedTextColor = Black10,
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    .copy(imeAction = ImeAction.Done),
+                keyboardOptions =
+                    if(lettersOn) {
+                        KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+
+                    } else {
+                        KeyboardOptions(keyboardType = KeyboardType.Number)
+                            .copy(imeAction = ImeAction.Done)
+                    },
                 singleLine = true
             )
         }
