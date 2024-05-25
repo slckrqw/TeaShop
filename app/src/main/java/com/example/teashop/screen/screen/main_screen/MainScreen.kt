@@ -110,12 +110,14 @@ fun LaunchMainScreen(navController: NavController, viewModel: MainScreenViewMode
 
     val bonusCount = userView?.teaBonuses ?: 0
 
-    Navigation(navController = navController) {
-        MakeMainScreen(
-            productsList = productView,
-            navController = navController,
-            bonusCount = bonusCount
-        )
+    productView?.let {
+        Navigation(navController = navController) {
+            MakeMainScreen(
+                productsList = productView,
+                navController = navController,
+                bonusCount = bonusCount
+            )
+        }
     }
 }
 

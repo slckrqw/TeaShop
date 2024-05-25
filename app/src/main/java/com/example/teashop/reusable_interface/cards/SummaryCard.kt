@@ -20,6 +20,8 @@ import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Red10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun MakeSummaryCard(
@@ -74,7 +76,10 @@ fun MakeSummaryCard(
                     color = Black10
                 )
                 Text(
-                    text = "$totalCost руб.",
+                    text = "${
+                        BigDecimal(
+                            totalCost
+                        ).setScale(1, RoundingMode.HALF_UP)} руб.",
                     fontFamily = montserratFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.W600,

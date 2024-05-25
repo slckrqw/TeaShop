@@ -1,6 +1,5 @@
 package com.example.teashop.reusable_interface.text_fields
 
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -13,6 +12,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,13 +59,17 @@ fun RowScope.MakeHalfTextField(
             TextField(
                 value = value,
                 onValueChange = {
-                    val cleanedInput = it.filter { char -> char.isDigit() }
-                    if (cleanedInput.isNotEmpty()) {
-                        if (cleanedInput.toInt() < maxInt) {
+                    if (lettersOn) {
+                        value = it
+                    } else {
+                        val cleanedInput = it.filter { char -> char.isDigit() }
+                        if (cleanedInput.isNotEmpty()) {
+                            if (cleanedInput.toInt() < maxInt) {
+                                value = cleanedInput
+                            }
+                        } else {
                             value = cleanedInput
                         }
-                    } else {
-                        value = cleanedInput
                     }
                     onValueChange(value)
                 },
@@ -82,7 +86,6 @@ fun RowScope.MakeHalfTextField(
                 keyboardOptions =
                     if(lettersOn) {
                         KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
-
                     } else {
                         KeyboardOptions(keyboardType = KeyboardType.Number)
                             .copy(imeAction = ImeAction.Done)

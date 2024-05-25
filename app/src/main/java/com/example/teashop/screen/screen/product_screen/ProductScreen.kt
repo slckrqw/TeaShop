@@ -171,13 +171,16 @@ fun MakeProductScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(Grey20)
                             .height(360.dp)
                     ) {
                         Image(
                             painter = rememberAsyncImagePainter(model = product.images[0].imageUrl),
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier.fillMaxSize(),
-                            contentDescription = null
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .clip(RoundedCornerShape(10.dp)),
+                            contentDescription = null,
                         )
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -241,7 +244,7 @@ fun MakeProductScreen(
                         fontSize = 9.sp,
                         fontWeight = FontWeight.W200,
                         color = Black10,
-                        modifier = Modifier.padding(start = 5.dp)
+                        modifier = Modifier.padding(start = 5.dp, top = 5.dp)
                     )
                     Text(
                         text = product.title,

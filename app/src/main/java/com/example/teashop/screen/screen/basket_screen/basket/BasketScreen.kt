@@ -2,7 +2,6 @@ package com.example.teashop.screen.screen.basket_screen.basket
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -183,8 +183,9 @@ fun MakeBasketScreen(
                                 Image(
                                     painter = rememberAsyncImagePainter(currentItem.product.images[0].imageUrl),
                                     modifier = Modifier
-                                        .widthIn(125.dp, 125.dp),
-                                    contentScale = ContentScale.FillBounds,
+                                        .widthIn(125.dp, 125.dp)
+                                        .align(Alignment.CenterVertically),
+                                    contentScale = ContentScale.Fit,
                                     contentDescription = null
                                 )
                                 Column(

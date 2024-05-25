@@ -9,5 +9,5 @@ data class Recipient(
     var name: String,
     var surname: String,
     var email: String,
-    var phoneNumber: String
+    var phoneNumber: String? = null
 ):Parcelable

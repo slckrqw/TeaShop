@@ -69,13 +69,13 @@ fun MakeMaskedTextField(
     header: String,
     onValueChange: (String) -> Unit = {},
     bottomPadding: Int = 10,
-    inputValue: String? = "",
+    inputValue: String = "",
     mask: String,
     contextLength: Int = 255
 ){
     val visualTransform = MaskVisualTransformation(mask)
     var value by remember{
-        mutableStateOf(inputValue ?: "")
+        mutableStateOf(inputValue)
     }
     Column(
         modifier = Modifier.padding(start = 10.dp)

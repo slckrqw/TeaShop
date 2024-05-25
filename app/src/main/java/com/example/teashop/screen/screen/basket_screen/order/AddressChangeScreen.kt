@@ -173,10 +173,7 @@ fun RowTextField(
                     onValueChange2(it)
                 }
             },
-            lettersOn = when(intercomOn){
-                true -> true
-                false -> false
-            }
+            lettersOn = intercomOn
         )
     }
 }

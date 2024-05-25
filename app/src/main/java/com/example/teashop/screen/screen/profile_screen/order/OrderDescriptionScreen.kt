@@ -148,11 +148,13 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
                         color = Black10
                     )
                     Text(
-                        text = "${order.recipient.surname} ${order.recipient.name}, ${order.recipient.phoneNumber}",
+                        text = "${order.recipient.surname} ${order.recipient.name}, ${order.recipient.phoneNumber ?: order.recipient.email}",
                         fontSize = 14.sp,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.W400,
-                        color = Black10
+                        color = Black10,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = "Адрес доставки",
@@ -170,7 +172,9 @@ fun MakeOrderDescriptionScreen(navController: NavController, order: Order){
                         fontSize = 14.sp,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.W400,
-                        color = Black10
+                        color = Black10,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

@@ -3,7 +3,6 @@ package com.example.teashop.screen.screen.profile_screen.user_data
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,8 +34,8 @@ import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.buttons.ConfirmButton
 import com.example.teashop.reusable_interface.buttons.MakeAgreeBottomButton
-import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.reusable_interface.cards.MakeTopCard
+import com.example.teashop.reusable_interface.text_fields.MakeFullTextField
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
@@ -87,7 +87,11 @@ fun MakeUserDataScreen(navController: NavController, user: User){
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
-            MakeTopCard(drawableId = R.drawable.back_arrow, text = "Мои данные", navController = navController)
+            MakeTopCard(
+                drawableId = R.drawable.back_arrow,
+                text = "Мои данные",
+                navController = navController
+            )
             Card(
                 colors = CardDefaults.cardColors(containerColor = White10),
                 modifier = Modifier
@@ -105,8 +109,18 @@ fun MakeUserDataScreen(navController: NavController, user: User){
                         color = Black10,
                         modifier = Modifier.padding(start = 10.dp, bottom = 5.dp)
                     )
-                    MakeFullTextField(header = "Имя", onValueChange = { userName = it }, inputValue = user.name, contextLength = 99)
-                    MakeFullTextField(header = "Фамилия", onValueChange = { userSurname = it }, bottomPadding = 0, inputValue = user.surname)
+                    MakeFullTextField(
+                        header = "Имя",
+                        onValueChange = { userName = it },
+                        inputValue = user.name,
+                        contextLength = 99
+                    )
+                    MakeFullTextField(
+                        header = "Фамилия",
+                        onValueChange = { userSurname = it },
+                        bottomPadding = 0,
+                        inputValue = user.surname
+                    )
                 }
             }
             Card(
@@ -144,61 +158,72 @@ fun MakeUserDataScreen(navController: NavController, user: User){
         }
         MakeAgreeBottomButton(
             onClick = {
-                confirmEdit = true
+                if (userName.isEmpty() || userSurname.isNullOrEmpty() || userEmail.isEmpty()) {
+                    makeToast(context, "Заполните все данные корректно")
+                    confirmEdit = false
+                    return@MakeAgreeBottomButton
+                }
+                if (!userEmail.contains("@")) {
+                    makeToast(context, "Укажите корректный адрес электронной почты")
+                    confirmEdit = false
+                    return@MakeAgreeBottomButton
+                }
+                if ((userPassword.isNotEmpty() && userFirstPassword.isNotEmpty() && userFirstPassword != userPassword) ||
+                    (userPassword.isNotEmpty() && userFirstPassword.isEmpty()) ||
+                    (userPassword.isEmpty() && userFirstPassword.isNotEmpty())
+                ) {
+                    makeToast(context, "Пароли должны совпадать")
+                    confirmEdit = false
+                    return@MakeAgreeBottomButton
+                }
+
+                if (userPassword.trim().isEmpty() && userEmail.trim() == user.email) {
+                    editConfirmed = true
+                } else {
+                    confirmEdit = true
+                }
             },
             text = "Сохранить изменения"
         )
-    }
-    if(confirmEdit){
-        ConfirmButton(
-            header = "Сохранить изменения?\nДля этого потребуется перезайти.",
-            accountAction = {editConfirmed = it},
-            expandedChange = {confirmEdit = it}
-        )
-    }
-    if(editConfirmed){
-        if (userName.isEmpty() || userSurname.isNullOrEmpty() || userEmail.isEmpty()) {
-            makeToast(context,"Заполните все данные корректно")
-            return
+        if (confirmEdit) {
+            ConfirmButton(
+                header = "Сохранить изменения?\nДля этого потребуется перезайти.",
+                accountAction = { editConfirmed = it },
+                expandedChange = { confirmEdit = it }
+            )
         }
-        if (!userEmail.contains("@")) {
-            makeToast(context,"Укажите корректный адрес электронной почты")
-            return
-        }
-        if ((userPassword.isNotEmpty() && userFirstPassword.isNotEmpty() && userFirstPassword != userPassword) ||
-            (userPassword.isNotEmpty() && userFirstPassword.isEmpty()) ||
-            (userPassword.isEmpty() && userFirstPassword.isNotEmpty())) {
-            makeToast(context,"Пароли должны совпадать")
-            return
-        }
-
-        val userSave = UserSave(
-            userName.trim(),
-            userSurname!!.trim(),
-            userEmail.trim(),
-            if (userPassword.trim().isEmpty()) userPassword.replace(" ", "")
-            else null,
-        )
-
-        userDataViewModel.saveUserInfo(
-            tokenStorage.getToken(context),
-            userSave,
-            onSuccess = {
-                tokenStorage.deleteToken(context)
-                makeToast(context, "Данные успешно обновлены!")
-                navController.navigate(
-                    Screen.Log.route,
-                    navOptions = navOptions {
-                        popUpTo(navController.graph.id) {
-                            inclusive = true
-                        }
+        if (editConfirmed) {
+            userDataViewModel.saveUserInfo(
+                tokenStorage.getToken(context),
+                UserSave(
+                    userName.trim(),
+                    userSurname!!.trim(),
+                    userEmail.trim(),
+                    if (userPassword.trim().isEmpty()) userPassword.replace(" ", "")
+                    else null,
+                ),
+                onSuccess = {
+                    if (userPassword.trim().isEmpty() && userEmail.trim() == user.email) {
+                        makeToast(context, "Данные успешно обновлены!")
+                        confirmEdit = false
+                    } else {
+                        tokenStorage.deleteToken(context)
+                        makeToast(context, "Данные успешно обновлены!")
+                        navController.navigate(
+                            Screen.Log.route,
+                            navOptions = navOptions {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                            }
+                        )
                     }
-                )
-            },
-            onError = {
-                makeToast(context, "Укажите корректные данные")
-            }
-        )
+                },
+                onError = {
+                    makeToast(context, "Укажите корректные данные")
+                }
+            )
+        }
     }
 }
 

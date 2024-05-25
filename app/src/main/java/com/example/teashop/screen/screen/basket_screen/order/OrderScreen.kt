@@ -196,12 +196,25 @@ fun MakeOrderScreen(
                     return@PaymentSheetResultCallback
                 }
 
+                if (receiverPhone.isNotEmpty()) {
+                    val sb = StringBuilder("+7(")
+                    receiverPhone.forEachIndexed { index, char ->
+                        when (index) {
+                            3 -> sb.append(")")
+                            6 -> sb.append("-")
+                            8 -> sb.append("-")
+                        }
+                        sb.append(char)
+                    }
+                    receiverPhone = sb.toString()
+                }
+
                 val orderSave = ClientOrderSave(
                     recipientDto = Recipient(
                         surname = receiverSurName!!.trim(),
                         name = receiverName.trim(),
                         email = receiverEmail.trim(),
-                        phoneNumber = receiverPhone.trim()
+                        phoneNumber = receiverPhone.ifEmpty { null }
                     ),
                     addressId = address.id,
                     bonusesSpent = bonusesSpent,
@@ -439,8 +452,12 @@ fun MakeOrderScreen(
                         return@MakeAgreeBottomButton
                     }
 
-                    if (receiverName.trim().isEmpty() || receiverSurName.isNullOrEmpty() ||
-                        receiverEmail.trim().isEmpty() || receiverPhone.trim().isEmpty()) {
+                    if (receiverPhone.trim().length != 10 && receiverPhone.trim().isNotEmpty()) {
+                        makeText(context,"Укажите корректный номер телефона", LENGTH_SHORT).show()
+                        return@MakeAgreeBottomButton
+                    }
+
+                    if (receiverName.trim().isEmpty() || receiverSurName.isNullOrEmpty()) {
                         makeText(context, "Заполните данные о получателе", LENGTH_SHORT).show()
                         return@MakeAgreeBottomButton
                     }

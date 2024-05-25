@@ -88,4 +88,8 @@ dependencies {
 
     //Stripe
     implementation("com.stripe:stripe-android:20.41.0")
+
+    //Email
+    implementation ("com.sun.mail:android-mail:1.6.0")
+    implementation ("com.sun.mail:android-activation:1.6.0")
 }

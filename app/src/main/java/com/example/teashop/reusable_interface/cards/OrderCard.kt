@@ -25,13 +25,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.teashop.data.model.order.OrderShort
-import com.example.teashop.data.model.packages.PackageOrder
-import com.example.teashop.data.model.packages.PackageShort
 import com.example.teashop.screen.screen.profile_screen.order.OrderStatusText
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -76,7 +76,10 @@ fun MakeOrderCard(order: OrderShort, navController: NavController, route: String
                 )
             }
             Text(
-                text = "Цена: ${order.totalCost} рублей",
+                text = "Цена: ${
+                    BigDecimal(
+                        order.totalCost
+                    ).setScale(1, RoundingMode.HALF_UP)} рублей",
                 fontSize = 10.sp,
                 fontFamily = montserratFamily,
                 fontWeight = FontWeight.W400,

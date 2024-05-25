@@ -160,16 +160,15 @@ fun RowScope.MakeProductCard(navController: NavController, product: ProductShort
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .fillMaxWidth()
                         .height(160.dp)
+                        .align(Alignment.CenterHorizontally)
                 ) {
                     Image(
                         rememberAsyncImagePainter(model = product.images[0].imageUrl),
                         modifier = Modifier
-                            .fillMaxSize()
                             .clip(RoundedCornerShape(10.dp)),
                         contentDescription = null,
-                        contentScale = ContentScale.FillBounds
+                        contentScale = ContentScale.Fit
                     )
                 }
                 Text(
@@ -460,9 +459,8 @@ fun MakeProductCard2(navController: NavController, product: ProductShort?) {
                     Image(
                         painter = rememberAsyncImagePainter(product.images[0].imageUrl),
                         contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
-                            .fillMaxSize()
                             .clip(RoundedCornerShape(10.dp))
                     )
                 }

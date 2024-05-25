@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +42,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.example.teashop.R
+import com.example.teashop.data.api.EMAIL
+import com.example.teashop.data.api.EMAIL_PASSWORD
 import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.model.user.User
 import com.example.teashop.data.storage.TokenStorage
@@ -60,6 +61,18 @@ import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.Properties
+import javax.mail.Authenticator
+import javax.mail.Message
+import javax.mail.MessagingException
+import javax.mail.PasswordAuthentication
+import javax.mail.Session
+import javax.mail.Transport
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
 
 const val CURRENT_VERSION = "1.0.0"
 
@@ -90,10 +103,10 @@ fun LaunchProfileScreen(navController: NavController){
         )
     }
 
-    userView?.let {
+    userView?.let { user ->
         Navigation(navController = navController){
             MakeProfileScreen(
-                userView,
+                user,
                 viewModel,
                 tokenStorage,
                 context,
@@ -107,13 +120,13 @@ var orderCount = ""
 
 @Composable
 fun MakeProfileScreen(
-    user: User?,
+    user: User,
     viewModel: ProfileViewModel,
     tokenStorage: TokenStorage,
     context: Context,
     navController: NavController
 ){
-    user?.ordersCount?.let {
+    user.ordersCount.let {
         orderCount = it.toString()
     }
     var bonusInfo by remember {
@@ -165,9 +178,9 @@ fun MakeProfileScreen(
                         modifier = Modifier.size(40.dp)
                     )
                     Text(
-                        text = user?.name?.let {
+                        text = user.name.let {
                             "Привет, $it"
-                        } ?: "Привет",
+                        },
                         fontFamily = montserratFamily,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.W500,
@@ -206,9 +219,9 @@ fun MakeProfileScreen(
                                 color = Black10
                             )
                             Text(
-                                text = user?.teaBonuses?.let {
+                                text = user.teaBonuses.let {
                                     "$it" + bonusDeclension(it)
-                                } ?: "0 Бонусов",
+                                },
                                 fontFamily = montserratFamily,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.W500,
@@ -283,7 +296,7 @@ fun MakeProfileScreen(
             }
         )
         Text(
-            text = "version $CURRENT_VERSION",
+            text = "версия $CURRENT_VERSION",
             fontFamily = montserratFamily,
             fontSize = 10.sp,
             color = Grey10,
@@ -321,7 +334,9 @@ fun MakeProfileScreen(
         SupportMessage(
             expanded = {expandedSupport = it},
             onValueChange = {messageText = it},
-            messageText = messageText
+            messageText = messageText,
+            context = context,
+            user = user
         )
     }
     if(exitAccount){
@@ -398,7 +413,9 @@ fun AppInfoSheet(expanded: (Boolean) -> Unit = {}){
 fun SupportMessage(
     expanded: (Boolean) -> Unit,
     onValueChange: (String) -> Unit = {},
-    messageText: String = ""
+    messageText: String = "",
+    context: Context,
+    user: User
 ){
     ModalBottomSheet(
         onDismissRequest = { expanded(false) },
@@ -419,7 +436,39 @@ fun SupportMessage(
             MakeAgreeBottomButton(
                 onClick = {
                     expanded(false)
-                    //TODO do request here
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val username = EMAIL
+                        val password = EMAIL_PASSWORD
+
+                        val props = Properties()
+                        props["mail.smtp.auth"] = "true"
+                        props["mail.smtp.starttls.enable"] = "true"
+                        props["mail.smtp.host"] = "smtp.yandex.com"
+                        props["mail.smtp.port"] = 587
+
+                        val session = Session.getInstance(props, object : Authenticator() {
+                            override fun getPasswordAuthentication(): PasswordAuthentication {
+                                return PasswordAuthentication(username, password)
+                            }
+                        })
+
+                        try {
+                            val message = MimeMessage(session)
+                            message.setFrom(InternetAddress(username))
+                            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(username))
+                            message.subject = "Обращение от ${user.email}"
+                            message.setText(messageText)
+
+                            Transport.send(message)
+
+                            CoroutineScope(Dispatchers.Main).launch {
+                                Toast.makeText(context, "Обращение успешно отправлено!", Toast.LENGTH_LONG).show()
+                            }
+                        } catch (e: MessagingException) {
+                            e.printStackTrace()
+                            Toast.makeText(context, "Упс! Невозможно отправить обращение :(", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 },
                 text = "Отправить"
             )
