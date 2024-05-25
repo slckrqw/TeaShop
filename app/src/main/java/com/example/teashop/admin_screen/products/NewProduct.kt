@@ -270,10 +270,14 @@ fun MakeAdminProduct(
                     MakeFullTextField(
                         header = "Размер скидки (в процентах)",
                         onValueChange = {
-                            if (it.toInt() > 99) {
-                                return@MakeFullTextField
+                            if(it.isEmpty()){
+                                product.discount = 0
+                            }else {
+                                if (it.toInt() > 99) {
+                                    return@MakeFullTextField
+                                }
+                                product.discount = it.toInt()
                             }
-                            product.discount = it.toInt()
                         },
                         bottomPadding = 0,
                         inputValue = product.discount.toString(),
@@ -472,7 +476,7 @@ fun MakeAdminProduct(
                                 id = if (product.id == 0L) null else product.id,
                                 packages = packages.map { packageProduct ->
                                     PackageSave(
-                                        variantId = packageProduct.variant.id,
+                                        variantId = packageProduct.variant.id, //TODO change to title
                                         quantity = packageProduct.quantity,
                                         price = packageProduct.price
                                     )
