@@ -28,29 +28,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.example.teashop.R
-import com.example.teashop.data.model.user.UserRole
 import com.example.teashop.data.model.auth.AuthRequest
 import com.example.teashop.data.model.auth.RegistrationRequest
+import com.example.teashop.data.model.user.UserRole
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.admin.AdminScreen
 import com.example.teashop.navigation.common.Navigation
 import com.example.teashop.navigation.common.Screen
 import com.example.teashop.reusable_interface.cards.MakeTopCard
+import com.example.teashop.reusable_interface.text_fields.PasswordTextField
 import com.example.teashop.ui.theme.Black10
 import com.example.teashop.ui.theme.Green10
 import com.example.teashop.ui.theme.Grey10
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
-
-const val MAX_SIZE = 70
 
 @Composable
 fun LaunchRegScreen(navController: NavController){
@@ -100,12 +97,11 @@ fun MakeSignInScreen(
     var userPassword by remember {
         mutableStateOf("")
     }
-    var passwordVisibility by remember {
-        mutableStateOf(true)
+    var userPasswordCheck by remember {
+        mutableStateOf("")
     }
-    val icon = when(passwordVisibility){
-        true -> R.drawable.eye
-        false -> R.drawable.hide
+    var passwordVisibility by remember{
+        mutableStateOf(true)
     }
 
     Column(
@@ -158,64 +154,20 @@ fun MakeSignInScreen(
                 onValueChange = {userEmail = it},
                 icon = R.drawable.email_icon
             )
-            TextField(
-                value = userPassword,
-                onValueChange = {
-                    if (userPassword.length < MAX_SIZE)
-                        userPassword = it
-                },
-                shape = RoundedCornerShape(15.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Grey10,
-                    unfocusedIndicatorColor = Grey10,
-                    focusedContainerColor = White10,
-                    unfocusedContainerColor = White10,
-                    disabledContainerColor = White10,
-                    disabledTextColor = Black10,
-                    focusedTextColor = Black10,
-                ),
-                placeholder = {
-                    Text(
-                        text = "Пароль",
-                        fontFamily = montserratFamily,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.W400,
-                        color = Grey10
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.password_icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(25.dp),
-                        tint = Grey10
-                    )
-                },
-                trailingIcon = {
-                   Icon(
-                        painter = painterResource(icon),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable(
-                                onClick = {
-                                    passwordVisibility = !passwordVisibility
-                                }
-                            )
-                            .size(25.dp),
-                        tint = Grey10
-                   )
-                },
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                modifier = Modifier
-                    .padding(start = 30.dp, end = 30.dp, top = 10.dp)
-                    .fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = when(passwordVisibility){
-                    false -> VisualTransformation.None
-                    true -> PasswordVisualTransformation()
-                }
+            PasswordTextField(
+                header = "Пароль",
+                onValueChange = {userPassword = it},
+                passwordVisibility = {passwordVisibility = it},
+                currentPasswordVisibility = passwordVisibility
             )
+            if(nameSwitch) {
+                PasswordTextField(
+                    header = "Подтверждение пароля",
+                    onValueChange = { userPasswordCheck = it },
+                    passwordVisibility = {passwordVisibility = it},
+                    currentPasswordVisibility = passwordVisibility
+                )
+            }
             Button(
                 onClick = {
                     if (!userEmail.contains("@")) {
@@ -223,56 +175,74 @@ fun MakeSignInScreen(
                             Toast.LENGTH_SHORT).show()
                         return@Button
                     }
-
-                    if (nameSwitch){
-                        val registrationRequest = RegistrationRequest(
-                            userName.trim(),
-                            userEmail.replace(" ", ""),
-                            userPassword.replace(" ", "")
-                        )
-                        registrationViewModel.registration(
-                            registrationRequest,
-                            onSuccess = {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                                navController.navigate(Screen.Log.route)
-                            },
-                            onError = {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                    when(nameSwitch) {
+                        true -> {
+                            if (userPassword == userPasswordCheck) {
+                                val registrationRequest = RegistrationRequest(
+                                    userName.trim(),
+                                    userEmail.replace(" ", ""),
+                                    userPassword.replace(" ", "")
+                                )
+                                registrationViewModel.registration(
+                                    registrationRequest,
+                                    onSuccess = {
+                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                        navController.navigate(Screen.Log.route)
+                                    },
+                                    onError = {
+                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Неверно введён пароль",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
-                        )
-                    } else {
-                        val authRequest = AuthRequest(
-                            userEmail.replace(" ", ""),
-                            userPassword.replace(" ", "")
-                        )
-                        authViewModel.authenticate(
-                            authRequest,
-                            onSuccess = { authResponse ->
-                                tokenStorage.saveTokenAndRole(context, authResponse.token, authResponse.role)
-                                if (authResponse.role == UserRole.USER.name) {
-                                    navController.navigate(
-                                        Screen.Profile.route,
-                                        navOptions = navOptions {
-                                            popUpTo(navController.graph.id) {
-                                                inclusive = true
-                                            }
-                                        }
+                        }
+                        false -> {
+                            val authRequest = AuthRequest(
+                                userEmail.replace(" ", ""),
+                                userPassword.replace(" ", "")
+                            )
+                            authViewModel.authenticate(
+                                authRequest,
+                                onSuccess = { authResponse ->
+                                    tokenStorage.saveTokenAndRole(
+                                        context,
+                                        authResponse.token,
+                                        authResponse.role
                                     )
-                                } else {
-                                    navController.navigate(
-                                        AdminScreen.Orders.route,
-                                        navOptions = navOptions {
-                                            popUpTo(navController.graph.id) {
-                                                inclusive = true
+                                    if (authResponse.role == UserRole.USER.name) {
+                                        navController.navigate(
+                                            Screen.Profile.route,
+                                            navOptions = navOptions {
+                                                popUpTo(navController.graph.id) {
+                                                    inclusive = true
+                                                }
                                             }
-                                        }
-                                    )
+                                        )
+                                    } else {
+                                        navController.navigate(
+                                            AdminScreen.Orders.route,
+                                            navOptions = navOptions {
+                                                popUpTo(navController.graph.id) {
+                                                    inclusive = true
+                                                }
+                                            }
+                                        )
+                                    }
+                                },
+                                onError = {
+                                    Toast.makeText(
+                                        context,
+                                        "Неправильный логин или пароль",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                            },
-                            onError = {
-                                Toast.makeText(context, "Неправильный логин или пароль", Toast.LENGTH_SHORT).show()
-                            }
-                        )
+                            )
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Green10),
@@ -298,7 +268,11 @@ fun MakeSignInScreen(
                     color = Grey10,
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
-                        .clickable(onClick = { navController.navigate("reg_screen") })
+                        .clickable(
+                            onClick = {
+                                navController.navigate("reg_screen")
+                            }
+                        )
                 )
             }
         }
