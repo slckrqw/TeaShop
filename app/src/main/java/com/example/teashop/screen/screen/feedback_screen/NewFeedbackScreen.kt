@@ -69,10 +69,15 @@ import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.Yellow10
 import com.example.teashop.ui.theme.montserratFamily
-import okhttp3.MediaType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody
+import java.io.IOException
 import java.io.InputStream
 import java.util.UUID
 
@@ -256,49 +261,71 @@ fun MakeNewFeedbackScreen(
                 Toast.makeText(context, "Укажите рейтинг и отзыв", Toast.LENGTH_SHORT).show()
                 return@MakeAgreeBottomButton
             }
-
-            val parts = imageList.mapIndexed { _, uri ->
-                uriToMultipartPart(context, uri)
-            }
-            tokenStorage.getToken(context)?.let {
-                viewModel.saveReview(
-                    parts,
-                    it,
-                    ReviewSave(
-                        productId = product.id,
-                        images = imagesView ?: listOf(),
-                        reviewText = userFeedbackContent,
-                        stars = userFeedbackRate.toShort()
-                    ),
-                    onSuccess = {
-                        Toast.makeText(context, "Ваш отзыв успешно добавлен!", Toast.LENGTH_SHORT)
-                            .show()
-                        navController.popBackStack()
-                    },
-                    onError = {
-                        Toast.makeText(
-                            context,
-                            "Не удалось сохранить отзыв",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                )
+            runBlocking {
+                val parts = imageList.mapIndexed { _, uri ->
+                    uriToMultipartPart(context, uri)
+                }
+                tokenStorage.getToken(context)?.let {
+                    viewModel.saveReview(
+                        parts,
+                        it,
+                        ReviewSave(
+                            productId = product.id,
+                            images = imagesView ?: listOf(),
+                            reviewText = userFeedbackContent,
+                            stars = userFeedbackRate.toShort()
+                        ),
+                        onSuccess = {
+                            Toast.makeText(context, "Ваш отзыв успешно добавлен!", Toast.LENGTH_SHORT)
+                                .show()
+                            navController.popBackStack()
+                        },
+                        onError = {
+                            Toast.makeText(
+                                context,
+                                "Не удалось сохранить отзыв",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
             }
         }, text = "Оставить отзыв")
     }
 }
 
-fun uriToMultipartPart(context: Context, uri: Uri): MultipartBody.Part {
-    val contentResolver: ContentResolver = context.contentResolver
-    val inputStream: InputStream? = contentResolver.openInputStream(uri)
-    val mediaType: MediaType? = contentResolver.getType(uri)?.toMediaTypeOrNull()
+suspend fun uriToMultipartPart(context: Context, uri: Uri): MultipartBody.Part {
+    return withContext(Dispatchers.IO) {
+        if (uri.scheme != ContentResolver.SCHEME_CONTENT) {
+            val client = OkHttpClient()
+            val request = Request.Builder().url(uri.toString()).build()
 
-    val requestBody = inputStream?.let {
-        RequestBody.create(mediaType, it.readBytes())
-    } ?: throw IllegalArgumentException("Невозможно загрузить изображение")
-    val uniqueFileName = "${UUID.randomUUID()}.webp"
+            try {
+                val response = client.newCall(request).execute()
+                if (!response.isSuccessful) throw IOException("Failed to download file: $response")
 
-    return MultipartBody.Part.createFormData("files", uniqueFileName, requestBody)
+                val bytes = response.body?.bytes()
+                if (bytes != null) {
+                    val mediaType = "image/webp".toMediaTypeOrNull()
+                    val requestBody = RequestBody.create(mediaType, bytes)
+                    val uniqueFileName = "${UUID.randomUUID()}.webp"
+                    return@withContext MultipartBody.Part.createFormData("files", uniqueFileName, requestBody)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        val contentResolver: ContentResolver = context.contentResolver
+        val inputStream: InputStream? = contentResolver.openInputStream(uri)
+        val mediaType = contentResolver.getType(uri)?.toMediaTypeOrNull()
+
+        val requestBody = inputStream?.let {
+            RequestBody.create(mediaType, it.readBytes())
+        } ?: throw IllegalArgumentException("Невозможно загрузить изображение")
+        val uniqueFileName = "${UUID.randomUUID()}.webp"
+
+        return@withContext MultipartBody.Part.createFormData("files", uniqueFileName, requestBody)
+    }
 }
 
 @Composable

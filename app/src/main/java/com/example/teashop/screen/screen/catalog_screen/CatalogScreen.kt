@@ -62,13 +62,13 @@ import com.example.teashop.data.enums.CatalogConfig
 import com.example.teashop.data.enums.ScreenConfig
 import com.example.teashop.data.enums.SearchSwitch
 import com.example.teashop.data.model.category.Category
-import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.pagination.product.ProductFilter
-import com.example.teashop.data.model.pagination.product.productFilterSaver
 import com.example.teashop.data.model.pagination.product.ProductPagingRequest
 import com.example.teashop.data.model.pagination.product.ProductSortType
 import com.example.teashop.data.model.pagination.product.ProductSorter
+import com.example.teashop.data.model.pagination.product.productFilterSaver
 import com.example.teashop.data.model.pagination.product.productSorterSaver
+import com.example.teashop.data.model.product.ProductShort
 import com.example.teashop.data.model.variant.VariantType
 import com.example.teashop.data.storage.TokenStorage
 import com.example.teashop.navigation.common.Navigation
@@ -520,7 +520,7 @@ fun BottomFilterCatalog(
             Button(
                 onClick = {
                     expandedChange(false)
-                    if((filterParams.minPrice  ?: 0.0) > (filterParams.maxPrice ?: 0.0)){
+                    if((filterParams.minPrice  ?: 0.0) > (filterParams.maxPrice ?: 1000000.0)){
                         filterParams.minPrice = null
                         filterParams.maxPrice = null
                     }
@@ -615,7 +615,11 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
             )
         },
         onValueChange = {
-            priceValueField = it.filter { char -> char.isDigit() }
+            if (it.contains("-") || (it.toDoubleOrNull() == null && it.isNotEmpty())) {
+                return@TextField
+            }
+            priceValueField = it
+            price(priceValueField.ifEmpty { "0" })
         },
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp)
@@ -634,11 +638,6 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
         ),
         singleLine = true
     )
-    if(priceValueField == "" && priceValue == 0.0){
-        price("0")
-    } else if(priceValueField != "") {
-        price(priceValueField)
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

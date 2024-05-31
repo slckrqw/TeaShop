@@ -192,9 +192,7 @@ fun MakeOrdersScreen(
                             .clip(RoundedCornerShape(10.dp))
                             .clickable(
                                 onClick = {
-                                    if ((filterParams.minPrice ?: 0.0) > (filterParams.maxPrice
-                                            ?: 0.0)
-                                    ) {
+                                    if ((filterParams.minPrice ?: 0.0) > (filterParams.maxPrice ?: 0.0)) {
                                         filterParams.minPrice = null
                                         filterParams.maxPrice = null
                                     }
@@ -476,7 +474,7 @@ fun BottomFilterCatalog(
             Button(
                 onClick = {
                     expandedChange(false)
-                    if((filterParams.minPrice  ?: 0.0) > (filterParams.maxPrice ?: 0.0)){
+                    if ((filterParams.minPrice  ?: 0.0) > (filterParams.maxPrice ?: 1000000.0)) {
                         filterParams.minPrice = null
                         filterParams.maxPrice = null
                     }
@@ -536,7 +534,11 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
             )
         },
         onValueChange = {
+            if (it.contains("-") || (it.toDoubleOrNull() == null && it.isNotEmpty())) {
+                return@TextField
+            }
             priceValueField = it
+            price(priceValueField.ifEmpty { "0" })
         },
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp)
@@ -555,11 +557,6 @@ fun RowScope.FilterCatalogField(priceValue: Double, price: (String) -> Unit, goa
         ),
         singleLine = true
     )
-    if(priceValueField == "" && priceValue == 0.0){
-        price("0")
-    } else if(priceValueField != ""){
-        price(priceValueField)
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

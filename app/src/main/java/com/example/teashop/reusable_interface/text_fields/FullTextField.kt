@@ -51,7 +51,13 @@ fun MakeFullTextField(
         )
         TextField(
             value = value,
-            onValueChange = { value = it.take(contextLength) },
+            onValueChange = {
+                if ((!lettersOn && it.contains("-"))
+                    || (!lettersOn && it.toDoubleOrNull() == null && it.isNotEmpty())) {
+                    return@TextField
+                }
+                value = it.take(contextLength)
+            },
             shape = RoundedCornerShape(15.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = White10,

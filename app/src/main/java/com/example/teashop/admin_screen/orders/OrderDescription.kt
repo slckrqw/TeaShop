@@ -145,7 +145,6 @@ fun MakeOrderDescriptionScreen(
                                         onSuccess = {
                                             Toast.makeText(context, "Данные успешно сохранены!",
                                                 Toast.LENGTH_SHORT).show()
-                                            navController.popBackStack()
                                         },
                                         onError = {
                                             Toast.makeText(context, "Ошибка при сохранении данных",

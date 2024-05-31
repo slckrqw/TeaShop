@@ -177,7 +177,13 @@ fun MakeSignInScreen(
                     }
                     when(nameSwitch) {
                         true -> {
-                            if (userPassword == userPasswordCheck) {
+                            if (userPassword.length < 6) {
+                                Toast.makeText(context, "Пароль должен содержать больше 6 символов",
+                                    Toast.LENGTH_SHORT).show()
+                                return@Button
+                            }
+                            if (userPassword == userPasswordCheck && userPassword.isNotEmpty()
+                                && userPasswordCheck.isNotEmpty()) {
                                 val registrationRequest = RegistrationRequest(
                                     userName.trim(),
                                     userEmail.replace(" ", ""),
@@ -196,7 +202,7 @@ fun MakeSignInScreen(
                             } else {
                                 Toast.makeText(
                                     context,
-                                    "Неверно введён пароль",
+                                    "Пароли должны совпадать",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }

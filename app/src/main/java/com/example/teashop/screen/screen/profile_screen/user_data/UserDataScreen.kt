@@ -143,12 +143,12 @@ fun MakeUserDataScreen(navController: NavController, user: User){
                         inputValue = user.email
                     )
                     MakeFullTextField(
-                        header = "Пароль",
+                        header = "Новый пароль",
                         onValueChange = { userFirstPassword = it },
                         encrypted = true
                     )
                     MakeFullTextField(
-                        header = "Новый пароль",
+                        header = "Подтверждение пароля",
                         onValueChange = { userPassword = it },
                         bottomPadding = 0,
                         encrypted = true

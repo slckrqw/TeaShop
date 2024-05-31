@@ -70,6 +70,9 @@ import com.example.teashop.ui.theme.Grey20
 import com.example.teashop.ui.theme.TeaShopTheme
 import com.example.teashop.ui.theme.White10
 import com.example.teashop.ui.theme.montserratFamily
+import kotlinx.coroutines.runBlocking
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun LaunchAdminProduct(
@@ -465,42 +468,45 @@ fun MakeAdminProduct(
                         return@MakeAgreeBottomButton
                     }
 
-                    val parts = imageList.mapIndexed { _, uri ->
-                        uriToMultipartPart(context, uri)
-                    }
-                    tokenStorage.getToken(context)?.let {
-                        viewModel.createOrUpdateProduct(
-                            parts,
-                            it,
-                            ProductSave(
-                                id = if (product.id == 0L) null else product.id,
-                                packages = packages.map { packageProduct ->
-                                    PackageSave(
-                                        variantId = packageProduct.variant.id, //TODO change to title
-                                        quantity = packageProduct.quantity,
-                                        price = packageProduct.price
-                                    )
+                    runBlocking {
+                        val parts = imageList.mapIndexed { _, uri ->
+                            uriToMultipartPart(context, uri)
+                        }
+                        tokenStorage.getToken(context)?.let {
+                            viewModel.createOrUpdateProduct(
+                                parts,
+                                it,
+                                ProductSave(
+                                    id = if (product.id == 0L) null else product.id,
+                                    packages = packages.map { packageProduct ->
+                                        PackageSave(
+                                            id = packageProduct.id,
+                                            variant = packageProduct.variant.title,
+                                            quantity = packageProduct.quantity,
+                                            price = packageProduct.price
+                                        )
+                                    },
+                                    categoryId = categoryId,
+                                    article = article,
+                                    title = title,
+                                    description = description,
+                                    discount = discount,
+                                    active = accounting?.active ?: true
+                                ),
+                                onSuccess = {
+                                    Toast.makeText(context, "Данные успешно сохранены!", Toast.LENGTH_SHORT)
+                                        .show()
+                                    navController.popBackStack()
                                 },
-                                categoryId = categoryId,
-                                article = article,
-                                title = title,
-                                description = description,
-                                discount = discount,
-                                active = accounting?.active ?: true
-                            ),
-                            onSuccess = {
-                                Toast.makeText(context, "Данные успешно сохранены!", Toast.LENGTH_SHORT)
-                                    .show()
-                                navController.popBackStack()
-                            },
-                            onError = {
-                                Toast.makeText(
-                                    context,
-                                    "Не удалось совершить операцию с продуктом",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        )
+                                onError = {
+                                    Toast.makeText(
+                                        context,
+                                        "Не удалось совершить операцию с продуктом",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            )
+                        }
                     }
                 },
                 text = "Сохранить"
@@ -522,6 +528,7 @@ fun PackageEditSheet(
     packageList: MutableList<PackageProduct>,
     expandedChange: (Boolean) -> Unit
 ){
+    val context = LocalContext.current
     var expanded by remember{
         mutableStateOf(false)
     }
@@ -541,6 +548,9 @@ fun PackageEditSheet(
             }
         )
     }
+    var packTypeTitle by remember {
+        mutableStateOf(if (pack.price != 0.0) pack.variant.title.value else "Тип упаковки")
+    }
 
     ModalBottomSheet(
         onDismissRequest = {expandedChange(false)},
@@ -551,15 +561,21 @@ fun PackageEditSheet(
         ){
             MakeFullTextField(
                 header = "Цена",
-                onValueChange = {priceTemp = it},
+                onValueChange = {
+                    if (!it.contains("-")) {
+                        priceTemp = it
+                    }
+                },
                 bottomPadding = 5,
-                inputValue = pack.price.toString()
+                inputValue = priceTemp,
+                lettersOn = false
             )
             MakeFullTextField(
                 header = "Количество",
                 onValueChange = {quantityTemp = it},
                 bottomPadding = 5,
-                inputValue = pack.quantity.toString()
+                inputValue = quantityTemp,
+                lettersOn = false
             )
             if(editSwitch) {
                 Button(
@@ -573,7 +589,7 @@ fun PackageEditSheet(
                     border = BorderStroke(1.dp, Green10)
                 ) {
                     Text(
-                        text = "Тип упаковки",
+                        text = packTypeTitle,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.W400,
                         fontSize = 15.sp,
@@ -606,6 +622,7 @@ fun PackageEditSheet(
                                     onClick = {
                                         expanded = false
                                         pack.variant.title = it
+                                        packTypeTitle = it.value
                                     },
                                     modifier = Modifier
                                         .background(Grey20)
@@ -618,22 +635,32 @@ fun PackageEditSheet(
             }
             MakeAgreeBottomButton(
                 onClick = {
-                    expandedChange(false)
-                    if(priceTemp == "" && pack.price == 0.0){
-                        pack.price = 0.0
+                    if (packTypeTitle == "Тип упаковки") {
+                        Toast.makeText(context, "Выберите тип упаковки", Toast.LENGTH_SHORT).show()
+                        return@MakeAgreeBottomButton
                     }
-                    else if(priceTemp != ""){
-                        pack.price = priceTemp.toDouble()
+
+                    if (priceTemp.toDoubleOrNull() == 0.0 || priceTemp.isEmpty()) {
+                        Toast.makeText(context, "Цена должна быть больше 0.0 руб.", Toast.LENGTH_SHORT).show()
+                        return@MakeAgreeBottomButton
+                    } else {
+                        pack.price = BigDecimal(
+                            priceTemp
+                        ).setScale(2, RoundingMode.HALF_UP).toDouble()
                     }
-                    if(quantityTemp == "" && pack.quantity == 0) {
+
+                    if (quantityTemp.toIntOrNull() == 0 || quantityTemp.isEmpty()) {
                         pack.quantity = 0
+                    } else {
+                        pack.quantity = BigDecimal(
+                            quantityTemp
+                        ).setScale(0, RoundingMode.HALF_UP).toInt()
                     }
-                    else if(quantityTemp != ""){
-                        pack.quantity = quantityTemp.toInt()
-                    }
-                    if(editSwitch){
+
+                    if (editSwitch) {
                         packageList.add(pack)
                     }
+                    expandedChange(false)
                 },
                 text = "Сохранить"
             )
