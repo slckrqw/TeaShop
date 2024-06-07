@@ -21,6 +21,8 @@
 * Viewing sales statistics for administrators
 * Managing products (add, update, delete) by administrators
 
+<br/>
+
 ## Some sample screens
 
 <br/>
