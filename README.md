@@ -1,4 +1,5 @@
 # TeaShop (mobile🎴)
+**Backend [here](https://github.com/Rezozo/TeaShop) 🔧**
 
 ## Used Technologies
 * Jetpack Compose
