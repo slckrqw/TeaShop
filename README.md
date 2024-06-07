@@ -7,7 +7,7 @@
 * Coil
 * Stripe API
 
-## Project Features:
+## Project Features
 
 * User and admin authentication
 * Viewing, filtering, and sorting products
