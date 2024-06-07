@@ -1,15 +1,11 @@
 # TeaShop (mobile🎴)
 
-<br/>
-
 ## Used Technologies
 * Jetpack Compose
 * Navigation Compose
 * Retrofit
 * Coil
 * Stripe API
-
-<br/>
 
 ## Project Features:
 
@@ -21,11 +17,9 @@
 * Viewing sales statistics for administrators
 * Managing products (add, update, delete) by administrators
 
-<br/>
-
 ## Some sample screens
 
-<br/>
+<br/> 
 
 # In conclusion...
 This was our first experience with Jetpack compose. The application needs a little improvement (Some todo and crutches). But overall this application works well. Enjoy :) 
