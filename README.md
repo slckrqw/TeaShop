@@ -32,7 +32,7 @@
 <img src="https://i.ibb.co/WtDB245/reviews.jpg" width="200" /><br/>
 
 * ### Profile Screen
-<img src="https://i.ibb.co/F67MgDQ/profile.jpg" width="200" /><br/>
+<img src="https://i.ibb.co/1zzbF1F/profile.png" width="200" /><br/>
 
 * ### Bucket Screen
 <img src="https://i.ibb.co/sF8y49R/bucket.jpg" width="200" /><br/>
